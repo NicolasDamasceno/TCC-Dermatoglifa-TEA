@@ -308,3 +308,21 @@ anonimização (LGPD art. 16). O prazo exato será o definido no protocolo do CE
 Cifragem AES-256-GCM por arquivo; chave fora do banco e do código (ASP.NET Core
 Data Protection ou `dotnet user-secrets` em desenvolvimento). Nenhum nome de
 arquivo contém dado do paciente.
+
+## Implementação (migration `Inicial`)
+
+O modelo acima está implementado em `aplicacao/back/src/Dermatoglifia.Infraestrutura/Persistencia`
+e foi aplicado e conferido num PostgreSQL 16 em 20/10/2026 (gravação e leitura
+do fluxo completo, concorrência e todas as restrições abaixo).
+
+| Aspecto | Como ficou |
+|---|---|
+| Nomes | `snake_case` (EFCore.NamingConventions); chaves `pk_<tabela>`, estrangeiras `fk_<tabela>_<referenciada>_<coluna>`, índices `ix_…`, únicos parciais `ux_…`, `CHECK` `ck_<tabela>_<coluna>` |
+| Enums | `varchar(30)` em MAIÚSCULAS_COM_SUBLINHADO + `CHECK` dos valores (ADR-0003) |
+| Concorrência | `sessao_coleta` e `analise` usam a coluna de sistema `xmin` (sem coluna extra) |
+| Indicadores | colunas `qtd_*` e `discordancia_*` da própria `analise`, nulas até concluir |
+| Probabilidades | `jsonb` com chaves no formato da API, ex.: `{"ARCO": 0.05, "VERTICILO": 0.8}` |
+| Identity | além das colunas listadas, `usuario` tem as colunas padrão do Identity (`user_name`, `phone_number`, `two_factor_enabled` etc.), e existem `usuario_claim`, `usuario_login` e `usuario_token`; o MVP não as usa |
+| Histórico de migrations | tabela `__historico_migracoes` |
+| Exclusões | `paciente` não pode ser apagado com consentimentos ou sessões (`RESTRICT`); apagar a identificação acontece pela anonimização (UC12) |
+

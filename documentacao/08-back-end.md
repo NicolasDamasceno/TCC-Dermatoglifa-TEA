@@ -311,7 +311,7 @@ resolução gravada); nenhuma digital real em `tests/` (RNF08).
 
 | Marco | Entrega | Commits esperados |
 |---|---|---|
-| M1 | Solução, projetos, Domínio com testes, `AppDbContext` e primeira migration | `build(back)`, `feat(back)`, `test(back)` |
+| M1 ✅ | Solução, projetos, Domínio com testes, `AppDbContext` e primeira migration | `build(back)`, `feat(back)`, `test(back)` |
 | M2 | Identity + JWT, solicitação e aprovação de médico, admin inicial (UC01–UC03) | `feat(back)` |
 | M3 | Pacientes, identificação separada e consentimento (UC04–UC05) + auditoria | `feat(back)` |
 | M4 | Sessão de coleta, upload, normalização e cifragem (UC06) | `feat(back)` |

@@ -65,5 +65,5 @@ SQLite fica restrito a testes automatizados, se útil.
 
 ## Ações
 
-1. [ ] Criar o `AppDbContext` e a primeira migration a partir do doc 05.
-2. [ ] Adicionar `.env.example` com a connection string de exemplo (sem segredo real).
+1. [x] Criar o `AppDbContext` e a primeira migration a partir do doc 05.
+2. [x] Adicionar `.env.example` com a connection string de exemplo (sem segredo real).
