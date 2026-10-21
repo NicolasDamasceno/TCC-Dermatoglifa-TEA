@@ -19,8 +19,17 @@ fi
 # Arquivos adicionados/modificados neste commit
 ARQUIVOS=$(git diff --cached --name-only --diff-filter=ACMR)
 
-PROIBIDOS=$(printf '%s\n' "$ARQUIVOS" | grep -Ei \
-  '\.(png|jpe?g|bmp|tiff?|wsq|jp2|gif|webp|raw|csv|tsv|xlsx?|parquet|npy|npz|pkl|db|sqlite3?|env)$|(^|/)(dados|dataset[^/]*|data|participantes|pacientes|coletas|uploads)/' \
+# 1) Formatos que podem conter digitais ou dados de participantes, em qualquer pasta.
+POR_FORMATO=$(printf '%s\n' "$ARQUIVOS" | grep -Ei \
+  '\.(png|jpe?g|bmp|tiff?|wsq|jp2|gif|webp|raw|csv|tsv|xlsx?|parquet|npy|npz|pkl|db|sqlite3?|env)$')
+
+# 2) Qualquer arquivo em pastas com nome de dados, exceto código-fonte e texto
+#    de documentação (ex.: a pasta de código Pacientes/ do back-end é permitida).
+POR_PASTA=$(printf '%s\n' "$ARQUIVOS" | grep -Ei \
+  '(^|/)(dados|dataset[^/]*|data|participantes|pacientes|coletas|uploads)/' \
+  | grep -Evi '\.(cs|csproj|py|ts|tsx|js|jsx|css|md)$')
+
+PROIBIDOS=$(printf '%s\n%s\n' "$POR_FORMATO" "$POR_PASTA" | grep -v '^$' \
   | grep -Ev '^documentacao/|^aplicacao/front/(public|src/assets)/' )
 
 if [ -n "$PROIBIDOS" ]; then
