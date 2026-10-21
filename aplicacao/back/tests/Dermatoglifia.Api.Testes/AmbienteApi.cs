@@ -113,6 +113,24 @@ public sealed class AmbienteApi : IAsyncLifetime
         return corpo.GetProperty("token").GetString()!;
     }
 
+    /// <summary>Cria um médico sintético, aprova pelo admin e devolve um cliente já autenticado.</summary>
+    public async Task<MedicoDeTeste> MedicoAprovadoAsync()
+    {
+        const string senha = "senhamedico123";
+        var email = $"medico-{Guid.NewGuid():N}@teste.local";
+        var crm = Random.Shared.Next(100_000, 9_999_999).ToString(System.Globalization.CultureInfo.InvariantCulture);
+
+        var solicitacao = await Cliente().PostAsJsonAsync("/api/medicos/solicitacoes",
+            new { nome = "Médico Sintético", email, senha, crm, ufCrm = "PI", especialidade = "Pediatria" }, Json);
+        solicitacao.EnsureSuccessStatusCode();
+        var id = (await solicitacao.Content.ReadFromJsonAsync<JsonElement>(Json)).GetProperty("id").GetGuid();
+
+        var admin = Cliente(await TokenAsync(EmailAdmin, SenhaAdmin));
+        (await admin.PostAsJsonAsync($"/api/medicos/{id}/aprovacao", new { vinculoProtocolo = "Equipe sintética" })).EnsureSuccessStatusCode();
+
+        return new MedicoDeTeste(id, email, Cliente(await TokenAsync(email, senha)));
+    }
+
     private async Task<string> IniciarConteinerAsync()
     {
         _conteiner = new PostgreSqlBuilder("postgres:16-alpine").Build();
@@ -135,3 +153,5 @@ public sealed class ColecaoApi : ICollectionFixture<AmbienteApi>
 {
     public const string Nome = "API com PostgreSQL";
 }
+
+public sealed record MedicoDeTeste(Guid Id, string Email, HttpClient Cliente);
