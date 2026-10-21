@@ -52,16 +52,17 @@ treino/dados/
 *.pkl
 !documentacao/**/*.csv
 
-# Pesos de modelos: um modelo treinado com digitais reais pode vazar informação
-# sobre quem participou (inferência de pertencimento). Enquanto o repositório for
-# público, os pesos ficam locais; versionam-se config, métricas, hash e notas.
-# Decisão em aberto — ver treino/README.md.
+# Pesos de modelos (ADR-0005): pesos treinados com digitais reais nunca entram
+# no Git (risco de inferência de pertencimento). Só são versionados os modelos
+# treinados com dados SINTÉTICOS, nas duas pastas liberadas abaixo.
 *.keras
 *.h5
 *.weights.h5
 *.onnx
 *.pt
 *.tflite
+!treino/modelos/sinteticos/**/*.keras
+!modelo_producao/demo/*.keras
 
 # Bancos locais e dumps
 *.db

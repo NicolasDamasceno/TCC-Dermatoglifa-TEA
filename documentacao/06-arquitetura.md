@@ -124,7 +124,7 @@ Etapa 2 se houver modelo validado, senão `escore_risco: null`.
 | Força bruta no login | Bloqueio após 5 falhas; hash de senha adaptativo |
 | Exposição pelo repositório | `.gitignore` + hooks; segredos fora do Git |
 | Reidentificação no treino | Dados pseudonimizados; tabela de ligação separada e local |
-| Reidentificação pelo modelo publicado | Pesos treinados com dados reais não vão para repositório público (ver `treino/README.md`) |
+| Reidentificação pelo modelo publicado | Pesos treinados com dados reais fora do Git, em local controlado; versão pública só com dados sintéticos (ADR-0005) |
 | Uso fora do protocolo | Só médicos vinculados ao protocolo do CEP são aprovados |
 | Uso não rastreado | Log de auditoria somente-inserção |
 

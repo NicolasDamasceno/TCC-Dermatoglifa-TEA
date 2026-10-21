@@ -30,4 +30,16 @@ if [ -n "$PROIBIDOS" ]; then
   exit 1
 fi
 
+# Pesos de modelos (ADR-0005): só modelos treinados com dados sintéticos,
+# e apenas nas pastas liberadas.
+PESOS=$(printf '%s\n' "$ARQUIVOS" | grep -Ei '\.(keras|h5|onnx|pt|tflite)$' \
+  | grep -Ev '^treino/modelos/sinteticos/|^modelo_producao/demo/' )
+
+if [ -n "$PESOS" ]; then
+  echo "ERRO: pesos de modelo fora das pastas de modelos sintéticos:"
+  printf '  %s\n' $PESOS
+  echo "Pesos treinados com dados reais ficam fora do Git (ADR-0005)."
+  exit 1
+fi
+
 exit 0

@@ -96,9 +96,14 @@ nunca dependência do cronograma (ADR-0002).
 - O `.gitignore` e o hook `pre-commit` bloqueiam imagens, CSV/planilhas e pastas
   de dados fora de `documentacao/` e dos assets do front. Não contornar.
 - Exemplos e testes usam dados **sintéticos** ou gerados, nunca reais.
-- Pesos de modelos (`*.keras` etc.) treinados com dados reais **não** vão para o
-  repositório enquanto ele for público (risco de inferir quem participou); o Git
-  guarda config, métricas, hash e notas de cada versão. Ver `treino/README.md`.
+- **Decisão do Nicolas (ADR-0005): o repositório continua público.** Pesos
+  (`*.keras` etc.) treinados com dados reais **nunca** entram no Git — ficam em
+  local controlado e o Git guarda só config, métricas, hash e notas
+  (`treino/modelos/reais/`). Para o repositório rodar, existe uma versão pública
+  da Etapa 1 treinada **só com dados sintéticos** (`treino/modelos/sinteticos/`
+  e `modelo_producao/demo/`). Coeficientes da Etapa 2 podem ser públicos (JSON).
+  Publicar pesos reais exige previsão no TCLE aprovado pelo CEP **e** avaliação de
+  inferência de pertencimento — não fazer sem pedido explícito do Nicolas.
 - Nenhuma digital real é coletada antes da aprovação do protocolo pelo CEP; até
   lá, todo desenvolvimento usa dados sintéticos.
 - Segredos (connection strings, chaves JWT) via `dotnet user-secrets` ou `.env`
@@ -121,8 +126,9 @@ nunca dependência do cronograma (ADR-0002).
 treino/                 scripts de treino e registro dos modelos treinados
   referencia/           modelo_arroz_keras.py (base das aulas)
   scripts/              código de treino/avaliação
-  modelos/              uma pasta por versão: config, métricas, hash, notas
-modelo_producao/        metadados do modelo que o site usa + serviço FastAPI (servico/)
+  modelos/sinteticos/   versões treinadas com dados sintéticos (pesos versionados)
+  modelos/reais/        versões treinadas com dados reais (só metadados)
+modelo_producao/        metadados do modelo em uso, demo/ (sintético) e servico/ (FastAPI)
 aplicacao/
   front/                React
   back/                 .NET

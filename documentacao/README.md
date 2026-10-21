@@ -20,6 +20,7 @@ Ler na ordem abaixo antes de criar ou alterar qualquer módulo (`CLAUDE.md`, Reg
 | [0002](adr/0002-pipeline-ia-duas-etapas.md) | Pipeline de IA em duas etapas: CNN de padrões → indicadores → escore | Proposto |
 | [0003](adr/0003-banco-postgresql.md) | PostgreSQL como banco | Proposto |
 | [0004](adr/0004-captura-por-envio-de-imagem.md) | Captura por envio de imagem, um dedo por vez, ≥ 500 ppi | Proposto |
+| [0005](adr/0005-publicacao-de-modelos.md) | Repositório público; pesos reais fora do Git; modelo público sintético | Aceito |
 
 Os ADRs ficam "Propostos" até a revisão com o orientador; ao serem aceitos,
 muda-se o status no próprio arquivo. Uma decisão nova que contrarie uma antiga
