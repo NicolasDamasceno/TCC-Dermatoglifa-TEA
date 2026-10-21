@@ -79,7 +79,8 @@ Resposta `200`:
 {
   "versao_modelo": "2026-11-15_padroes_v1",
   "digitais": [
-    { "mao": "DIREITA", "dedo": "POLEGAR", "padrao": "VERTICILO",
+    { "mao": "DIREITA", "dedo": "POLEGAR",
+      "classe_imagem": "VERTICILO", "padrao": "VERTICILO",
       "confianca": 0.91,
       "probabilidades": { "ARCO": 0.01, "ARCO_TENDIDO": 0.02,
                           "ALCA_ESQUERDA": 0.05, "ALCA_DIREITA": 0.01, "VERTICILO": 0.91 },

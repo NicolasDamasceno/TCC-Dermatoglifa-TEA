@@ -40,12 +40,16 @@ erDiagram
     USUARIO {
         uuid id PK
         varchar nome
-        varchar email UK
+        varchar email
+        varchar email_normalizado UK
         varchar senha_hash
         papel_usuario papel
         status_cadastro status
-        smallint tentativas_falhas
-        timestamptz bloqueado_ate
+        varchar security_stamp
+        varchar concurrency_stamp
+        int access_failed_count
+        boolean lockout_enabled
+        timestamptz lockout_end
         timestamptz criado_em
         timestamptz ultimo_acesso_em
     }
@@ -122,6 +126,8 @@ erDiagram
         uuid id PK
         varchar versao UK
         varchar arquitetura
+        origem_dados origem_dados
+        boolean escore_validado
         char hash_sha256
         jsonb metricas_teste
         date treinado_em
@@ -186,6 +192,7 @@ erDiagram
 | `dedo` | `POLEGAR`, `INDICADOR`, `MEDIO`, `ANELAR`, `MINIMO` |
 | `status_analise` | `PENDENTE`, `PROCESSANDO`, `CONCLUIDA`, `ERRO` |
 | `padrao_digital` | `ARCO`, `ARCO_TENDIDO`, `ALCA_ULNAR`, `ALCA_RADIAL`, `VERTICILO` |
+| `origem_dados` | `SINTETICO`, `REAL` |
 
 Os cinco padrões de `padrao_digital` são as categorias usadas pelos estudos de
 dermatoglifia e TEA (arch, tented arch, ulnar loop, radial loop, whorl). A CNN
@@ -196,9 +203,13 @@ convertido para ulnar/radial pela mão registrada (ADR-0002).
 ## Dicionário de dados — restrições relevantes
 
 ### usuario
-- `email` único, armazenado em minúsculas.
-- `senha_hash`: `PasswordHasher` do ASP.NET Core Identity; a senha nunca é armazenada.
-- `tentativas_falhas` e `bloqueado_ate` implementam o bloqueio do RNF05.
+- Gerenciada pelo ASP.NET Core Identity (ADR-0006), com colunas renomeadas para
+  o padrão do banco. `email_normalizado` é único.
+- `senha_hash`: hash do `PasswordHasher` do Identity; a senha nunca é armazenada.
+- `access_failed_count`, `lockout_enabled` e `lockout_end` implementam o bloqueio
+  do RNF05 (5 falhas → 15 minutos).
+- `security_stamp` muda quando o usuário é inativado ou troca a senha,
+  invalidando tokens emitidos antes.
 
 ### medico
 - `UNIQUE (crm, uf_crm)`.
@@ -248,6 +259,10 @@ convertido para ulnar/radial pela mão registrada (ADR-0002).
 ### modelo_ia
 - Índice parcial único em `ativo` onde `ativo = true`: só um modelo ativo.
 - `metricas_teste`: cópia de `treino/modelos/<versao>/metricas.json`.
+- `origem_dados`: `SINTETICO` para o modelo de demonstração (ADR-0005), `REAL`
+  para o treinado com dados da pesquisa; exibido junto do resultado.
+- `escore_validado`: só `true` quando a Etapa 2 dessa versão foi validada; com
+  `false`, o back-end grava `escore_risco` nulo mesmo que o serviço envie valor (RN10).
 
 ### analise
 - `UNIQUE (sessao_coleta_id)` no MVP.

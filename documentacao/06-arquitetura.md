@@ -70,7 +70,10 @@ aplicacao/front/src/
   rotas/          rotas protegidas por papel
 ```
 
-`AvisoNaoDiagnostico` é obrigatório em toda tela que mostre resultado (RN04).
+`AvisoNaoDiagnostico` é obrigatório em toda tela que mostre resultado (RN04) e
+exibe o texto enviado pela API, para que a versão mostrada seja a registrada na análise.
+
+O desenho detalhado do back-end está em [08-back-end.md](08-back-end.md).
 
 ## API REST — primeira versão
 

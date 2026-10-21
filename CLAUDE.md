@@ -139,7 +139,7 @@ nunca dependência do cronograma (ADR-0002).
 | Camada | Tecnologia | Pasta |
 |---|---|---|
 | IA (treino e inferência) | Python + Keras | `treino/`, `modelo_producao/` |
-| Back-end (API) | .NET (ASP.NET Core Web API) | `aplicacao/back/` |
+| Back-end (API) | .NET 10 LTS (ASP.NET Core Web API, EF Core, Identity + JWT) | `aplicacao/back/` |
 | Front-end | React | `aplicacao/front/` |
 | Banco | PostgreSQL (ver ADR-0003) | — |
 

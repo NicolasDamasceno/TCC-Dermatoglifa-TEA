@@ -10,14 +10,15 @@ classDiagram
     direction LR
 
     class Usuario {
+        <<IdentityUser~Guid~>>
         +Guid Id
         +string Nome
         +string Email
-        -string SenhaHash
         +PapelUsuario Papel
         +StatusCadastro Status
-        +RegistrarFalhaLogin()
-        +EstaBloqueado() bool
+        +Ativar()
+        +Inativar()
+        +PodeAutenticar() bool
     }
 
     class Medico {

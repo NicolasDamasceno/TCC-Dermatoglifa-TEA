@@ -11,6 +11,7 @@ Ler na ordem abaixo antes de criar ou alterar qualquer módulo (`CLAUDE.md`, Reg
 | 05 | [Modelo de banco de dados](05-modelo-banco-de-dados.md) | Diagrama ER, enums, dicionário de dados, retenção |
 | 06 | [Arquitetura](06-arquitetura.md) | Componentes, organização do back e do front, API REST, segurança |
 | 07 | [Fundamentos da pesquisa](07-fundamentos-pesquisa.md) | Evidência científica, IA, hardware e normas, com fontes e itens a verificar |
+| 08 | [Desenho do back-end](08-back-end.md) | Solução .NET 10, domínio, serviços, contratos da API, upload cifrado, cliente da IA, testes, ordem de implementação |
 
 ## Decisões de arquitetura (ADRs)
 
@@ -21,6 +22,7 @@ Ler na ordem abaixo antes de criar ou alterar qualquer módulo (`CLAUDE.md`, Reg
 | [0003](adr/0003-banco-postgresql.md) | PostgreSQL como banco | Proposto |
 | [0004](adr/0004-captura-por-envio-de-imagem.md) | Captura por envio de imagem, um dedo por vez, ≥ 500 ppi | Proposto |
 | [0005](adr/0005-publicacao-de-modelos.md) | Repositório público; pesos reais fora do Git; modelo público sintético | Aceito |
+| [0006](adr/0006-autenticacao-identity-jwt.md) | Autenticação com ASP.NET Core Identity (Core) e JWT | Proposto |
 
 Os ADRs ficam "Propostos" até a revisão com o orientador; ao serem aceitos,
 muda-se o status no próprio arquivo. Uma decisão nova que contrarie uma antiga
