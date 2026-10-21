@@ -26,8 +26,8 @@ classDiagram
         +string UfCrm
         +string Especialidade
         +string VinculoProtocolo
-        +Aprovar(Usuario admin)
-        +Recusar(Usuario admin, string motivo)
+        +Aprovar(Guid adminId, string vinculoProtocolo)
+        +Recusar(string motivo)
     }
 
     class Paciente {
@@ -138,7 +138,7 @@ classDiagram
         VERTICILO
     }
 
-    Usuario <|-- Medico
+    Usuario "1" -- "0..1" Medico : conta de acesso
     Medico "1" --> "*" Paciente : responsável
     Paciente "1" -- "1" IdentificacaoPaciente : pseudonimização
     Paciente "1" *-- "*" Consentimento
@@ -153,8 +153,9 @@ classDiagram
     ResultadoDigital --> PadraoDigital
 ```
 
-> No banco, `Medico` é uma tabela 1-para-1 com `usuario` (ver doc 05); no código
-> a herança é a forma mais direta de expressar que todo médico é um usuário.
+> `Usuario` é a conta do ASP.NET Core Identity e fica na Infraestrutura (ADR-0006,
+> doc 08); `Medico` é a entidade de domínio com os dados profissionais, ligada 1-para-1
+> à conta pelo id (tabela `medico` com chave `usuario_id`, doc 05).
 > `IdentificacaoPaciente` fica separada de `Paciente` para que biometria e
 > resultados só conheçam o identificador pseudônimo (LGPD art. 13, §4º).
 

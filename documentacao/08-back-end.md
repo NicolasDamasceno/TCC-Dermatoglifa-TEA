@@ -27,11 +27,12 @@ aplicacao/back/
   Dermatoglifia.sln
   src/
     Dermatoglifia.Dominio/           sem dependências externas
-      Entidades/                     Usuario, Medico, Paciente, IdentificacaoPaciente,
+      Entidades/                     Medico, Paciente, IdentificacaoPaciente,
                                      Consentimento, SessaoColeta, Digital, Analise,
                                      ResultadoDigital, ModeloIA, RegistroAuditoria
       Enums/                         Mao, Dedo, PadraoDigital, StatusSessao, ...
-      ObjetosDeValor/                IndicadoresDermatoglificos, PosicaoDedo
+      ObjetosDeValor/                IndicadoresDermatoglificos, PosicaoDedo, ArquivoDigital
+      Servicos/                      TabelaConversaoAlca (alça esquerda/direita → ulnar/radial)
       Excecoes/                      RegraDeNegocioException
     Dermatoglifia.Aplicacao/         casos de uso; depende só do Domínio
       Abstracoes/                    IClienteInferencia, IArmazenamentoImagens,
@@ -42,7 +43,8 @@ aplicacao/back/
       Persistencia/                  AppDbContext, configurações Fluent API, migrations
       Armazenamento/                 ArmazenamentoLocalCifrado
       Inferencia/                    ClienteInferenciaHttp
-      Identidade/                    ServicoToken, configuração do Identity
+      Identidade/                    Usuario : IdentityUser<Guid>, ServicoToken,
+                                     configuração do Identity
     Dermatoglifia.Api/               HTTP: controllers, autenticação, ProblemDetails
       Controllers/  Configuracao/  Program.cs
   tests/
@@ -60,8 +62,10 @@ flowchart TB
     Api -. "registra dependências" .-> Inf
 ```
 
-Regra: o Domínio não referencia nada; a Aplicação só conhece o Domínio e as
-próprias interfaces; a Infraestrutura implementa essas interfaces; a Api monta
+Regra: o Domínio não referencia nada — por isso a conta de usuário
+(`Usuario : IdentityUser<Guid>`, ADR-0006) fica na Infraestrutura e o domínio
+se refere a ela só pelo id (`Medico.UsuarioId`, `Paciente.MedicoResponsavelId`);
+a Aplicação só conhece o Domínio e as próprias interfaces; a Infraestrutura implementa essas interfaces; a Api monta
 tudo no `Program.cs`. Isso permite testar as regras sem banco, disco ou rede.
 
 ## 3. Domínio — regras que vivem nas entidades
@@ -72,7 +76,6 @@ métodos que validam antes de mudar estado. Violação lança
 
 | Entidade | Regras (RN do doc 02) |
 |---|---|
-| `Usuario` | `PodeAutenticar()` só com `Status = ATIVO` (RN01) |
 | `Medico` | `Aprovar(admin, vinculoProtocolo)` exige vínculo preenchido e status `PENDENTE` (RN01) |
 | `IdentificacaoPaciente` | Menor de 18 anos na data do cadastro exige responsável (UC04 1a) |
 | `Paciente` | `PodeColetar(hoje)` exige consentimento vigente com `AutorizaAnalise` e `CienteUsoIA` (RN03) |
