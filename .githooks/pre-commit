@@ -1,0 +1,33 @@
+#!/bin/sh
+# Bloqueia commits com identidade diferente da pessoal e arquivos que
+# possam conter dados de participantes. Ativar com:
+#   git config core.hooksPath .githooks
+
+NOME_ESPERADO="Nicolas Damasceno"
+EMAIL_ESPERADO="152975012+NicolasDamasceno@users.noreply.github.com"
+
+NOME=$(git config user.name)
+EMAIL=$(git config user.email)
+
+if [ "$NOME" != "$NOME_ESPERADO" ] || [ "$EMAIL" != "$EMAIL_ESPERADO" ]; then
+  echo "ERRO: identidade git inesperada: $NOME <$EMAIL>"
+  echo "Configure: git config user.name \"$NOME_ESPERADO\""
+  echo "           git config user.email \"$EMAIL_ESPERADO\""
+  exit 1
+fi
+
+# Arquivos adicionados/modificados neste commit
+ARQUIVOS=$(git diff --cached --name-only --diff-filter=ACMR)
+
+PROIBIDOS=$(printf '%s\n' "$ARQUIVOS" | grep -Ei \
+  '\.(png|jpe?g|bmp|tiff?|wsq|jp2|gif|webp|raw|csv|tsv|xlsx?|parquet|npy|npz|pkl|db|sqlite3?|env)$|(^|/)(dados|dataset[^/]*|data|participantes|pacientes|coletas|uploads)/' \
+  | grep -Ev '^documentacao/|^aplicacao/front/(public|src/assets)/' )
+
+if [ -n "$PROIBIDOS" ]; then
+  echo "ERRO: arquivos que podem conter dados de participantes:"
+  printf '  %s\n' $PROIBIDOS
+  echo "Dados de treino e digitais ficam apenas na máquina local."
+  exit 1
+fi
+
+exit 0

@@ -1,0 +1,124 @@
+# =====================================================================
+#  SIGILO DOS PARTICIPANTES
+#  Dados de treino, digitais e qualquer dado pessoal ficam SOMENTE na
+#  máquina local. Nada disso pode chegar ao repositório (público).
+# =====================================================================
+
+# Pastas de dados (em qualquer nível do repositório)
+dados/
+dataset/
+datasets/
+dataset_*/
+data/
+raw/
+brutos/
+coletas/
+participantes/
+pacientes/
+uploads/
+treino/dados/
+
+# Imagens bloqueadas por padrão (digitais podem estar em qualquer formato)
+*.png
+*.jpg
+*.jpeg
+*.bmp
+*.tif
+*.tiff
+*.wsq
+*.jp2
+*.gif
+*.webp
+*.raw
+
+# Liberadas apenas onde não há dado de participante
+!documentacao/**/*.png
+!documentacao/**/*.jpg
+!documentacao/**/*.svg
+!aplicacao/front/public/**/*.png
+!aplicacao/front/public/**/*.svg
+!aplicacao/front/src/assets/**/*.png
+!aplicacao/front/src/assets/**/*.svg
+
+# Planilhas e exports tabulares podem conter dados de participantes
+*.csv
+*.tsv
+*.xlsx
+*.xls
+*.parquet
+*.npy
+*.npz
+*.h5py
+*.pkl
+!documentacao/**/*.csv
+
+# Pesos de modelos: um modelo treinado com digitais reais pode vazar informação
+# sobre quem participou (inferência de pertencimento). Enquanto o repositório for
+# público, os pesos ficam locais; versionam-se config, métricas, hash e notas.
+# Decisão em aberto — ver treino/README.md.
+*.keras
+*.h5
+*.weights.h5
+*.onnx
+*.pt
+*.tflite
+
+# Bancos locais e dumps
+*.db
+*.sqlite
+*.sqlite3
+*.bak
+*.dump
+*.sql.gz
+
+# Segredos e configuração local
+.env
+.env.*
+!.env.example
+*.pfx
+*.key
+*.pem
+appsettings.*.local.json
+secrets.json
+
+# =====================================================================
+#  Python (IA)
+# =====================================================================
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.ipynb_checkpoints/
+.pytest_cache/
+logs/
+tmp_virtual/
+
+# =====================================================================
+#  .NET (back)
+# =====================================================================
+bin/
+obj/
+*.user
+*.suo
+.vs/
+TestResults/
+
+# =====================================================================
+#  React (front)
+# =====================================================================
+node_modules/
+dist/
+build/
+coverage/
+.vite/
+npm-debug.log*
+
+# =====================================================================
+#  Sistema / editores
+# =====================================================================
+.DS_Store
+Thumbs.db
+desktop.ini
+.idea/
+.vscode/*
+!.vscode/extensions.json

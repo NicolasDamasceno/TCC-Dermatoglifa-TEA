@@ -1,0 +1,11 @@
+#!/bin/sh
+# Impede linhas de coautoria ou assinatura de ferramentas na mensagem
+# do commit: apenas a identidade pessoal deve aparecer no histórico.
+
+if grep -Eiq '^(Co-Authored-By|Claude-Session|Signed-off-by: *Claude)|Generated with \[?Claude' "$1"; then
+  echo "ERRO: a mensagem contém coautoria/assinatura de ferramenta."
+  echo "Remova linhas como 'Co-Authored-By:' ou 'Claude-Session:'."
+  exit 1
+fi
+
+exit 0
