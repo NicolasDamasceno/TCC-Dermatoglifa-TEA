@@ -1,6 +1,6 @@
 # ADR-0006: Autenticação com ASP.NET Core Identity (Core) e token JWT
 
-**Status:** Proposto
+**Status:** Implementado no M2 (aceite formal pendente com o orientador)
 **Data:** 2026-10-20
 **Decisores:** Nicolas Damasceno (autor), orientador do TCC
 
@@ -72,6 +72,14 @@ com dados sensíveis.
 
 ## Ações
 
-1. [ ] Configurar `AddIdentityCore<Usuario>` + `AddEntityFrameworkStores`.
-2. [ ] Implementar `ServicoToken` e o endpoint de login.
-3. [ ] Criar o primeiro ADMIN por comando de inicialização com senha vinda de variável de ambiente (nunca no código).
+1. [x] Configurar `AddIdentityCore<Usuario>` + `AddEntityFrameworkStores`.
+2. [x] Implementar a emissão do token (`EmissorTokenJwt`, na API) e o endpoint de login.
+3. [x] Criar o primeiro ADMIN na inicialização com senha vinda de variável de ambiente (nunca no código).
+
+## Notas de implementação
+
+- O token leva um resumo SHA-256 do *security stamp*, não o valor; a validação a
+  cada requisição compara os resumos em tempo constante.
+- A emissão do JWT ficou na API, e não na Infraestrutura, porque depende das
+  bibliotecas de autenticação do ASP.NET Core.
+- Limite de 10 tentativas por minuto por IP no login e na solicitação de cadastro.

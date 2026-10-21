@@ -34,7 +34,7 @@ aplicacao/back/
       ObjetosDeValor/                IndicadoresDermatoglificos, PosicaoDedo, ArquivoDigital
       Servicos/                      TabelaConversaoAlca (alça esquerda/direita → ulnar/radial)
       Excecoes/                      RegraDeNegocioException
-    Dermatoglifia.Aplicacao/         casos de uso; depende só do Domínio
+    Dermatoglifia.Aplicacao/         casos de uso; depende do Domínio e das abstrações do EF Core
       Abstracoes/                    IClienteInferencia, IArmazenamentoImagens,
                                      IAuditoria, IRelogio, IUsuarioAtual
       Pacientes/  Coletas/  Analises/  Medicos/  Autenticacao/
@@ -43,10 +43,10 @@ aplicacao/back/
       Persistencia/                  AppDbContext, configurações Fluent API, migrations
       Armazenamento/                 ArmazenamentoLocalCifrado
       Inferencia/                    ClienteInferenciaHttp
-      Identidade/                    Usuario : IdentityUser<Guid>, ServicoToken,
-                                     configuração do Identity
+      Identidade/                    Usuario : IdentityUser<Guid>, Contas (IContas),
+                                     admin inicial, mensagens do Identity em português
     Dermatoglifia.Api/               HTTP: controllers, autenticação, ProblemDetails
-      Controllers/  Configuracao/  Program.cs
+      Controllers/  Autenticacao/ (emissão e validação do JWT)  Erros/  Program.cs
   tests/
     Dermatoglifia.Dominio.Testes/
     Dermatoglifia.Aplicacao.Testes/
@@ -65,7 +65,8 @@ flowchart TB
 Regra: o Domínio não referencia nada — por isso a conta de usuário
 (`Usuario : IdentityUser<Guid>`, ADR-0006) fica na Infraestrutura e o domínio
 se refere a ela só pelo id (`Medico.UsuarioId`, `Paciente.MedicoResponsavelId`);
-a Aplicação só conhece o Domínio e as próprias interfaces; a Infraestrutura implementa essas interfaces; a Api monta
+a Aplicação conhece o Domínio, as próprias interfaces e as abstrações de consulta
+do EF Core (`DbSet`, via `IContextoDados`) — sem saber que o banco é PostgreSQL; a Infraestrutura implementa essas interfaces; a Api monta
 tudo no `Program.cs`. Isso permite testar as regras sem banco, disco ou rede.
 
 ## 3. Domínio — regras que vivem nas entidades
@@ -148,7 +149,14 @@ JSON em camelCase; datas em ISO 8601 UTC; enums como texto (`"DIREITA"`).
 { "token": "eyJ...", "expiraEm": "2026-10-21T03:15:00Z",
   "usuario": { "id": "…", "nome": "Dra. Ana", "papel": "MEDICO" } }
 ```
-`401` credenciais inválidas · `403` cadastro pendente/inativo · `423` bloqueado temporariamente.
+`401` credenciais inválidas (mesma resposta para e-mail inexistente e senha errada) ·
+`403` cadastro pendente, recusado ou inativo (só revelado com a senha certa) ·
+`423` bloqueado por 15 minutos após 5 falhas · `429` mais de 10 tentativas por minuto do mesmo IP.
+
+O token carrega `sub`, `nome`, `papel` e um resumo SHA-256 do *security stamp*
+(nunca o valor em si). A cada requisição o resumo é comparado com o da conta:
+inativar, recusar ou trocar a senha invalida o token na hora. Toda rota exige
+login por padrão; as públicas são marcadas com `[AllowAnonymous]`.
 
 ### Pacientes
 `POST /api/pacientes`
@@ -302,7 +310,7 @@ contatos de pacientes nunca aparecem em log (apenas `uuid`).
 | Domínio | Regras das entidades, sem banco | menor sem responsável é rejeitado; sessão com dedo não coletável conclui `INCOMPLETA`; transições inválidas de `Analise` |
 | Aplicação | Serviços com abstrações falsas | médico não enxerga paciente de outro; resposta inconsistente da IA leva a `ERRO`; indicadores recalculados |
 | Conversão ulnar/radial e indicadores | Tabelas de casos | 0–4 sem polegar e 0–5 com polegar em combinações conhecidas |
-| Integração | API + PostgreSQL em contêiner + IA falsa | fluxo UC04→UC08 completo; upload com PNG sintético de 500 ppi; 401/403/404/409/413/415/422 |
+| Integração | API + PostgreSQL real (contêiner via Testcontainers, ou o servidor em `TESTES_BANCO`) + IA falsa | fluxo UC04→UC08 completo; upload com PNG sintético de 500 ppi; 401/403/404/409/413/415/422 |
 
 Imagens de teste são **geradas no próprio teste** (ruído/padrões sintéticos com
 resolução gravada); nenhuma digital real em `tests/` (RNF08).
@@ -312,7 +320,7 @@ resolução gravada); nenhuma digital real em `tests/` (RNF08).
 | Marco | Entrega | Commits esperados |
 |---|---|---|
 | M1 ✅ | Solução, projetos, Domínio com testes, `AppDbContext` e primeira migration | `build(back)`, `feat(back)`, `test(back)` |
-| M2 | Identity + JWT, solicitação e aprovação de médico, admin inicial (UC01–UC03) | `feat(back)` |
+| M2 ✅ | Identity + JWT, solicitação e aprovação de médico, admin inicial (UC01–UC03) | `feat(back)` |
 | M3 | Pacientes, identificação separada e consentimento (UC04–UC05) + auditoria | `feat(back)` |
 | M4 | Sessão de coleta, upload, normalização e cifragem (UC06) | `feat(back)` |
 | M5 | Cliente da IA com serviço falso, verificação de consistência, análise (UC07–UC08) | `feat(back)` |
