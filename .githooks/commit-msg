@@ -1,10 +1,33 @@
 #!/bin/sh
-# Impede linhas de coautoria ou assinatura de ferramentas na mensagem
-# do commit: apenas a identidade pessoal deve aparecer no histórico.
+# 1) Impede linhas de coautoria ou assinatura de ferramentas: apenas a
+#    identidade pessoal deve aparecer no histórico.
+# 2) Exige o padrão Conventional Commits na primeira linha (ver CLAUDE.md).
 
 if grep -Eiq '^(Co-Authored-By|Claude-Session|Signed-off-by: *Claude)|Generated with \[?Claude' "$1"; then
   echo "ERRO: a mensagem contém coautoria/assinatura de ferramenta."
   echo "Remova linhas como 'Co-Authored-By:' ou 'Claude-Session:'."
+  exit 1
+fi
+
+PRIMEIRA=$(grep -v '^#' "$1" | head -n 1)
+
+# Merges e reverts gerados pelo próprio git passam sem validação
+case "$PRIMEIRA" in
+  Merge\ *|Revert\ *) exit 0 ;;
+esac
+
+TIPOS='feat|fix|docs|chore|refactor|test|build|ci|perf|style|revert'
+if ! printf '%s\n' "$PRIMEIRA" | grep -Eq "^($TIPOS)(\([a-z0-9-]+\))?!?: [^ ].*$"; then
+  echo "ERRO: a primeira linha não segue o padrão Conventional Commits."
+  echo "  Formato: tipo(escopo): descrição no imperativo"
+  echo "  Tipos:   feat, fix, docs, chore, refactor, test, build, ci, perf, style, revert"
+  echo "  Exemplo: docs(adr): adiciona ADR-0006 sobre autenticação"
+  echo "  Recebido: $PRIMEIRA"
+  exit 1
+fi
+
+if [ "$(printf '%s' "$PRIMEIRA" | wc -m)" -gt 72 ]; then
+  echo "ERRO: a primeira linha tem mais de 72 caracteres."
   exit 1
 fi
 

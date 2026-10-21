@@ -32,8 +32,31 @@ complementar de risco** baseada em achados dermatoglíficos.
 - Depois do commit, conferir com `git log -1 --format='%an <%ae> | %cn <%ce>'`.
 - Os hooks em `.githooks/` reforçam isso. Ativar em cada clone:
   `git config core.hooksPath .githooks`. Nunca usar `--no-verify`.
-- Mensagens de commit em português, no imperativo
-  (ex.: `Adiciona entidade Paciente ao modelo de dados`).
+- Mensagens no padrão **Conventional Commits** (validado pelo hook `commit-msg`),
+  com a descrição em português, no imperativo e em minúscula:
+  ```
+  tipo(escopo): descrição curta (até 72 caracteres na linha)
+
+  Corpo opcional explicando o porquê, em tópicos se ajudar.
+  ```
+  | Tipo | Quando usar |
+  |---|---|
+  | `feat` | nova funcionalidade (endpoint, tela, script de treino) |
+  | `fix` | correção de erro |
+  | `docs` | documentação, ADRs, READMEs |
+  | `refactor` | mudança de código sem alterar comportamento |
+  | `test` | testes |
+  | `chore` | configuração do repositório, hooks, `.gitignore` |
+  | `build` / `ci` | dependências, build, pipelines |
+  | `perf` / `style` | desempenho / formatação |
+  | `revert` | desfaz um commit anterior |
+
+  Escopos: `treino`, `ia`, `back`, `front`, `banco`, `docs`, `adr`, `repo`.
+  Mudança incompatível: `!` após o escopo (`feat(back)!: ...`) e rodapé
+  `BREAKING CHANGE:`. Um commit por assunto; não misturar tipos.
+  Exemplos: `feat(treino): adiciona script da CNN de padrões`,
+  `docs(adr): registra ADR-0006 sobre autenticação`.
+- Commits já enviados não são reescritos (sem `push --force` na `main`).
 
 ## Regra 2 — Consultar contexto e objetivos antes de cada novo módulo
 
