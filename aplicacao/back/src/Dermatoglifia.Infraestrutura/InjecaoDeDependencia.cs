@@ -1,6 +1,7 @@
 using Dermatoglifia.Aplicacao.Abstracoes;
 using Dermatoglifia.Infraestrutura.Auditoria;
 using Dermatoglifia.Infraestrutura.Identidade;
+using Dermatoglifia.Infraestrutura.Imagens;
 using Dermatoglifia.Infraestrutura.Persistencia;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -43,6 +44,11 @@ public static class InjecaoDeDependencia
             })
             .AddErrorDescriber<DescritorErrosIdentity>()
             .AddEntityFrameworkStores<AppDbContext>();
+
+        // Imagens das digitais: validação/normalização e armazenamento cifrado (ADR-0004, RNF02).
+        services.AddSingleton(OpcoesArmazenamento.Carregar(configuration));
+        services.AddSingleton<IArmazenamentoImagens, ArmazenamentoLocalCifrado>();
+        services.AddSingleton<IProcessadorImagens, ProcessadorImagens>();
 
         services.AddSingleton<IRelogio, RelogioSistema>();
         services.AddScoped<IContas, Contas>();

@@ -21,6 +21,10 @@ public sealed partial class TratadorExcecoes(IProblemDetailsService problemDetai
             RegraDeNegocioException e => (StatusCodes.Status422UnprocessableEntity, e.Message),
             NaoEncontradoException e => (StatusCodes.Status404NotFound, e.Message),
             ConflitoException e => (StatusCodes.Status409Conflict, e.Message),
+            FormatoNaoSuportadoException e => (StatusCodes.Status415UnsupportedMediaType, e.Message),
+            ConteudoMuitoGrandeException e => (StatusCodes.Status413PayloadTooLarge, e.Message),
+            BadHttpRequestException { StatusCode: StatusCodes.Status413PayloadTooLarge } =>
+                (StatusCodes.Status413PayloadTooLarge, "Arquivo acima do tamanho permitido."),
             DbUpdateConcurrencyException => (StatusCodes.Status409Conflict,
                 "O registro foi alterado por outra operação. Recarregue e tente de novo."),
             DbUpdateException { InnerException: PostgresException { SqlState: PostgresErrorCodes.UniqueViolation } } =>
