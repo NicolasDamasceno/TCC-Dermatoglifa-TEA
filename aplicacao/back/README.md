@@ -59,6 +59,13 @@ na mensagem. O modelo de variáveis está em `.env.example`.
 | `GET /api/medicos/solicitacoes` | admin | lista cadastros pendentes |
 | `POST /api/medicos/{id}/aprovacao` | admin | aprova, informando o vínculo com o protocolo |
 | `POST /api/medicos/{id}/recusa` | admin | recusa, informando o motivo |
+| `GET /api/pacientes?busca=` | médico | lista os próprios pacientes |
+| `POST /api/pacientes` | médico | cadastra paciente (identificação guardada à parte) |
+| `GET /api/pacientes/{id}` | médico | detalhe, responsável e consentimentos |
+| `POST /api/pacientes/{id}/consentimentos` | médico | registra TCLE ou TALE |
+| `POST /api/pacientes/{id}/consentimentos/{cid}/revogacao` | médico | revoga um consentimento |
+
+Paciente de outro médico responde `404`, como se não existisse.
 
 ## Testes
 
@@ -93,5 +100,6 @@ o doc 05 se a estrutura do banco mudar.
 |---|---|
 | M1 — solução, domínio com testes, `AppDbContext` e migration inicial | concluído |
 | M2 — Identity + JWT, solicitação e aprovação de médico, admin inicial | concluído |
-| M3 — pacientes, identificação separada, consentimento e auditoria | próximo |
-| M4 a M6 | pendentes |
+| M3 — pacientes, identificação separada, consentimento e auditoria | concluído |
+| M4 — sessão de coleta, upload, normalização e cifragem das digitais | próximo |
+| M5 e M6 | pendentes |

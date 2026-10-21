@@ -84,10 +84,11 @@ O desenho detalhado do back-end está em [08-back-end.md](08-back-end.md).
 | GET | `/api/medicos/solicitacoes?status=PENDENTE` | ADMIN | UC03 |
 | POST | `/api/medicos/{id}/aprovacao` | ADMIN | UC03 |
 | POST | `/api/medicos/{id}/recusa` | ADMIN | UC03 |
-| GET | `/api/pacientes` | MEDICO | lista os pacientes do médico |
+| GET | `/api/pacientes?busca=` | MEDICO | lista os pacientes do médico (filtro opcional por nome) |
 | POST | `/api/pacientes` | MEDICO | UC04 |
 | GET | `/api/pacientes/{id}` | MEDICO | UC04/UC09 |
 | POST | `/api/pacientes/{id}/consentimentos` | MEDICO | UC05 |
+| POST | `/api/pacientes/{id}/consentimentos/{consentimentoId}/revogacao` | MEDICO | UC05 (3b) |
 | POST | `/api/pacientes/{id}/sessoes` | MEDICO | UC06 (iniciar) |
 | GET | `/api/sessoes/{id}` | MEDICO | UC06 (situação dos 10 dedos) |
 | PUT | `/api/sessoes/{id}/digitais/{mao}/{dedo}` | MEDICO | UC06 (enviar/refazer) |

@@ -166,11 +166,32 @@ login por padrão; as públicas são marcadas com `[AllowAnonymous]`.
 ```
 `201` → `{ "id": "…", "podeColetar": false }` (falta o consentimento).
 
+`GET /api/pacientes/{id}` → `200`
+```json
+{ "paciente": { "id": "…", "nome": "…", "dataNascimento": "2022-03-14", "idadeAnos": 4,
+                "sexo": "MASCULINO", "situacao": "SUSPEITA", "podeColetar": true,
+                "anonimizado": false, "criadoEm": "…" },
+  "responsavel": { "nome": "…", "parentesco": "MAE", "contato": "…" },
+  "fonteDiagnostico": null,
+  "consentimentos": [ { "id": "…", "tipo": "TCLE", "versaoTermo": "CEP-v1.0", "assinadoEm": "2026-11-03",
+                        "autorizaAnalise": true, "cienteUsoIA": true, "autorizaUsoTreino": false,
+                        "vigente": true, "revogadoEm": null } ] }
+```
+`GET /api/pacientes?busca=ana` devolve a lista com o mesmo formato de `paciente`.
+Listar e abrir paciente ficam registrados na auditoria (leitura de dado pessoal).
+Só o papel MEDICO acessa estas rotas; o administrador não vê dados de pacientes.
+
 `POST /api/pacientes/{id}/consentimentos`
 ```json
 { "tipo": "TCLE", "versaoTermo": "CEP-v1.0", "assinadoEm": "2026-11-03",
   "autorizaAnalise": true, "cienteUsoIA": true, "autorizaUsoTreino": false }
 ```
+`201` → `{ "consentimentoId": "…", "podeColetar": true }`. Os três campos
+booleanos só liberam a coleta num **TCLE**; o TALE registra o assentimento da
+criança e, sozinho, não libera.
+
+`POST /api/pacientes/{id}/consentimentos/{consentimentoId}/revogacao` → `200`
+`{ "consentimentoId": "…", "podeColetar": false }`; revogar de novo → `422`.
 
 ### Coleta
 `POST /api/pacientes/{id}/sessoes`
@@ -321,7 +342,7 @@ resolução gravada); nenhuma digital real em `tests/` (RNF08).
 |---|---|---|
 | M1 ✅ | Solução, projetos, Domínio com testes, `AppDbContext` e primeira migration | `build(back)`, `feat(back)`, `test(back)` |
 | M2 ✅ | Identity + JWT, solicitação e aprovação de médico, admin inicial (UC01–UC03) | `feat(back)` |
-| M3 | Pacientes, identificação separada e consentimento (UC04–UC05) + auditoria | `feat(back)` |
+| M3 ✅ | Pacientes, identificação separada e consentimento (UC04–UC05) + auditoria | `feat(back)` |
 | M4 | Sessão de coleta, upload, normalização e cifragem (UC06) | `feat(back)` |
 | M5 | Cliente da IA com serviço falso, verificação de consistência, análise (UC07–UC08) | `feat(back)` |
 | M6 | ProblemDetails completo, CORS, testes de integração, `.env.example` | `feat(back)`, `test(back)` |
