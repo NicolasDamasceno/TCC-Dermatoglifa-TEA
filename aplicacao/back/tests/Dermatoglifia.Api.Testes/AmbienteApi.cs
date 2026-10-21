@@ -38,6 +38,9 @@ public sealed class AmbienteApi : IAsyncLifetime
 
     public WebApplicationFactory<Program> Fabrica { get; private set; } = null!;
 
+    /// <summary>Pasta temporária das imagens cifradas desta execução (apagada no fim).</summary>
+    public string DiretorioImagens { get; } = Path.Combine(Path.GetTempPath(), $"dermatoglifia-testes-{Guid.NewGuid():N}");
+
     public async Task InitializeAsync()
     {
         _servidor = Environment.GetEnvironmentVariable("TESTES_BANCO") ?? await IniciarConteinerAsync();
@@ -60,6 +63,8 @@ public sealed class AmbienteApi : IAsyncLifetime
             ["LimiteRequisicoes:EntradaPorMinuto"] = "10000",
             ["AdminInicial:Email"] = EmailAdmin,
             ["AdminInicial:Senha"] = SenhaAdmin,
+            ["Armazenamento:Diretorio"] = DiretorioImagens,
+            ["Armazenamento:Chaves:1"] = Convert.ToBase64String(RandomNumberGenerator.GetBytes(32)),
         };
 
         Fabrica = new WebApplicationFactory<Program>().WithWebHostBuilder(host =>
@@ -82,6 +87,11 @@ public sealed class AmbienteApi : IAsyncLifetime
         if (_conteiner is not null)
         {
             await _conteiner.DisposeAsync();
+        }
+
+        if (Directory.Exists(DiretorioImagens))
+        {
+            Directory.Delete(DiretorioImagens, recursive: true);
         }
     }
 
