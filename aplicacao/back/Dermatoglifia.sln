@@ -17,6 +17,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{0AB3BF05
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dermatoglifia.Dominio.Testes", "tests\Dermatoglifia.Dominio.Testes\Dermatoglifia.Dominio.Testes.csproj", "{BF134B81-65B3-4B7B-A0A8-C8D11C4ACFBB}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dermatoglifia.Api.Testes", "tests\Dermatoglifia.Api.Testes\Dermatoglifia.Api.Testes.csproj", "{C41749AE-3A98-49DC-99C1-1B5057E07CE9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -87,6 +89,18 @@ Global
 		{BF134B81-65B3-4B7B-A0A8-C8D11C4ACFBB}.Release|x64.Build.0 = Release|Any CPU
 		{BF134B81-65B3-4B7B-A0A8-C8D11C4ACFBB}.Release|x86.ActiveCfg = Release|Any CPU
 		{BF134B81-65B3-4B7B-A0A8-C8D11C4ACFBB}.Release|x86.Build.0 = Release|Any CPU
+		{C41749AE-3A98-49DC-99C1-1B5057E07CE9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C41749AE-3A98-49DC-99C1-1B5057E07CE9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C41749AE-3A98-49DC-99C1-1B5057E07CE9}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{C41749AE-3A98-49DC-99C1-1B5057E07CE9}.Debug|x64.Build.0 = Debug|Any CPU
+		{C41749AE-3A98-49DC-99C1-1B5057E07CE9}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{C41749AE-3A98-49DC-99C1-1B5057E07CE9}.Debug|x86.Build.0 = Debug|Any CPU
+		{C41749AE-3A98-49DC-99C1-1B5057E07CE9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C41749AE-3A98-49DC-99C1-1B5057E07CE9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C41749AE-3A98-49DC-99C1-1B5057E07CE9}.Release|x64.ActiveCfg = Release|Any CPU
+		{C41749AE-3A98-49DC-99C1-1B5057E07CE9}.Release|x64.Build.0 = Release|Any CPU
+		{C41749AE-3A98-49DC-99C1-1B5057E07CE9}.Release|x86.ActiveCfg = Release|Any CPU
+		{C41749AE-3A98-49DC-99C1-1B5057E07CE9}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -97,5 +111,6 @@ Global
 		{2BDFE309-845C-49D8-8B88-136A367275DE} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 		{6726F6AD-B71E-4121-AFD1-D0CDC1004F5A} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 		{BF134B81-65B3-4B7B-A0A8-C8D11C4ACFBB} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
+		{C41749AE-3A98-49DC-99C1-1B5057E07CE9} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
 	EndGlobalSection
 EndGlobal
