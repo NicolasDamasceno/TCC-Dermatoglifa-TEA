@@ -1,4 +1,5 @@
 using Dermatoglifia.Dominio.Enums;
+using Dermatoglifia.Dominio.Excecoes;
 using Microsoft.AspNetCore.Identity;
 
 namespace Dermatoglifia.Infraestrutura.Identidade;
@@ -25,16 +26,24 @@ public sealed class Usuario : IdentityUser<Guid>
     /// Cria a conta. Médicos começam PENDENTES até a aprovação (UC02/UC03);
     /// administradores são criados ativos pelo comando de inicialização.
     /// </summary>
-    public static Usuario Criar(string nome, string email, PapelUsuario papel, DateTimeOffset agora)
+    public static Usuario Criar(string nome, string email, PapelUsuario papel, DateTimeOffset agora, Guid? id = null)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(nome);
-        ArgumentException.ThrowIfNullOrWhiteSpace(email);
+        var nomeLimpo = nome?.Trim();
+        if (string.IsNullOrEmpty(nomeLimpo) || nomeLimpo.Length > 150)
+        {
+            throw new RegraDeNegocioException("Nome é obrigatório e deve ter no máximo 150 caracteres.");
+        }
+
+        if (string.IsNullOrWhiteSpace(email))
+        {
+            throw new RegraDeNegocioException("E-mail é obrigatório.");
+        }
 
         var emailNormalizado = email.Trim().ToLowerInvariant();
         return new Usuario
         {
-            Id = Guid.CreateVersion7(),
-            Nome = nome.Trim(),
+            Id = id ?? Guid.CreateVersion7(),
+            Nome = nomeLimpo,
             Email = emailNormalizado,
             UserName = emailNormalizado,
             Papel = papel,
@@ -44,15 +53,18 @@ public sealed class Usuario : IdentityUser<Guid>
         };
     }
 
-    public void Ativar() => Status = StatusCadastro.Ativo;
-
-    public void Recusar() => Status = StatusCadastro.Recusado;
-
     /// <summary>
-    /// Inativa a conta. Quem chamar deve também atualizar o security stamp
-    /// (UserManager.UpdateSecurityStampAsync) para invalidar tokens emitidos antes.
+    /// Muda o status. Qualquer status diferente de ATIVO troca o security stamp,
+    /// o que invalida na hora os tokens emitidos antes (ADR-0006).
     /// </summary>
-    public void Inativar() => Status = StatusCadastro.Inativo;
+    public void AlterarStatus(StatusCadastro status)
+    {
+        Status = status;
+        if (status != StatusCadastro.Ativo)
+        {
+            SecurityStamp = Guid.NewGuid().ToString("N").ToUpperInvariant();
+        }
+    }
 
     public void RegistrarAcesso(DateTimeOffset agora) => UltimoAcessoEm = agora;
 }

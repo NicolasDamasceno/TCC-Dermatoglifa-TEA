@@ -1,9 +1,11 @@
+using Dermatoglifia.Aplicacao.Abstracoes;
 using Dermatoglifia.Dominio.Entidades;
 using Dermatoglifia.Dominio.Enums;
 using Dermatoglifia.Infraestrutura.Identidade;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Storage;
 
 namespace Dermatoglifia.Infraestrutura.Persistencia;
 
@@ -13,7 +15,7 @@ namespace Dermatoglifia.Infraestrutura.Persistencia;
 /// um campo de <see cref="Usuario"/> (ADR-0006).
 /// </summary>
 public sealed class AppDbContext(DbContextOptions<AppDbContext> options)
-    : IdentityUserContext<Usuario, Guid>(options)
+    : IdentityUserContext<Usuario, Guid>(options), IContextoDados
 {
     /// <summary>Schema separado para os dados que identificam a pessoa (pseudonimização).</summary>
     public const string SchemaIdentificacao = "identificacao";
@@ -28,6 +30,11 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options)
     public DbSet<Analise> Analises => Set<Analise>();
     public DbSet<ResultadoDigital> ResultadosDigitais => Set<ResultadoDigital>();
     public DbSet<RegistroAuditoria> Auditoria => Set<RegistroAuditoria>();
+
+    public Task<int> SalvarAsync(CancellationToken cancelamento = default) => SaveChangesAsync(cancelamento);
+
+    public Task<IDbContextTransaction> IniciarTransacaoAsync(CancellationToken cancelamento = default)
+        => Database.BeginTransactionAsync(cancelamento);
 
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
     {
