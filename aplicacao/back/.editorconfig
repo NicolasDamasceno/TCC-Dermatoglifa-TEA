@@ -1,0 +1,9 @@
+root = false
+
+# Migrations são geradas pelo EF Core: os analisadores não se aplicam a elas.
+[src/Dermatoglifia.Infraestrutura/Persistencia/Migracoes/**.cs]
+generated_code = true
+
+# Nos testes, o sublinhado nos nomes dos métodos é intencional (legibilidade).
+[tests/**.cs]
+dotnet_diagnostic.CA1707.severity = none
