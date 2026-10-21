@@ -41,13 +41,17 @@ dotnet user-secrets set "Jwt:Chave" "$(openssl rand -base64 32)" --project src/D
 dotnet user-secrets set "AdminInicial:Email" "<seu e-mail>" --project src/Dermatoglifia.Api
 dotnet user-secrets set "AdminInicial:Senha" "<senha com 10+ caracteres, letra e número>" --project src/Dermatoglifia.Api
 
+# Pasta das imagens cifradas (FORA do repositório) e chave de cifragem
+dotnet user-secrets set "Armazenamento:Diretorio" "$HOME/dermatoglifia-imagens" --project src/Dermatoglifia.Api
+dotnet user-secrets set "Armazenamento:Chaves:1" "$(openssl rand -base64 32)" --project src/Dermatoglifia.Api
+
 # Cria as tabelas e sobe a API
 dotnet ef database update -p src/Dermatoglifia.Infraestrutura -s src/Dermatoglifia.Api
 dotnet run --project src/Dermatoglifia.Api
 ```
 
-A API não inicia sem a connection string ou sem uma chave JWT de pelo menos 32
-bytes, nem com migrations pendentes — falha rápida de propósito, com a instrução
+A API não inicia sem a connection string, sem uma chave JWT de pelo menos 32
+bytes, sem a pasta e a chave de armazenamento, nem com migrations pendentes — falha rápida de propósito, com a instrução
 na mensagem. O modelo de variáveis está em `.env.example`.
 
 ## Rotas disponíveis
@@ -64,6 +68,12 @@ na mensagem. O modelo de variáveis está em `.env.example`.
 | `GET /api/pacientes/{id}` | médico | detalhe, responsável e consentimentos |
 | `POST /api/pacientes/{id}/consentimentos` | médico | registra TCLE ou TALE |
 | `POST /api/pacientes/{id}/consentimentos/{cid}/revogacao` | médico | revoga um consentimento |
+| `POST /api/pacientes/{id}/sessoes` | médico | inicia a coleta das 10 digitais |
+| `GET /api/sessoes/{id}` | médico | situação de cada dedo |
+| `PUT /api/sessoes/{id}/digitais/{mao}/{dedo}` | médico | envia ou refaz a imagem de um dedo (PNG, BMP ou TIFF, ≥ 500 ppi, até 5 MB) |
+| `POST /api/sessoes/{id}/digitais/{mao}/{dedo}/nao-coletavel` | médico | registra dedo que não pode ser coletado |
+| `POST /api/sessoes/{id}/conclusao` | médico | conclui a sessão |
+| `POST /api/sessoes/{id}/cancelamento` | médico | cancela a sessão |
 
 Paciente de outro médico responde `404`, como se não existisse.
 
@@ -101,5 +111,6 @@ o doc 05 se a estrutura do banco mudar.
 | M1 — solução, domínio com testes, `AppDbContext` e migration inicial | concluído |
 | M2 — Identity + JWT, solicitação e aprovação de médico, admin inicial | concluído |
 | M3 — pacientes, identificação separada, consentimento e auditoria | concluído |
-| M4 — sessão de coleta, upload, normalização e cifragem das digitais | próximo |
-| M5 e M6 | pendentes |
+| M4 — sessão de coleta, upload, normalização e cifragem das digitais | concluído |
+| M5 — cliente do Serviço de IA, verificação de consistência e análise | próximo |
+| M6 | pendente |

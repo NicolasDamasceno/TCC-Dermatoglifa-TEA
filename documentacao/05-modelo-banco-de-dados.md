@@ -300,14 +300,16 @@ anonimização (LGPD art. 16). O prazo exato será o definido no protocolo do CE
 ```
 <DIRETORIO_ARMAZENAMENTO>/            (fora do repositório e da pasta pública)
   <sessao_coleta_id>/
-    DIREITA_POLEGAR.png.enc
+    DIREITA_POLEGAR_<uuid>.png.enc
     ...
-    ESQUERDA_MINIMO.png.enc
+    ESQUERDA_MINIMO_<uuid>.png.enc
 ```
 
-Cifragem AES-256-GCM por arquivo; chave fora do banco e do código (ASP.NET Core
-Data Protection ou `dotnet user-secrets` em desenvolvimento). Nenhum nome de
-arquivo contém dado do paciente.
+Cifragem AES-256-GCM por arquivo, com o caminho relativo como dado associado;
+chave fora do banco e do código (`dotnet user-secrets` em desenvolvimento,
+variável de ambiente no servidor). Cada envio gera um nome novo (`<uuid>`), e
+`digital.caminho_arquivo` aponta para o arquivo vigente. Nenhum nome de arquivo
+contém dado do paciente. Detalhes no doc 08, seção 6.
 
 ## Implementação (migration `Inicial`)
 

@@ -94,6 +94,7 @@ O desenho detalhado do back-end está em [08-back-end.md](08-back-end.md).
 | PUT | `/api/sessoes/{id}/digitais/{mao}/{dedo}` | MEDICO | UC06 (enviar/refazer) |
 | POST | `/api/sessoes/{id}/digitais/{mao}/{dedo}/nao-coletavel` | MEDICO | UC06 (4b) |
 | POST | `/api/sessoes/{id}/conclusao` | MEDICO | UC06 → UC07 |
+| POST | `/api/sessoes/{id}/cancelamento` | MEDICO | UC06 (4c) |
 | GET | `/api/analises/{id}` | MEDICO | UC08 |
 | POST | `/api/analises/{id}/nova-tentativa` | MEDICO | UC07 (2a) |
 | PATCH | `/api/analises/{id}/observacao` | MEDICO | UC08 |

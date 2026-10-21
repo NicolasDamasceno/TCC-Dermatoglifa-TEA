@@ -13,12 +13,18 @@ e ADRs 0001–0006 — e não os repete: aqui está **como** construir.
 | API | ASP.NET Core Web API com **controllers** | Estrutura explícita por recurso, alinhada aos casos de uso |
 | ORM | EF Core 10 + `Npgsql.EntityFrameworkCore.PostgreSQL` 10.x | ADR-0003 |
 | Autenticação | ASP.NET Core Identity (Core) + `JwtBearer` | ADR-0006 |
-| Imagens | `SixLabors.ImageSharp` | Ler formato real, resolução (ppi) e converter para cinza 8 bits |
+| Imagens | `Magick.NET-Q8-AnyCPU` 15.0.0 (ImageMagick) | Ler PNG/BMP/TIFF, resolução (ppi) e converter para cinza 8 bits |
 | Cifragem | `System.Security.Cryptography.AesGcm` (nativo) | AES-256-GCM sem dependência extra (RNF02) |
 | Testes | xUnit + `WebApplicationFactory` + Testcontainers (PostgreSQL) | Testes de domínio rápidos e de integração com banco real |
 
-> Licença do ImageSharp (Six Labors Split License) e versões exatas dos pacotes
-> são conferidas no momento de adicioná-los e citadas na mensagem do commit.
+> **Por que Magick.NET (decidido no M4, 21/10/2026).** O plano era o ImageSharp.
+> A versão 4 passou a exigir chave de licença registrada na Six Labors até para o
+> uso gratuito (sem ela, o build em Release falha), e a última versão da linha 3
+> (3.1.12) tem cinco vulnerabilidades conhecidas no NuGet. O Magick.NET 15.0.0 tem
+> licença Apache 2.0 sem chave, nenhuma vulnerabilidade conhecida na data e traz
+> as bibliotecas nativas para Windows, Linux e macOS. Como o ImageMagick já teve
+> falhas exploradas pela detecção automática de formato, o formato é sempre
+> decidido pela assinatura do arquivo e passado explicitamente à biblioteca.
 
 ## 2. Estrutura da solução
 
@@ -198,21 +204,34 @@ criança e, sozinho, não libera.
 ```json
 { "metodo": "LEITOR_OPTICO", "tipoImpressao": "ROLADA", "dispositivo": "…" }
 ```
-`GET /api/sessoes/{id}` devolve o estado dos 10 dedos, na ordem de coleta:
-```json
-{ "id": "…", "status": "EM_ANDAMENTO",
-  "dedos": [ { "mao": "DIREITA", "dedo": "POLEGAR", "situacao": "COLETADO",
-               "resolucaoDpi": 500, "capturadaEm": "…" },
-             { "mao": "DIREITA", "dedo": "INDICADOR", "situacao": "PENDENTE" } ] }
-```
-`PUT /api/sessoes/{id}/digitais/{mao}/{dedo}` — `multipart/form-data`, campo `imagem`.
-`200` dedo coletado · `415` formato não aceito · `422` resolução abaixo de 500 ppi ·
-`413` acima de 5 MB · `409` sessão não está em andamento.
+`201` → a sessão (formato abaixo) · `422` sem TCLE vigente · `409` já existe sessão
+em andamento para o paciente · `404` paciente de outro médico.
 
-`POST /api/sessoes/{id}/conclusao` → `200`
+`GET /api/sessoes/{id}` devolve o estado dos 10 dedos, na ordem de coleta (todas
+as rotas de coleta respondem nesse mesmo formato):
 ```json
-{ "sessaoStatus": "COMPLETA", "analiseId": "…", "analiseStatus": "CONCLUIDA" }
+{ "id": "…", "pacienteId": "…", "status": "EM_ANDAMENTO", "metodo": "LEITOR_OPTICO",
+  "tipoImpressao": "ROLADA", "dispositivo": "…", "idadeMeses": 55,
+  "iniciadaEm": "…", "concluidaEm": null,
+  "dedos": [ { "mao": "DIREITA", "dedo": "POLEGAR", "situacao": "COLETADO",
+               "resolucaoDpi": 500, "motivoNaoColetavel": null, "capturadaEm": "…" },
+             { "mao": "DIREITA", "dedo": "INDICADOR", "situacao": "PENDENTE", … } ] }
 ```
+`situacao`: `PENDENTE`, `COLETADO` ou `NAO_COLETAVEL`.
+
+`PUT /api/sessoes/{id}/digitais/{mao}/{dedo}` — `multipart/form-data`, campo `imagem`;
+`mao` e `dedo` como em `DIREITA` / `POLEGAR`. Enviar de novo o mesmo dedo substitui a imagem.
+`200` dedo coletado · `415` não é PNG/BMP/TIFF válido · `422` resolução ausente ou abaixo
+de 500 ppi, lado fora de 100–4000 px, sessão não está em andamento ou consentimento
+revogado · `413` acima de 5 MB · `400` mão ou dedo inválidos.
+
+`POST /api/sessoes/{id}/digitais/{mao}/{dedo}/nao-coletavel` com `{ "motivo": "…" }`.
+
+`POST /api/sessoes/{id}/conclusao` → `200` com `status` `COMPLETA` (10 dedos) ou
+`INCOMPLETA` (algum não coletável); `422` com dedos pendentes. No M5 a resposta
+passa a incluir a análise solicitada.
+
+`POST /api/sessoes/{id}/cancelamento` → `200` com `status` `CANCELADA`.
 
 ### Análise
 `GET /api/analises/{id}`
@@ -245,6 +264,8 @@ português para exibição e `errors` por campo nas validações:
 | Validação de entrada (DataAnnotations) | 400 |
 | `NaoEncontradoException` (inclui recurso de outro médico) | 404 |
 | `ConflitoException` (e-mail/CRM repetido, sessão já em andamento) | 409 |
+| `FormatoNaoSuportadoException` (imagem não é PNG/BMP/TIFF válido) | 415 |
+| `ConteudoMuitoGrandeException` / corpo acima do limite | 413 |
 | `RegraDeNegocioException` | 422 |
 | Falha da IA ao concluir | 200 com `analiseStatus: "ERRO"` (não é erro da requisição) |
 | Inesperada | 500 sem detalhes internos; detalhe só no log |
@@ -262,18 +283,32 @@ flowchart LR
     R -- sim --> N["normaliza:<br/>cinza 8 bits, PNG,<br/>remove metadados"]
     N --> H[SHA-256 do PNG normalizado]
     H --> C["AES-256-GCM<br/>nonce aleatório"]
-    C --> D["disco: sessao/MAO_DEDO.png.enc"]
+    C --> D["disco: sessao/MAO_DEDO_uuid.png.enc"]
     D --> B[(UPSERT digital)]
 ```
 
-- O formato é decidido pelos bytes iniciais (assinatura), nunca pela extensão.
+- O formato é decidido pelos bytes iniciais (assinatura), nunca pela extensão, e
+  passado explicitamente ao ImageMagick. Dimensões (100–4000 px por lado) são
+  conferidas antes de decodificar os pixels; limites de recursos do ImageMagick
+  reforçam isso.
 - Resolução lida dos metadados da imagem; ausente → rejeita com orientação
   (o método de captura do protocolo precisa gravar a resolução).
+- O PNG normalizado tem apenas os blocos `IHDR`, `pHYs` (resolução), `IDAT` e
+  `IEND`: perfis, comentários, textos e datas são descartados, e a mesma imagem
+  gera sempre o mesmo SHA-256.
 - Arquivo cifrado: `[versão da chave: 1 byte][nonce: 12 bytes][tag: 16 bytes][dados]`.
   A versão permite trocar a chave no futuro sem perder arquivos antigos.
+- O **caminho relativo do arquivo entra como dado associado** da cifragem: um
+  arquivo copiado para o lugar de outro (a digital de um dedo no lugar de outro
+  dedo ou de outra sessão) não decifra.
 - Chave mestra de 256 bits em configuração secreta (`Armazenamento:Chaves:1`),
-  nunca no banco nem no repositório.
-- Substituir a imagem de um dedo apaga o arquivo anterior depois do commit.
+  nunca no banco nem no repositório. Pasta criada com permissão só do dono
+  (700) e arquivos com 600, no Linux/macOS.
+- Gravação atômica (arquivo temporário + mover). Cada envio usa um nome novo; se
+  o banco falhar, o arquivo novo é apagado; o arquivo substituído só é apagado
+  depois que o banco confirmou a troca.
+- Antes de cada envio o consentimento é conferido de novo: revogado no meio da
+  sessão, a coleta para.
 - Imagens nunca são servidas pela API (doc 06).
 
 ## 7. Cliente do Serviço de IA
@@ -343,7 +378,7 @@ resolução gravada); nenhuma digital real em `tests/` (RNF08).
 | M1 ✅ | Solução, projetos, Domínio com testes, `AppDbContext` e primeira migration | `build(back)`, `feat(back)`, `test(back)` |
 | M2 ✅ | Identity + JWT, solicitação e aprovação de médico, admin inicial (UC01–UC03) | `feat(back)` |
 | M3 ✅ | Pacientes, identificação separada e consentimento (UC04–UC05) + auditoria | `feat(back)` |
-| M4 | Sessão de coleta, upload, normalização e cifragem (UC06) | `feat(back)` |
+| M4 ✅ | Sessão de coleta, upload, normalização e cifragem (UC06) | `feat(back)` |
 | M5 | Cliente da IA com serviço falso, verificação de consistência, análise (UC07–UC08) | `feat(back)` |
 | M6 | ProblemDetails completo, CORS, testes de integração, `.env.example` | `feat(back)`, `test(back)` |
 

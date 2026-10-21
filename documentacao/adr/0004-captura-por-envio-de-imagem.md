@@ -73,5 +73,5 @@ levantados usou esse método, o que afasta os dados da literatura de referência
 ## Ações
 
 1. [ ] Definir com o orientador o leitor ou o procedimento de tinta, e registrá-lo no protocolo do CEP.
-2. [ ] Implementar a validação de formato/resolução no back-end com testes.
+2. [x] Implementar a validação de formato/resolução no back-end com testes (M4; doc 08, seção 6).
 3. [ ] Confirmar a orientação das imagens do método escolhido para a tabela alça esquerda/direita → ulnar/radial (ADR-0002).
