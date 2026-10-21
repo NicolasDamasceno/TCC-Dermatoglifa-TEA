@@ -1,6 +1,6 @@
 # ADR-0003: PostgreSQL como banco de dados
 
-**Status:** Proposto
+**Status:** Aceito (20/10/2026, confirmado pelo autor)
 **Data:** 2026-10-20
 **Decisores:** Nicolas Damasceno (autor), orientador do TCC
 
@@ -56,8 +56,11 @@ SQLite fica restrito a testes automatizados, se útil.
 ## Consequências
 
 - Mais fácil: regras de integridade declaradas no banco; nenhuma licença.
-- Mais difícil: tipos enumerados do PostgreSQL exigem mapeamento no Npgsql
-  (alternativa: armazenar como `varchar` com `CHECK`, decidir na implementação).
+- Enums do domínio são gravados como **`varchar` com restrição `CHECK`** listando os
+  valores permitidos, em vez de tipos `enum` nativos do PostgreSQL: a migration
+  fica simples, acrescentar um valor é só alterar o `CHECK`, e não há
+  mapeamento extra no Npgsql. Os nomes de tipo no doc 05 indicam o conjunto de
+  valores, não um tipo nativo.
 - Revisitar: hospedagem caso o sistema seja usado fora do ambiente local.
 
 ## Ações

@@ -178,6 +178,9 @@ erDiagram
 
 ## Tipos enumerados
 
+Gravados como `varchar` com `CHECK` dos valores permitidos (ADR-0003); os nomes
+abaixo identificam o conjunto de valores, não tipos nativos do PostgreSQL.
+
 | Tipo | Valores |
 |---|---|
 | `papel_usuario` | `MEDICO`, `ADMIN` |

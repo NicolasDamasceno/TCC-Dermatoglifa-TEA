@@ -19,7 +19,7 @@ Ler na ordem abaixo antes de criar ou alterar qualquer módulo (`CLAUDE.md`, Reg
 |---|---|---|
 | [0001](adr/0001-servico-inferencia-python.md) | Inferência em serviço Python (FastAPI) chamado pela API .NET | Proposto |
 | [0002](adr/0002-pipeline-ia-duas-etapas.md) | Pipeline de IA em duas etapas: CNN de padrões → indicadores → escore | Proposto |
-| [0003](adr/0003-banco-postgresql.md) | PostgreSQL como banco | Proposto |
+| [0003](adr/0003-banco-postgresql.md) | PostgreSQL como banco | Aceito |
 | [0004](adr/0004-captura-por-envio-de-imagem.md) | Captura por envio de imagem, um dedo por vez, ≥ 500 ppi | Proposto |
 | [0005](adr/0005-publicacao-de-modelos.md) | Repositório público; pesos reais fora do Git; modelo público sintético | Aceito |
 | [0006](adr/0006-autenticacao-identity-jwt.md) | Autenticação com ASP.NET Core Identity (Core) e JWT | Proposto |
