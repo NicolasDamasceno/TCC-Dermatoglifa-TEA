@@ -1,3 +1,4 @@
+using Dermatoglifia.Aplicacao.Analises;
 using Dermatoglifia.Aplicacao.Autenticacao;
 using Dermatoglifia.Aplicacao.Coletas;
 using Dermatoglifia.Aplicacao.Medicos;
@@ -14,6 +15,7 @@ public static class InjecaoDeDependencia
         services.AddScoped<ServicoMedicos>();
         services.AddScoped<ServicoPacientes>();
         services.AddScoped<ServicoColetas>();
+        services.AddScoped<ServicoAnalises>();
         return services;
     }
 }

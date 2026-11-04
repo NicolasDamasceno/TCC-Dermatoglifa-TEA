@@ -2,17 +2,22 @@ using Dermatoglifia.Aplicacao.Abstracoes;
 using Dermatoglifia.Infraestrutura.Auditoria;
 using Dermatoglifia.Infraestrutura.Identidade;
 using Dermatoglifia.Infraestrutura.Imagens;
+using Dermatoglifia.Infraestrutura.Inferencia;
 using Dermatoglifia.Infraestrutura.Persistencia;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace Dermatoglifia.Infraestrutura;
 
 public static class InjecaoDeDependencia
 {
     public const string NomeConnectionString = "Banco";
+
+    /// <summary>Nome do HttpClient do Serviço de IA (os testes trocam o handler por uma IA falsa).</summary>
+    public const string NomeClienteInferencia = "servico-ia";
 
     /// <summary>Registra os serviços da Infraestrutura. Falha na hora se faltar a connection string.</summary>
     public static IServiceCollection AdicionarInfraestrutura(this IServiceCollection services, IConfiguration configuration)
@@ -49,6 +54,18 @@ public static class InjecaoDeDependencia
         services.AddSingleton(OpcoesArmazenamento.Carregar(configuration));
         services.AddSingleton<IArmazenamentoImagens, ArmazenamentoLocalCifrado>();
         services.AddSingleton<IProcessadorImagens, ProcessadorImagens>();
+
+        // Serviço de IA (ADR-0001; doc 08, seção 7).
+        var inferencia = OpcoesInferencia.Carregar(configuration);
+        services.AddSingleton(inferencia.ConversaoAlca);
+        services.AddHttpClient(NomeClienteInferencia, cliente =>
+        {
+            cliente.BaseAddress = inferencia.UrlBase;
+            cliente.Timeout = inferencia.Timeout;
+        });
+        services.AddScoped<IClienteInferencia>(sp => new ClienteInferenciaHttp(
+            sp.GetRequiredService<IHttpClientFactory>().CreateClient(NomeClienteInferencia),
+            sp.GetRequiredService<ILogger<ClienteInferenciaHttp>>()));
 
         services.AddSingleton<IRelogio, RelogioSistema>();
         services.AddScoped<IContas, Contas>();

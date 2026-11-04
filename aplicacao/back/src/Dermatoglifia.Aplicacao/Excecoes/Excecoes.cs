@@ -11,3 +11,10 @@ public sealed class FormatoNaoSuportadoException(string mensagem) : Exception(me
 
 /// <summary>Arquivo enviado acima do tamanho permitido. A API responde 413.</summary>
 public sealed class ConteudoMuitoGrandeException(string mensagem) : Exception(mensagem);
+
+/// <summary>
+/// O Serviço de IA não respondeu de forma utilizável (indisponível, tempo esgotado,
+/// erro HTTP, JSON inválido). Não é erro da requisição do médico: a análise vai
+/// para ERRO com esta mensagem e pode ser repetida (UC07, 2a).
+/// </summary>
+public sealed class FalhaInferenciaException(string mensagem, Exception? causa = null) : Exception(mensagem, causa);

@@ -1,4 +1,5 @@
 using Dermatoglifia.Aplicacao.Abstracoes;
+using Dermatoglifia.Aplicacao.Analises;
 using Dermatoglifia.Aplicacao.Excecoes;
 using Dermatoglifia.Dominio.Entidades;
 using Dermatoglifia.Dominio.Enums;
@@ -19,6 +20,7 @@ public sealed partial class ServicoColetas(
     IContextoDados contexto,
     IProcessadorImagens processador,
     IArmazenamentoImagens armazenamento,
+    ServicoAnalises servicoAnalises,
     IAuditoria auditoria,
     IUsuarioAtual usuarioAtual,
     IRelogio relogio,
@@ -53,7 +55,14 @@ public sealed partial class ServicoColetas(
     }
 
     public async Task<SessaoDto> ObterAsync(Guid sessaoId, CancellationToken cancelamento = default)
-        => Mapear(await CarregarAsync(sessaoId, rastrear: false, cancelamento));
+    {
+        var sessao = await CarregarAsync(sessaoId, rastrear: false, cancelamento);
+        var analise = await contexto.Analises.AsNoTracking()
+            .Where(a => a.SessaoColetaId == sessao.Id)
+            .Select(a => new { a.Id, a.Status })
+            .SingleOrDefaultAsync(cancelamento);
+        return Mapear(sessao, analise?.Id, analise?.Status);
+    }
 
     /// <summary>Envia (ou refaz) a imagem de um dedo.</summary>
     public async Task<SessaoDto> EnviarDigitalAsync(
@@ -130,7 +139,10 @@ public sealed partial class ServicoColetas(
 
     /// <summary>
     /// Conclui a sessão: COMPLETA com os 10 dedos, INCOMPLETA se algum foi
-    /// marcado como não coletável (RN09). A análise (UC07) entra no marco M5.
+    /// marcado como não coletável (RN09). Sessão COMPLETA gera a análise (UC07):
+    /// sessão concluída e análise PENDENTE são gravadas juntas, e só depois a
+    /// análise é processada — se o processamento falhar, ela fica visível como
+    /// ERRO (ou PENDENTE) e pode ser repetida.
     /// </summary>
     public async Task<SessaoDto> ConcluirAsync(Guid sessaoId, CancellationToken cancelamento = default)
     {
@@ -139,8 +151,24 @@ public sealed partial class ServicoColetas(
 
         auditoria.Registrar("SESSAO_CONCLUIDA", "sessao_coleta", sessao.Id,
             new Dictionary<string, string> { ["status"] = status.ToString().ToUpperInvariant() });
+
+        Analise? analise = null;
+        if (status == StatusSessao.Completa)
+        {
+            analise = Analise.Solicitar(sessao, AvisosResultado.VersaoAtual, relogio.Agora);
+            contexto.Analises.Add(analise);
+            auditoria.Registrar("ANALISE_SOLICITADA", "analise", analise.Id);
+        }
+
         await contexto.SalvarAsync(cancelamento);
-        return Mapear(sessao);
+
+        if (analise is null)
+        {
+            return Mapear(sessao);
+        }
+
+        var statusAnalise = await servicoAnalises.ProcessarAsync(analise.Id, cancelamento);
+        return Mapear(sessao, analise.Id, statusAnalise);
     }
 
     public async Task<SessaoDto> CancelarAsync(Guid sessaoId, CancellationToken cancelamento = default)
@@ -213,7 +241,7 @@ public sealed partial class ServicoColetas(
         ["dedo"] = posicao.Dedo.ToString().ToUpperInvariant(),
     };
 
-    private static SessaoDto Mapear(SessaoColeta sessao)
+    private static SessaoDto Mapear(SessaoColeta sessao, Guid? analiseId = null, StatusAnalise? analiseStatus = null)
     {
         var dedos = PosicaoDedo.OrdemColeta.Select(posicao =>
         {
@@ -229,7 +257,7 @@ public sealed partial class ServicoColetas(
 
         return new SessaoDto(
             sessao.Id, sessao.PacienteId, sessao.Status, sessao.Metodo, sessao.TipoImpressao, sessao.Dispositivo,
-            sessao.IdadeMeses, sessao.IniciadaEm, sessao.ConcluidaEm, dedos);
+            sessao.IdadeMeses, sessao.IniciadaEm, sessao.ConcluidaEm, dedos, analiseId, analiseStatus);
     }
 
     [LoggerMessage(Level = LogLevel.Warning, Message = "Não foi possível apagar o arquivo substituído {Caminho}.")]
@@ -254,4 +282,6 @@ public sealed record SessaoDto(
     int IdadeMeses,
     DateTimeOffset IniciadaEm,
     DateTimeOffset? ConcluidaEm,
-    IReadOnlyList<DedoDto> Dedos);
+    IReadOnlyList<DedoDto> Dedos,
+    Guid? AnaliseId,
+    StatusAnalise? AnaliseStatus);
