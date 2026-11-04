@@ -1,0 +1,36 @@
+[project]
+name = "dermatoglifia-ia"
+version = "1.0.0"
+description = "Código comum de IA (treino e inferência) e Serviço de IA do TCC Dermatoglifia × TEA"
+requires-python = ">=3.11,<3.14"
+# Versões exatas em requirements.txt (instalação reprodutível); aqui só os nomes.
+dependencies = ["tensorflow", "keras", "numpy", "fastapi", "uvicorn", "python-multipart"]
+
+[project.optional-dependencies]
+dev = ["pytest", "httpx"]
+
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["dermatoglifia_ia", "servico"]
+
+[tool.pytest.ini_options]
+testpaths = ["testes"]
+addopts = "-q"
+filterwarnings = ["ignore::DeprecationWarning", "ignore:Using `httpx`:DeprecationWarning", "ignore::UserWarning"]
+
+[tool.ruff]
+line-length = 120
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "S", "BLE", "SIM", "RUF"]
+ignore = ["RUF001", "RUF002", "RUF003"]  # acentos do português não são caracteres ambíguos aqui
+
+[tool.ruff.lint.per-file-ignores]
+"testes/*" = ["S101", "E402"]
+
+[tool.ruff.format]
+quote-style = "single"

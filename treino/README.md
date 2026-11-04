@@ -24,6 +24,19 @@ export TCC_DADOS_DIR=/caminho/local/fora/do/repositorio
 O `.gitignore` e o hook `pre-commit` bloqueiam imagens, planilhas e pastas
 `dados/`, `dataset*/` caso algo seja copiado para cá por engano.
 
+## Código comum com o serviço
+
+O pré-processamento, as classes e os indicadores ficam no pacote `dermatoglifia_ia`,
+em `modelo_producao/servico/`, para que treino e produção nunca divirjam
+(ADR-0001). O treino o instala no mesmo ambiente:
+
+```sh
+pip install -r modelo_producao/servico/requirements.txt
+pip install -e modelo_producao/servico --no-deps
+```
+
+e carrega as imagens com `image_dataset_from_directory(**argumentos_dataset(...))`.
+
 ## Pesos dos modelos (ADR-0005)
 
 O repositório é público. Um modelo treinado com digitais reais pode revelar quem
@@ -51,7 +64,7 @@ Cada treino gera uma pasta `AAAA-MM-DD_<nome>_v<N>/` em `sinteticos/` ou `reais/
 | `modelo.keras` | pesos e arquitetura (só no Git em `sinteticos/`) |
 | `modelo.sha256` | hash SHA-256 do `modelo.keras` |
 | `metricas.json` | matriz de confusão, recall por classe; na Etapa 2, sensibilidade, especificidade, AUC |
-| `config.json` | hiperparâmetros, tamanho de imagem, classes, seed, versão do Keras, origem dos dados (sintético/real) |
+| `config.json` | hiperparâmetros, seed, versão do Keras e, obrigatoriamente, o que o serviço lê: `versao`, `classes` (na ordem da saída), `tamanho_imagem`, `ajuste_proporcao`, `interpolacao`, `origem_dados` (formato em `modelo_producao/servico/README.md`) |
 | `coeficientes.json` | apenas na Etapa 2 |
 | `graficos/` | curvas de acurácia/perda em **SVG** (PNG é bloqueado pelo `.gitignore`) |
 | `NOTAS.md` | o que mudou em relação à versão anterior |

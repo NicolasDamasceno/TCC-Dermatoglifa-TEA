@@ -63,6 +63,8 @@ treino/dados/
 *.tflite
 !treino/modelos/sinteticos/**/*.keras
 !modelo_producao/demo/*.keras
+# Pasta do modelo real em uso, só no servidor da pesquisa (modelo_producao/README.md).
+modelo_producao/producao/
 
 # Bancos locais e dumps
 *.db
@@ -91,6 +93,8 @@ __pycache__/
 venv/
 .ipynb_checkpoints/
 .pytest_cache/
+*.egg-info/
+.ruff_cache/
 logs/
 tmp_virtual/
 

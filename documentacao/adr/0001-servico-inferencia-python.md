@@ -116,9 +116,22 @@ ausente ou valor desconhecido → a API trata como resposta em formato inválido
 - A conexão é HTTP simples porque o serviço roda na mesma máquina ou rede interna;
   se ele for para outro servidor, usar HTTPS (as imagens são dado biométrico).
 
+## Implementação (04/11/2026)
+
+- Modelo de produção inválido não cai para o de demonstração: o serviço responde
+  503 e explica em `/saude` (decisão registrada em `modelo_producao/README.md`).
+- `.keras` lido com `safe_mode=True` e conferido pelo hash; saída precisa ser
+  softmax com as 5 classes.
+- O conteúdo das imagens nunca é registrado; o serviço escuta em `127.0.0.1` e
+  não publica `/docs` nem `/openapi.json`.
+- O teste de ponta a ponta com a API real achou um defeito do back (a
+  normalização clareava os tons de cinza), corrigido antes de qualquer coleta real.
+
 ## Ações
 
-1. [ ] Criar o serviço FastAPI em `modelo_producao/servico/`, junto do modelo que
+1. [x] Criar o serviço FastAPI em `modelo_producao/servico/`, junto do modelo que
    ele carrega (mantém as quatro pastas definidas para o repositório).
-2. [ ] Compartilhar o módulo de pré-processamento entre treino e serviço.
+2. [x] Compartilhar o módulo de pré-processamento entre treino e serviço: pacote
+   `dermatoglifia_ia`, instalado pelo treino com `pip install -e`. Um teste confere,
+   pixel a pixel, que ele dá o mesmo resultado que o `image_dataset_from_directory`.
 3. [x] Implementar `ClienteInferenciaHttp` no back-end com timeout e tratamento de erro (M5).
