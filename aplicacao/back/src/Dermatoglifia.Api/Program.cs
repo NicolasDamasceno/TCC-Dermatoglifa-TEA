@@ -25,9 +25,7 @@ builder.Services
             return new BadRequestObjectResult(problema);
         });
 
-builder.Services.AddProblemDetails();
-builder.Services.AddExceptionHandler<TratadorExcecoes>();
-
+builder.Services.AdicionarProblemas();
 builder.Services.AdicionarAplicacao();
 builder.Services.AdicionarInfraestrutura(builder.Configuration);
 builder.Services.AdicionarAutenticacaoJwt(builder.Configuration);
@@ -35,6 +33,7 @@ builder.Services.AdicionarAutenticacaoJwt(builder.Configuration);
 var app = builder.Build();
 
 app.UseExceptionHandler();
+app.UseStatusCodePages(); // 401, 403, 404, 405, 429... sem corpo ganham problem+json
 app.UseHttpsRedirection();
 app.UseRateLimiter();
 app.UseAuthentication();
