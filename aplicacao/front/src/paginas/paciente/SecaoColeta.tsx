@@ -46,7 +46,7 @@ export function SecaoColeta({ pacienteId, podeColetar, anonimizado, sessoes, reg
         <div className={estilos.acoes}>
           <Botao onClick={registrarConsentimento}>Registrar o TCLE</Botao>
           <LinkBotao to={`/sessoes/${emAndamento.id}`} variante="secundario">
-            Abrir a coleta
+            Ver a coleta
           </LinkBotao>
         </div>
       </>
@@ -173,7 +173,7 @@ function FormularioInicio({ pacienteId, cancelar }: { pacienteId: string; cancel
       />
       <div className={estilos.acoes}>
         <Botao type="submit" carregando={inicio.isPending} textoCarregando="Iniciando…">
-          Começar a coleta
+          Iniciar coleta
         </Botao>
         <Botao variante="secundario" onClick={cancelar}>
           Cancelar

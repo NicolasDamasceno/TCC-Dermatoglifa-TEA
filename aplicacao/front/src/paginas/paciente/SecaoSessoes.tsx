@@ -48,13 +48,13 @@ function LinkDaSessao({ sessao: s }: { sessao: SessaoDoPaciente }) {
   const quando = dataHora(s.iniciadaEm);
   if (s.analiseId) {
     return (
-      <Link to={`/analises/${s.analiseId}`} aria-label={`Ver resultado da coleta de ${quando}`}>
-        Ver resultado
+      <Link to={`/analises/${s.analiseId}`} aria-label={`Ver o resultado da coleta de ${quando}`}>
+        Ver o resultado
       </Link>
     );
   }
 
-  const texto = s.status === 'EM_ANDAMENTO' ? 'Continuar coleta' : 'Ver coleta';
+  const texto = s.status === 'EM_ANDAMENTO' ? 'Continuar coleta' : 'Ver a coleta';
   return (
     <Link to={`/sessoes/${s.id}`} aria-label={`${texto} de ${quando}`}>
       {texto}

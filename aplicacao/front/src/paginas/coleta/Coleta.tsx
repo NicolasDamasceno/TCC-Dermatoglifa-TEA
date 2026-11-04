@@ -314,7 +314,7 @@ function SituacaoFinal({ sessao, naoColetaveis }: { sessao: SessaoColeta; naoCol
     <Mensagem titulo={`Coleta ${status.toLowerCase()}${quando}.`}>
       {sessao.status === 'COMPLETA' && sessao.analiseId && (
         <p>
-          <Link to={`/analises/${sessao.analiseId}`}>Ver o resultado da análise</Link>
+          <Link to={`/analises/${sessao.analiseId}`}>Ver o resultado</Link>
         </p>
       )}
       {sessao.status === 'INCOMPLETA' && (

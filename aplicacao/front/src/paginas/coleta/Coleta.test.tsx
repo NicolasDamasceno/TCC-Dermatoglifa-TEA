@@ -184,7 +184,7 @@ describe('Coleta (UC06)', () => {
       ),
     });
 
-    expect(await screen.findByRole('link', { name: 'Ver o resultado da análise' })).toHaveAttribute(
+    expect(await screen.findByRole('link', { name: 'Ver o resultado' })).toHaveAttribute(
       'href',
       '/analises/analise-1',
     );

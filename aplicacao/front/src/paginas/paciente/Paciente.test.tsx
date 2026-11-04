@@ -140,7 +140,7 @@ describe('Paciente (UC04, UC05)', () => {
     const usuario = userEvent.setup();
 
     await usuario.click(await screen.findByRole('button', { name: 'Iniciar coleta' }));
-    await usuario.click(screen.getByRole('button', { name: 'Começar a coleta' }));
+    await usuario.click(screen.getByRole('button', { name: 'Iniciar coleta' }));
     expect(screen.getByRole('group', { name: 'Método de captura' })).toHaveAccessibleDescription(
       'Escolha o método de captura.',
     );
@@ -149,7 +149,7 @@ describe('Paciente (UC04, UC05)', () => {
     await usuario.click(screen.getByRole('radio', { name: 'Leitor óptico' }));
     await usuario.click(screen.getByRole('radio', { name: /^Rolada/ }));
     await usuario.type(screen.getByLabelText('Dispositivo (opcional)'), 'Leitor sintético');
-    await usuario.click(screen.getByRole('button', { name: 'Começar a coleta' }));
+    await usuario.click(screen.getByRole('button', { name: 'Iniciar coleta' }));
 
     expect(await screen.findByRole('heading', { name: 'Coleta das digitais', level: 1 })).toBeInTheDocument();
     const inicio = fetchMock.mock.calls.find(([, init]) => init?.method === 'POST')!;
@@ -189,7 +189,7 @@ describe('Paciente (UC04, UC05)', () => {
     expect(within(coleta).queryByRole('button', { name: 'Iniciar coleta' })).not.toBeInTheDocument();
 
     const coletas = screen.getByRole('region', { name: 'Coletas' });
-    expect(within(coletas).getByRole('link', { name: /^Ver resultado da coleta de/ })).toHaveAttribute(
+    expect(within(coletas).getByRole('link', { name: /^Ver o resultado da coleta de/ })).toHaveAttribute(
       'href',
       '/analises/analise-1',
     );
@@ -202,7 +202,7 @@ describe('Paciente (UC04, UC05)', () => {
     const coleta = await screen.findByRole('region', { name: 'Coleta das digitais' });
     expect(coleta).toHaveTextContent('ela não pode continuar');
     expect(within(coleta).queryByRole('link', { name: 'Continuar coleta' })).not.toBeInTheDocument();
-    expect(within(coleta).getByRole('link', { name: 'Abrir a coleta' })).toHaveAttribute('href', `/sessoes/${sessao().id}`);
+    expect(within(coleta).getByRole('link', { name: 'Ver a coleta' })).toHaveAttribute('href', `/sessoes/${sessao().id}`);
     expect(within(coleta).getByRole('button', { name: 'Registrar o TCLE' })).toBeInTheDocument();
   });
 
