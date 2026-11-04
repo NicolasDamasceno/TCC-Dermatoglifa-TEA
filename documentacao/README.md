@@ -23,6 +23,7 @@ Ler na ordem abaixo antes de criar ou alterar qualquer módulo (`CLAUDE.md`, Reg
 | [0004](adr/0004-captura-por-envio-de-imagem.md) | Captura por envio de imagem, um dedo por vez, ≥ 500 ppi | Proposto |
 | [0005](adr/0005-publicacao-de-modelos.md) | Repositório público; pesos reais fora do Git; modelo público sintético | Aceito |
 | [0006](adr/0006-autenticacao-identity-jwt.md) | Autenticação com ASP.NET Core Identity (Core) e JWT | Implementado (aceite pendente) |
+| [0007](adr/0007-stack-front-end.md) | Front-end com Vite, React, TypeScript e TanStack Query; sessão na aba | Proposto |
 
 Os ADRs ficam "Propostos" até a revisão com o orientador; ao serem aceitos,
 muda-se o status no próprio arquivo. Uma decisão nova que contrarie uma antiga
