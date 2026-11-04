@@ -66,6 +66,24 @@ public sealed class ServicoPacientes(
         auditoria.Registrar("PACIENTE_VISUALIZADO", "paciente", paciente.Id);
         await contexto.SalvarAsync(cancelamento);
 
+        // Sessões do paciente (mais recente primeiro) com a análise de cada uma, para
+        // retomar uma coleta em andamento ou abrir um resultado a partir do paciente.
+        var sessoes = await contexto.SessoesColeta.AsNoTracking()
+            .Where(s => s.PacienteId == paciente.Id)
+            .OrderByDescending(s => s.IniciadaEm)
+            .Select(s => new
+            {
+                s.Id,
+                s.Status,
+                s.IniciadaEm,
+                s.ConcluidaEm,
+                Analise = contexto.Analises
+                    .Where(a => a.SessaoColetaId == s.Id)
+                    .Select(a => new { a.Id, a.Status })
+                    .FirstOrDefault(),
+            })
+            .ToListAsync(cancelamento);
+
         var identificacao = paciente.Identificacao;
         var responsavel = identificacao?.ResponsavelNome is null
             ? null
@@ -80,6 +98,10 @@ public sealed class ServicoPacientes(
                 .Select(c => new ConsentimentoDto(
                     c.Id, c.Tipo, c.VersaoTermo, c.AssinadoEm, c.AutorizaAnalise, c.CienteUsoIA,
                     c.AutorizaUsoTreino, c.EstaVigente, c.RevogadoEm))
+                .ToList(),
+            sessoes
+                .Select(s => new SessaoDoPaciente(
+                    s.Id, s.Status, s.IniciadaEm, s.ConcluidaEm, s.Analise?.Id, s.Analise?.Status))
                 .ToList());
     }
 
@@ -185,4 +207,14 @@ public sealed record PacienteDetalhe(
     PacienteResumo Paciente,
     ResponsavelDto? Responsavel,
     string? FonteDiagnostico,
-    IReadOnlyList<ConsentimentoDto> Consentimentos);
+    IReadOnlyList<ConsentimentoDto> Consentimentos,
+    IReadOnlyList<SessaoDoPaciente> Sessoes);
+
+/// <summary>Resumo de uma sessão de coleta no detalhe do paciente.</summary>
+public sealed record SessaoDoPaciente(
+    Guid Id,
+    StatusSessao Status,
+    DateTimeOffset IniciadaEm,
+    DateTimeOffset? ConcluidaEm,
+    Guid? AnaliseId,
+    StatusAnalise? AnaliseStatus);

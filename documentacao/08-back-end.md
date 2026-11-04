@@ -181,8 +181,13 @@ login por padrão; as públicas são marcadas com `[AllowAnonymous]`.
   "fonteDiagnostico": null,
   "consentimentos": [ { "id": "…", "tipo": "TCLE", "versaoTermo": "CEP-v1.0", "assinadoEm": "2026-11-03",
                         "autorizaAnalise": true, "cienteUsoIA": true, "autorizaUsoTreino": false,
-                        "vigente": true, "revogadoEm": null } ] }
+                        "vigente": true, "revogadoEm": null } ],
+  "sessoes": [ { "id": "…", "status": "COMPLETA", "iniciadaEm": "…", "concluidaEm": "…",
+                 "analiseId": "…", "analiseStatus": "CONCLUIDA" } ] }
 ```
+`sessoes` vem da mais recente para a mais antiga, com a análise de cada uma
+(`null` enquanto a sessão não foi concluída): é por ela que o front retoma uma
+coleta em andamento ou abre um resultado a partir do paciente.
 `GET /api/pacientes?busca=ana` devolve a lista com o mesmo formato de `paciente`.
 Listar e abrir paciente ficam registrados na auditoria (leitura de dado pessoal).
 Só o papel MEDICO acessa estas rotas; o administrador não vê dados de pacientes.

@@ -76,6 +76,34 @@ public sealed class ColetaTestes(AmbienteApi ambiente)
     }
 
     [Fact]
+    public async Task Detalhe_do_paciente_lista_as_sessoes_com_a_analise()
+    {
+        var (medico, pacienteId, sessaoId) = await SessaoIniciadaAsync();
+
+        var emAndamento = Assert.Single((await DetalheAsync(medico, pacienteId)).GetProperty("sessoes").EnumerateArray());
+        Assert.Equal(sessaoId, emAndamento.GetProperty("id").GetGuid());
+        Assert.Equal("EM_ANDAMENTO", emAndamento.GetProperty("status").GetString());
+        Assert.Equal(JsonValueKind.Null, emAndamento.GetProperty("analiseId").ValueKind);
+        Assert.Equal(JsonValueKind.Null, emAndamento.GetProperty("analiseStatus").ValueKind);
+
+        foreach (var (mao, dedo) in OrdemColeta)
+        {
+            await EnviarAsync(medico.Cliente, sessaoId, mao, dedo, ImagensSinteticas.Gerar());
+        }
+
+        var conclusao = await JsonAsync(await medico.Cliente.PostAsync($"/api/sessoes/{sessaoId}/conclusao", null));
+
+        var concluida = Assert.Single((await DetalheAsync(medico, pacienteId)).GetProperty("sessoes").EnumerateArray());
+        Assert.Equal("COMPLETA", concluida.GetProperty("status").GetString());
+        Assert.Equal(conclusao.GetProperty("analiseId").GetGuid(), concluida.GetProperty("analiseId").GetGuid());
+        Assert.Equal(conclusao.GetProperty("analiseStatus").GetString(), concluida.GetProperty("analiseStatus").GetString());
+        Assert.NotEqual(JsonValueKind.Null, concluida.GetProperty("concluidaEm").ValueKind);
+    }
+
+    private static Task<JsonElement> DetalheAsync(MedicoDeTeste medico, Guid pacienteId)
+        => medico.Cliente.GetFromJsonAsync<JsonElement>($"/api/pacientes/{pacienteId}", AmbienteApi.Json);
+
+    [Fact]
     public async Task Fluxo_completo_dez_digitais_cifradas_e_sessao_completa()
     {
         var (medico, _, sessaoId) = await SessaoIniciadaAsync();
