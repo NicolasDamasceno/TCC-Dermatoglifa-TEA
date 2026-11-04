@@ -22,6 +22,7 @@ onde guardar o token JWT (ADR-0006), já que a API devolve dados pessoais e de s
 | Estilo | CSS Modules + variáveis CSS (tokens do doc 09); sem biblioteca de componentes | — |
 | Fonte | Atkinson Hyperlegible Next, hospedada no próprio app (`@fontsource-variable`) | 5.3.0 |
 | Testes | Vitest + Testing Library + jsdom | 5.1.0 / 16.3.3 / 30.1.3 |
+| Acessibilidade nos testes | axe-core (adicionado no F6; `eslint-plugin-jsx-a11y` ainda não suporta ESLint 10) | 4.14.0 |
 | Lint | ESLint + typescript-eslint + regras de hooks | 10.14.0 / 8.72.1 / 7.1.1 |
 
 Versões fixas (sem `^`) no `package.json`, para que o build do TCC seja reproduzível.
