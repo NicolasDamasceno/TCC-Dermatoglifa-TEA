@@ -10,6 +10,13 @@ public sealed class Analise : Entidade
     /// <summary>Tolerância para a soma das probabilidades de um dedo.</summary>
     public const decimal ToleranciaSomaProbabilidades = 0.01m;
 
+    /// <summary>
+    /// Uma análise em PROCESSANDO há mais tempo que isso é considerada travada
+    /// (a API caiu no meio) e pode ser processada de novo. Bem acima do tempo
+    /// máximo de uma chamada ao Serviço de IA (doc 08, seção 7).
+    /// </summary>
+    public static readonly TimeSpan TempoMaximoProcessamento = TimeSpan.FromMinutes(5);
+
     private readonly List<ResultadoDigital> _resultados = [];
 
     public Guid SessaoColetaId { get; private set; }
@@ -22,6 +29,7 @@ public sealed class Analise : Entidade
     public DateTimeOffset? RegistradoProntuarioEm { get; private set; }
     public string? MensagemErro { get; private set; }
     public DateTimeOffset SolicitadaEm { get; private set; }
+    public DateTimeOffset? ProcessamentoIniciadoEm { get; private set; }
     public DateTimeOffset? ConcluidaEm { get; private set; }
 
     /// <summary>Token de concorrência otimista (coluna xmin do PostgreSQL).</summary>
@@ -45,12 +53,25 @@ public sealed class Analise : Entidade
         };
     }
 
-    /// <summary>PENDENTE → PROCESSANDO, ou ERRO → PROCESSANDO (nova tentativa).</summary>
-    public void IniciarProcessamento()
+    /// <summary>
+    /// Pode ir para PROCESSANDO: pendente, com erro, ou travada em processamento
+    /// há mais de <see cref="TempoMaximoProcessamento"/>.
+    /// </summary>
+    public bool PodeProcessar(DateTimeOffset agora) => Status switch
     {
-        Regra.Exigir(Status is StatusAnalise.Pendente or StatusAnalise.Erro,
-            "A análise só pode ser processada quando pendente ou após erro.");
+        StatusAnalise.Pendente or StatusAnalise.Erro => true,
+        StatusAnalise.Processando => ProcessamentoIniciadoEm is null
+                                     || agora - ProcessamentoIniciadoEm.Value > TempoMaximoProcessamento,
+        _ => false,
+    };
+
+    /// <summary>PENDENTE, ERRO ou travada → PROCESSANDO.</summary>
+    public void IniciarProcessamento(DateTimeOffset agora)
+    {
+        Regra.Exigir(Status != StatusAnalise.Concluida, "A análise já foi concluída.");
+        Regra.Exigir(PodeProcessar(agora), "A análise já está em processamento. Aguarde o resultado.");
         Status = StatusAnalise.Processando;
+        ProcessamentoIniciadoEm = agora;
         MensagemErro = null;
     }
 
@@ -132,7 +153,8 @@ public sealed class Analise : Entidade
     {
         Regra.Exigir(Status == StatusAnalise.Processando, "A análise não está em processamento.");
         Status = StatusAnalise.Erro;
-        MensagemErro = Regra.TextoObrigatorio(mensagem, "Mensagem de erro", 500);
+        var texto = Regra.TextoObrigatorio(mensagem, "Mensagem de erro", int.MaxValue);
+        MensagemErro = texto.Length <= 500 ? texto : texto[..500];
     }
 
     public void RegistrarObservacao(string? observacao)

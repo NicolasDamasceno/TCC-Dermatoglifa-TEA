@@ -53,6 +53,10 @@ namespace Dermatoglifia.Infraestrutura.Persistencia.Migracoes
                         .HasColumnType("character varying(2000)")
                         .HasColumnName("observacao_medico");
 
+                    b.Property<DateTimeOffset?>("ProcessamentoIniciadoEm")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("processamento_iniciado_em");
+
                     b.Property<DateTimeOffset?>("RegistradoProntuarioEm")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("registrado_prontuario_em");
