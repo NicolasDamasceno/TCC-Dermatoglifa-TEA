@@ -1,0 +1,25 @@
+/* Mesma cor da faixa de pesquisa, com mais peso: é a primeira coisa lida no resultado. */
+.aviso {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-2);
+  padding: var(--esp-4) var(--esp-5);
+  background: var(--pesquisa-fundo);
+  border: 1px solid var(--pesquisa);
+  border-left-width: 6px;
+  color: var(--pesquisa);
+}
+
+.titulo {
+  font-size: var(--t-2);
+}
+
+.texto {
+  max-width: 48rem;
+  color: var(--tinta);
+  font-weight: 600;
+}
+
+.versao {
+  font-size: var(--t-0);
+}

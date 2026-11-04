@@ -164,10 +164,20 @@ voltando depois para a página pedida.
   encerrada mostra a ficha só para leitura e o caminho para o resultado. Em telas
   estreitas, o texto do quadro sai da vista (continua para o leitor de tela) e
   uma legenda curta explica as marcas.
-- **Resultado.** Ordem fixa de leitura: **aviso de protótipo** (texto vindo da API,
-  RN04) → alertas → ficha anotada → indicadores com legenda → versão e origem do
-  modelo → observação e confirmação de registro no prontuário. Análise com erro
-  mostra a mensagem e "Tentar análise de novo".
+- **Resultado.** Ordem fixa de leitura: **aviso "Não é diagnóstico"** (texto e
+  versão vindos da API, RN04; componente `AvisoNaoDiagnostico`) → alertas da API
+  ("Leia também"; o de modelo sintético em negrito) → ficha anotada (padrão e
+  confiança por dedo, sem imagens; "baixa qualidade" quando a IA sinaliza) →
+  indicadores em tabela, cada um com a escala ("de 10", "de 4", "de 5") e o que
+  conta, **sem rótulos de alto/baixo**, porque não há ponto de corte validado →
+  escore só se o modelo tiver `escoreValidado` e houver valor (RN10) → modelo que
+  respondeu (versão, origem dos dados, data, métricas de teste em ordem fixa) →
+  observação do médico e confirmação do registro no prontuário, que exige marcar
+  a declaração antes do botão. A confiança é explicada como probabilidade do
+  padrão previsto, nunca como chance de TEA. Análise em processamento se atualiza
+  sozinha a cada 4 s; análise com erro mostra a mensagem e "Tentar análise de
+  novo". Em telas estreitas, a ficha anotada vira lista por mão e a descrição de
+  cada indicador desce para baixo do nome.
 
 ## 5. Sessão, dados e segurança
 
@@ -228,7 +238,7 @@ rótulos acessíveis, navegação. Nenhum dado real; imagens de teste geradas na
 | F2 | Solicitar cadastro (UC02) e cadastros pendentes do admin (UC03) | Concluído: 63 testes no total; conferido contra a API real |
 | F3 | Pacientes: lista, novo, detalhe e consentimentos (UC04, UC05) | Concluído: 83 testes no total; conferido contra a API real |
 | F4 | Coleta com a ficha decadactilar (UC06) | Concluído: 96 testes no total; conferido contra a API real com imagens sintéticas |
-| F5 | Resultado da análise (UC07, UC08) | — |
+| F5 | Resultado da análise (UC07, UC08) | Concluído: 108 testes no total; conferido contra a API real com um serviço de IA falso, fora do repositório |
 | F6 | Revisão de acessibilidade, build de produção, ajustes de texto | — |
 
 Telas de marcos ainda não feitos existem como reserva (`EmConstrucao`), já

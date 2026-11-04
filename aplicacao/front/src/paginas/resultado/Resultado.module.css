@@ -1,0 +1,312 @@
+.pagina {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-6);
+}
+
+.cabecalho {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-3);
+}
+
+.voltar {
+  font-size: var(--t-0);
+}
+
+.resumo,
+.dados {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--esp-3) var(--esp-6);
+  margin: 0;
+}
+
+.resumo dt,
+.dados dt {
+  font-size: var(--t-0);
+  color: var(--tinta-suave);
+}
+
+.resumo dd,
+.dados dd {
+  margin: 0;
+  font-weight: 600;
+}
+
+.metrica {
+  font-variant-numeric: tabular-nums;
+}
+
+.alertas {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-3);
+}
+
+.alertas h2 {
+  font-size: var(--t-2);
+}
+
+.alertas ul {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-2);
+  margin: 0;
+  padding-left: var(--esp-5);
+  max-width: 48rem;
+}
+
+.alertaForte {
+  font-weight: 700;
+}
+
+.secao {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--esp-4);
+  padding-top: var(--esp-5);
+  border-top: 1px solid var(--linha-fina);
+}
+
+.secao > * {
+  max-width: 100%;
+}
+
+.nota {
+  color: var(--tinta-suave);
+  font-size: var(--t-0);
+}
+
+/* --- Ficha anotada --------------------------------------------------------- */
+
+.ficha {
+  width: 100%;
+}
+
+.ficha caption {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}
+
+.quadroResultado {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: var(--esp-1);
+  height: 100%;
+  min-height: 6.5rem;
+}
+
+.padrao {
+  font-size: var(--t-2);
+  font-weight: 700;
+  line-height: 1.15;
+}
+
+.confianca {
+  font-size: var(--t-0);
+  color: var(--tinta-suave);
+  font-variant-numeric: tabular-nums;
+}
+
+.qualidade {
+  align-self: flex-start;
+  padding: 0 var(--esp-1);
+  background: var(--pesquisa-fundo);
+  color: var(--pesquisa);
+  font-size: var(--t-0);
+  font-weight: 700;
+}
+
+.semResultado {
+  color: var(--tinta-suave);
+  font-size: var(--t-0);
+}
+
+/* --- Indicadores ----------------------------------------------------------- */
+
+.rolagem {
+  position: relative;
+  overflow-x: auto;
+  width: 100%;
+}
+
+.indicadores {
+  width: 100%;
+  min-width: 36rem;
+  border-collapse: collapse;
+  background: var(--papel-ficha);
+  border: 1px solid var(--linha);
+}
+
+.indicadores th,
+.indicadores td {
+  padding: var(--esp-3) var(--esp-4);
+  text-align: left;
+  vertical-align: baseline;
+  border-bottom: 1px solid var(--linha-fina);
+}
+
+.indicadores tbody tr:last-child > * {
+  border-bottom: 0;
+}
+
+.indicadores thead th {
+  font-size: var(--t-0);
+  font-weight: 600;
+  color: var(--tinta-suave);
+  border-bottom-color: var(--linha);
+}
+
+/* As discordâncias formam um segundo grupo: traço mais forte acima. */
+.inicioGrupo > * {
+  border-top: 1px solid var(--linha);
+}
+
+.colValor {
+  width: 7rem;
+  white-space: nowrap;
+}
+
+.valor {
+  font-size: var(--t-3);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.escala {
+  color: var(--tinta-suave);
+  font-size: var(--t-0);
+}
+
+.descricao {
+  color: var(--tinta-suave);
+  max-width: 34rem;
+}
+
+.escore {
+  font-size: var(--t-4);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+/* --- Erro, registro -------------------------------------------------------- */
+
+.tentar {
+  margin-top: var(--esp-3);
+}
+
+.erroTentativa {
+  font-weight: 700;
+}
+
+.formulario {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-3);
+  width: 100%;
+  max-width: 40rem;
+}
+
+.acoes {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--esp-3);
+}
+
+.salva {
+  color: var(--coletado);
+  font-weight: 600;
+}
+
+.prontuario {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--esp-3);
+  max-width: 40rem;
+  padding-top: var(--esp-4);
+  border-top: 1px solid var(--linha-fina);
+}
+
+.prontuario h3 {
+  font-size: var(--t-1);
+}
+
+.confirmado {
+  color: var(--coletado);
+  font-weight: 600;
+}
+
+.fichaLista,
+.descricaoCompacta {
+  display: none;
+}
+
+.fichaLista {
+  flex-direction: column;
+  gap: var(--esp-4);
+  width: 100%;
+}
+
+.fichaLista h3 {
+  font-size: var(--t-1);
+  padding-bottom: var(--esp-1);
+  border-bottom: 1px solid var(--linha);
+}
+
+.fichaLista ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.fichaLista li {
+  display: grid;
+  grid-template-columns: 5.5rem minmax(0, 1fr);
+  gap: var(--esp-2);
+  padding: var(--esp-2) 0;
+  border-bottom: 1px solid var(--linha-fina);
+}
+
+.fichaLista .qualidade {
+  margin-left: var(--esp-2);
+}
+
+.dedoLista {
+  color: var(--tinta-suave);
+}
+
+@media (max-width: 40rem) {
+  .ficha {
+    display: none;
+  }
+
+  .fichaLista {
+    display: flex;
+  }
+
+  .indicadores {
+    min-width: 0;
+  }
+
+  .colDescricao,
+  .descricao {
+    display: none;
+  }
+
+  .descricaoCompacta {
+    display: block;
+    margin-top: var(--esp-1);
+    color: var(--tinta-suave);
+    font-size: var(--t-0);
+    font-weight: 400;
+  }
+}

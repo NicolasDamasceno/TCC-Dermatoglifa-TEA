@@ -2,6 +2,7 @@ import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it } from 'vitest';
 import type { SituacaoDedo } from '../../api/coletas';
+import { analise } from '../../testes/analises';
 import { arquivo, ID_SESSAO, sessaoColeta, TODOS_COLETADOS } from '../../testes/coletas';
 import { detalhe, ID_PACIENTE } from '../../testes/pacientes';
 import { comSessao, json, renderizarApp, simularApi } from '../../testes/utilitarios';
@@ -126,6 +127,7 @@ describe('Coleta (UC06)', () => {
         200,
         sessaoColeta({ status: 'COMPLETA', analiseId: 'analise-1', analiseStatus: 'CONCLUIDA' }, TODOS_COLETADOS),
       ),
+      'GET /api/analises/analise-1': json(200, analise({ id: 'analise-1' })),
     });
 
     expect(await screen.findByText(/Os 10 dedos foram coletados/)).toBeInTheDocument();

@@ -3,8 +3,3 @@
   flex-direction: column;
   gap: var(--esp-4);
 }
-
-.nota {
-  color: var(--tinta-suave);
-  font-size: var(--t-0);
-}
