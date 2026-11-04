@@ -60,3 +60,24 @@ export function renderizarApp(rota: string) {
     </Provedores>,
   );
 }
+
+type Resposta = Response | Error | ((init: RequestInit | undefined) => Response);
+
+/**
+ * Fetch simulado por rota ("PUT /api/sessoes/…"), para telas com várias consultas
+ * em ordem imprevisível. Cada rota tem uma fila; a última resposta se repete.
+ */
+export function simularApi(rotas: Record<string, Resposta | Resposta[]>) {
+  const filas = new Map(Object.entries(rotas).map(([rota, r]) => [rota, Array.isArray(r) ? [...r] : [r]]));
+  const mock = vi.fn<(url: string, init?: RequestInit) => Promise<Response>>((url, init) => {
+    const chave = `${init?.method ?? 'GET'} ${url}`;
+    const fila = filas.get(chave);
+    if (!fila || fila.length === 0) return Promise.reject(new Error(`fetch inesperado no teste: ${chave}`));
+    const resposta = fila.length > 1 ? fila.shift()! : fila[0]!;
+    if (resposta instanceof Error) return Promise.reject(resposta);
+    if (resposta instanceof Response) return Promise.resolve(resposta.clone());
+    return Promise.resolve(resposta(init));
+  });
+  vi.stubGlobal('fetch', mock);
+  return mock;
+}

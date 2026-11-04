@@ -60,6 +60,7 @@ do dedo recém-coletado recebe a marca) e desligado com `prefers-reduced-motion`
 
 **O que não usar:** grade de cartões arredondados com sombra, rótulos em caixa-alta,
 fonte monoespaçada para dados, setas em botões, gradientes, ícones decorativos.
+A única textura é a hachura do dedo não coletável, porque informa um estado.
 
 ### Esqueleto das telas
 
@@ -146,10 +147,23 @@ voltando depois para a página pedida.
   link para o resultado), os consentimentos (registrar TCLE/TALE com as três
   autorizações por extenso, revogar com confirmação) e o responsável legal. As
   sessões vêm do próprio `GET /api/pacientes/{id}` (campo `sessoes`, doc 08).
-- **Coleta.** A ficha; ao escolher um dedo: arquivo, **pré-visualização local**
-  (RNF13 — a imagem só existe no navegador até o envio; a API nunca a devolve),
-  confirmar envio; "Dedo não pode ser coletado" com motivo; "Concluir coleta"
-  habilitado com os 10 quadros resolvidos.
+- **Coleta.** A ficha ocupa o topo; cada quadro é um botão ("Direita, Polegar:
+  pendente") e o dedo da vez fica com moldura de tinta. Abaixo, o painel do dedo:
+  arquivo, **pré-visualização local** (RNF13 — a imagem só existe no navegador até
+  o envio; a API nunca a devolve) e "Confira: esta é a digital do polegar
+  direito?" antes de "Enviar polegar direito". Formato e tamanho são conferidos
+  antes do envio; a resolução, só a API confere. TIFF é aceito, mas o navegador
+  não o exibe: a conferência é pelo nome do arquivo. Depois de cada envio, a ficha
+  passa ao próximo pendente, o foco vai para o novo painel e um aviso discreto é
+  lido pelo leitor de tela. As miniaturas dos dedos enviados ficam só na memória
+  da aba enquanto a tela está aberta. "Este dedo não pode ser coletado" pede o
+  motivo; o quadro fica hachurado (a hachura é a única textura da interface e
+  carrega significado, como o risco numa ficha em papel). "Concluir coleta" só
+  habilita com os 10 dedos resolvidos e diz antes se a coleta terminará
+  incompleta (sem análise, RN09); "Cancelar coleta" pede confirmação. Coleta já
+  encerrada mostra a ficha só para leitura e o caminho para o resultado. Em telas
+  estreitas, o texto do quadro sai da vista (continua para o leitor de tela) e
+  uma legenda curta explica as marcas.
 - **Resultado.** Ordem fixa de leitura: **aviso de protótipo** (texto vindo da API,
   RN04) → alertas → ficha anotada → indicadores com legenda → versão e origem do
   modelo → observação e confirmação de registro no prontuário. Análise com erro
@@ -213,7 +227,7 @@ rótulos acessíveis, navegação. Nenhum dado real; imagens de teste geradas na
 | F1 | Projeto, tokens e fonte, cliente da API, sessão, rotas protegidas por papel, layout com faixa de pesquisa, tela Entrar | Concluído: 45 testes; conferido contra a API real |
 | F2 | Solicitar cadastro (UC02) e cadastros pendentes do admin (UC03) | Concluído: 63 testes no total; conferido contra a API real |
 | F3 | Pacientes: lista, novo, detalhe e consentimentos (UC04, UC05) | Concluído: 83 testes no total; conferido contra a API real |
-| F4 | Coleta com a ficha decadactilar (UC06) | — |
+| F4 | Coleta com a ficha decadactilar (UC06) | Concluído: 96 testes no total; conferido contra a API real com imagens sintéticas |
 | F5 | Resultado da análise (UC07, UC08) | — |
 | F6 | Revisão de acessibilidade, build de produção, ajustes de texto | — |
 

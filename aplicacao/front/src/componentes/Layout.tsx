@@ -1,4 +1,4 @@
-import { Link, NavLink, Outlet } from 'react-router';
+import { Link, NavLink, Outlet, useLocation } from 'react-router';
 import { useSessao } from '../sessao/contextoSessao';
 import { AvisoPesquisa } from './AvisoPesquisa';
 import estilos from './Layout.module.css';
@@ -9,6 +9,8 @@ import estilos from './Layout.module.css';
  */
 export function Layout() {
   const { sessao, sair } = useSessao();
+  // Coleta e resultado pertencem ao trabalho com o paciente: "Pacientes" segue marcado.
+  const naAreaDePacientes = /^\/(pacientes|sessoes|analises)(\/|$)/.test(useLocation().pathname);
 
   return (
     <>
@@ -25,7 +27,7 @@ export function Layout() {
             <>
               <nav aria-label="Principal" className={estilos.navegacao}>
                 {sessao.usuario.papel === 'MEDICO' ? (
-                  <NavLink to="/pacientes" className={classeLink}>
+                  <NavLink to="/pacientes" className={() => classeLink({ isActive: naAreaDePacientes })}>
                     Pacientes
                   </NavLink>
                 ) : (

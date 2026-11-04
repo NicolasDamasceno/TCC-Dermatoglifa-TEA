@@ -1,6 +1,7 @@
 import { Route, Routes } from 'react-router';
 import { Layout } from './componentes/Layout';
 import { CadastrosPendentes } from './paginas/CadastrosPendentes';
+import { Coleta } from './paginas/coleta/Coleta';
 import { EmConstrucao } from './paginas/EmConstrucao';
 import { Entrar } from './paginas/Entrar';
 import { Inicio } from './paginas/Inicio';
@@ -11,7 +12,7 @@ import { Pacientes } from './paginas/Pacientes';
 import { SolicitarCadastro } from './paginas/SolicitarCadastro';
 import { RotaProtegida } from './sessao/RotaProtegida';
 
-/** Rotas do doc 09, seção 3. Telas dos marcos F4 e F5 ainda são reservas. */
+/** Rotas do doc 09, seção 3. A tela do marco F5 ainda é reserva. */
 export function App() {
   return (
     <Routes>
@@ -31,12 +32,7 @@ export function App() {
           <Route path="/pacientes" element={<Pacientes />} />
           <Route path="/pacientes/novo" element={<NovoPaciente />} />
           <Route path="/pacientes/:id" element={<Paciente />} />
-          <Route
-            path="/sessoes/:id"
-            element={
-              <EmConstrucao titulo="Coleta" marco="F4" descricao="Coleta das dez impressões digitais na ficha decadactilar." />
-            }
-          />
+          <Route path="/sessoes/:id" element={<Coleta />} />
           <Route
             path="/analises/:id"
             element={

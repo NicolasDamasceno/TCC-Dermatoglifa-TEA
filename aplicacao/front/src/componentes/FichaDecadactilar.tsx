@@ -9,6 +9,8 @@ interface PropsFicha {
   quadro?: (mao: Mao, dedo: Dedo) => ReactNode;
   /** Só ilustração: escondida de leitores de tela. */
   decorativa?: boolean;
+  /** Quadros ocupados por botões: sem respiro interno, o botão preenche o quadro. */
+  interativa?: boolean;
   className?: string;
 }
 
@@ -17,7 +19,7 @@ interface PropsFicha {
  * do polegar ao mínimo. É uma tabela de verdade — linha = mão, coluna = dedo —
  * para que o leitor de tela anuncie "Direita, Indicador" em cada quadro.
  */
-export function FichaDecadactilar({ legenda, quadro, decorativa = false, className }: PropsFicha) {
+export function FichaDecadactilar({ legenda, quadro, decorativa = false, interativa = false, className }: PropsFicha) {
   return (
     <table
       className={[estilos.ficha, className].filter(Boolean).join(' ')}
@@ -41,7 +43,7 @@ export function FichaDecadactilar({ legenda, quadro, decorativa = false, classNa
               {NOME_MAO[mao]}
             </th>
             {DEDOS.map((dedo) => (
-              <td key={dedo} className={estilos.quadro}>
+              <td key={dedo} className={interativa ? `${estilos.quadro} ${estilos.interativo}` : estilos.quadro}>
                 {quadro?.(mao, dedo)}
               </td>
             ))}

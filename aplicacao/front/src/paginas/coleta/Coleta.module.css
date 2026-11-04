@@ -1,0 +1,354 @@
+.pagina {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-5);
+}
+
+.cabecalho {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-3);
+}
+
+.voltar {
+  font-size: var(--t-0);
+}
+
+.resumo {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--esp-3) var(--esp-6);
+  margin: 0;
+}
+
+.resumo dt {
+  font-size: var(--t-0);
+  color: var(--tinta-suave);
+}
+
+.resumo dd {
+  margin: 0;
+  font-weight: 600;
+}
+
+.areaFicha {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-2);
+}
+
+.progresso {
+  color: var(--tinta-suave);
+}
+
+.progresso strong {
+  color: var(--tinta);
+}
+
+/* A legenda da tabela fica para o leitor de tela; o progresso faz o papel visual. */
+.ficha caption {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}
+
+/* --- Quadros da ficha ------------------------------------------------------ */
+
+.quadro {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  width: 100%;
+  height: 100%;
+  min-height: 7.5rem;
+  padding: var(--esp-2);
+  border: 0;
+  background: transparent;
+  color: var(--tinta-suave);
+  font: inherit;
+  text-align: left;
+}
+
+button.quadro {
+  cursor: pointer;
+}
+
+button.quadro:hover {
+  background: var(--papel);
+}
+
+button.quadro:focus-visible {
+  outline: 3px solid var(--tinta);
+  outline-offset: -3px;
+}
+
+.estado {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--esp-1);
+  font-size: var(--t-0);
+  font-weight: 600;
+}
+
+.COLETADO .estado {
+  color: var(--coletado);
+}
+
+/* Marca cheia: coletado. Não depende só da cor (o texto diz o estado). */
+.COLETADO .estado::before {
+  content: '';
+  width: 0.6rem;
+  height: 0.6rem;
+  background: currentColor;
+}
+
+/* Hachura: dedo que não existe ou não pode ser coletado, como se risca numa ficha em papel. */
+.NAO_COLETAVEL {
+  background: repeating-linear-gradient(
+    -45deg,
+    transparent 0 6px,
+    var(--linha-fina) 6px 7px
+  );
+}
+
+.NAO_COLETAVEL .estado {
+  padding: 0 var(--esp-1);
+  background: var(--papel-ficha);
+  color: var(--tinta);
+}
+
+.miniatura {
+  position: absolute;
+  inset: var(--esp-1) var(--esp-1) 1.6rem;
+  width: calc(100% - 2 * var(--esp-1));
+  height: calc(100% - var(--esp-1) - 1.6rem);
+  object-fit: contain;
+  filter: grayscale(1);
+  animation: carimbo 240ms ease-out;
+}
+
+@keyframes carimbo {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+}
+
+/* Dedo da vez: moldura de tinta, como o quadro que se está preenchendo. */
+.selecionado {
+  box-shadow: inset 0 0 0 3px var(--tinta);
+  color: var(--tinta);
+}
+
+/* --- Painel do dedo -------------------------------------------------------- */
+
+.painel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-4);
+  padding: var(--esp-5);
+  background: var(--papel-ficha);
+  border: 1px solid var(--linha);
+  border-left: 4px solid var(--tinta);
+}
+
+.painel h2:focus {
+  outline: none;
+}
+
+.nota {
+  color: var(--tinta-suave);
+  font-size: var(--t-0);
+}
+
+.envio {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: var(--esp-5);
+  align-items: start;
+}
+
+.escolha {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-1);
+}
+
+.rotuloArquivo {
+  font-weight: 600;
+}
+
+.arquivo {
+  min-height: var(--alvo-toque);
+  padding: var(--esp-2);
+  border: 1px dashed var(--linha);
+  border-radius: var(--raio);
+  background: var(--papel);
+  cursor: pointer;
+}
+
+.arquivo::file-selector-button {
+  margin-right: var(--esp-3);
+  padding: var(--esp-2) var(--esp-4);
+  border: 1px solid var(--tinta);
+  border-radius: var(--raio);
+  background: var(--papel-ficha);
+  color: var(--tinta);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.erro {
+  color: var(--erro);
+  font-size: var(--t-0);
+  font-weight: 600;
+}
+
+.previa {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-2);
+  margin: 0;
+}
+
+.previa img {
+  display: block;
+  width: 100%;
+  max-height: 18rem;
+  object-fit: contain;
+  background: var(--papel);
+  border: 1px solid var(--linha);
+}
+
+.semPrevia {
+  padding: var(--esp-5) var(--esp-4);
+  border: 1px dashed var(--linha);
+  color: var(--tinta-suave);
+}
+
+.previa figcaption {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-1);
+}
+
+.nomeArquivo {
+  font-size: var(--t-0);
+  color: var(--tinta-suave);
+  overflow-wrap: anywhere;
+}
+
+.acoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--esp-3);
+}
+
+.naoColetavel {
+  padding-top: var(--esp-4);
+  border-top: 1px solid var(--linha-fina);
+}
+
+.formNaoColetavel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-3);
+  max-width: 34rem;
+}
+
+/* --- Concluir / cancelar --------------------------------------------------- */
+
+.encerrar {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--esp-3);
+  padding-top: var(--esp-5);
+  border-top: 1px solid var(--linha-fina);
+}
+
+.confirmacao {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-3);
+  padding-left: var(--esp-4);
+  border-left: 3px solid var(--erro);
+}
+
+/* Em telas estreitas o texto do quadro some da vista (continua para o leitor de tela)
+   e uma legenda curta explica as marcas. */
+.legendaCompacta {
+  display: none;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--esp-1) var(--esp-2);
+  font-size: var(--t-0);
+  color: var(--tinta-suave);
+}
+
+.marcaColetado,
+.marcaNaoColetavel,
+.marcaPendente {
+  display: inline-block;
+  width: 0.9rem;
+  height: 0.9rem;
+  border: 1px solid var(--linha);
+  vertical-align: middle;
+}
+
+.marcaColetado {
+  background: var(--coletado);
+  border-color: var(--coletado);
+}
+
+.marcaNaoColetavel {
+  background: repeating-linear-gradient(-45deg, var(--papel-ficha) 0 2px, var(--linha) 2px 3px);
+}
+
+.marcaPendente {
+  background: var(--papel-ficha);
+}
+
+@media (max-width: 40rem) {
+  .quadro {
+    min-height: 5.5rem;
+    padding: var(--esp-1);
+  }
+
+  .textoEstado {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+  }
+
+  .COLETADO .estado::before {
+    width: 0.8rem;
+    height: 0.8rem;
+  }
+
+  .legendaCompacta {
+    display: flex;
+  }
+
+  .miniatura {
+    inset: var(--esp-1) var(--esp-1) 1.3rem;
+    height: calc(100% - var(--esp-1) - 1.3rem);
+  }
+
+  .envio {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .painel {
+    padding: var(--esp-4);
+  }
+}

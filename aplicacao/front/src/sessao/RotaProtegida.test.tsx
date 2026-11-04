@@ -83,7 +83,7 @@ describe('rotas protegidas e sessão', () => {
 
     // Rota sem consultas próprias: a única chamada é a do botão.
     render(
-      <Provedores rota="/sessoes/abc">
+      <Provedores rota="/pacientes/novo">
         <ChamaApi />
         <App />
       </Provedores>,

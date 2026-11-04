@@ -43,3 +43,21 @@
 tbody tr + tr .quadro {
   border-top-width: 2px;
 }
+
+.interativo {
+  padding: 0;
+}
+
+@media (max-width: 40rem) {
+  .canto {
+    width: 4.25rem;
+  }
+
+  .quadro {
+    height: 5.5rem;
+  }
+
+  .dedo {
+    font-size: 0.7rem;
+  }
+}

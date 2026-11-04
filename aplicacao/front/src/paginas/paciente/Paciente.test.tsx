@@ -2,7 +2,8 @@ import { screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it } from 'vitest';
 import { detalhe, ID_PACIENTE, sessao, tcle } from '../../testes/pacientes';
-import { comSessao, json, renderizarApp, simularFetch } from '../../testes/utilitarios';
+import { ID_SESSAO, sessaoColeta } from '../../testes/coletas';
+import { comSessao, json, renderizarApp, simularApi, simularFetch } from '../../testes/utilitarios';
 
 const ROTA = `/pacientes/${ID_PACIENTE}`;
 
@@ -126,11 +127,17 @@ describe('Paciente (UC04, UC05)', () => {
   });
 
   it('inicia a coleta com método e tipo de impressão e abre a ficha', async () => {
-    const { fetchMock, usuario } = abrir(
-      json(200, detalhe({ consentimentos: [tcle()] }, { podeColetar: true })),
-      json(201, { id: sessao().id }),
-      json(200, detalhe({ consentimentos: [tcle()], sessoes: [sessao()] }, { podeColetar: true })),
-    );
+    comSessao();
+    const fetchMock = simularApi({
+      [`GET ${'/api/pacientes/' + ID_PACIENTE}`]: [
+        json(200, detalhe({ consentimentos: [tcle()] }, { podeColetar: true })),
+        json(200, detalhe({ consentimentos: [tcle()], sessoes: [sessao()] }, { podeColetar: true })),
+      ],
+      [`POST /api/pacientes/${ID_PACIENTE}/sessoes`]: json(201, sessaoColeta()),
+      [`GET /api/sessoes/${ID_SESSAO}`]: json(200, sessaoColeta()),
+    });
+    renderizarApp(ROTA);
+    const usuario = userEvent.setup();
 
     await usuario.click(await screen.findByRole('button', { name: 'Iniciar coleta' }));
     await usuario.click(screen.getByRole('button', { name: 'Começar a coleta' }));
@@ -144,9 +151,13 @@ describe('Paciente (UC04, UC05)', () => {
     await usuario.type(screen.getByLabelText('Dispositivo (opcional)'), 'Leitor sintético');
     await usuario.click(screen.getByRole('button', { name: 'Começar a coleta' }));
 
-    expect(await screen.findByRole('heading', { name: 'Coleta', level: 1 })).toBeInTheDocument();
-    expect(fetchMock.mock.calls[1]![0]).toBe(`/api/pacientes/${ID_PACIENTE}/sessoes`);
-    expect(corpo(fetchMock, 1)).toEqual({ metodo: 'LEITOR_OPTICO', tipoImpressao: 'ROLADA', dispositivo: 'Leitor sintético' });
+    expect(await screen.findByRole('heading', { name: 'Coleta das digitais', level: 1 })).toBeInTheDocument();
+    const inicio = fetchMock.mock.calls.find(([, init]) => init?.method === 'POST')!;
+    expect(JSON.parse(inicio[1]!.body as string)).toEqual({
+      metodo: 'LEITOR_OPTICO',
+      tipoImpressao: 'ROLADA',
+      dispositivo: 'Leitor sintético',
+    });
   });
 
   it('oferece continuar a coleta em andamento e abrir resultados anteriores', async () => {

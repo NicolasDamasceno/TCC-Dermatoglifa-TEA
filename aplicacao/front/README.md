@@ -60,6 +60,6 @@ Nenhum segredo vai para o front: tudo que começa com `VITE_` fica visível no n
 | F1 | Base, sessão, rotas por papel, layout com faixa de pesquisa, tela Entrar | Concluído |
 | F2 | Solicitar cadastro e cadastros pendentes (UC02, UC03) | Concluído |
 | F3 | Pacientes e consentimentos (UC04, UC05) | Concluído |
-| F4 | Coleta com a ficha decadactilar (UC06) | — |
+| F4 | Coleta com a ficha decadactilar (UC06) | Concluído |
 | F5 | Resultado da análise (UC07, UC08) | — |
 | F6 | Revisão de acessibilidade e build | — |

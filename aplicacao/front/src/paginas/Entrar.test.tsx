@@ -39,12 +39,12 @@ describe('Entrar (UC01)', () => {
 
   it('volta para a página pedida antes do login', async () => {
     simularFetch(json(200, respostaEntrada(MEDICO)));
-    renderizarApp('/sessoes/abc');
+    renderizarApp('/pacientes/novo');
 
     expect(await screen.findByRole('heading', { name: 'Entrar' })).toBeInTheDocument();
     await preencherEEntrar();
 
-    expect(await screen.findByRole('heading', { name: 'Coleta' })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: 'Cadastrar paciente', level: 1 })).toBeInTheDocument();
   });
 
   it.each([
