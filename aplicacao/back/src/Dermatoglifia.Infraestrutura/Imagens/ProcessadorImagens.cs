@@ -69,9 +69,13 @@ internal sealed class ProcessadorImagens : IProcessadorImagens
         {
             using var imagem = new MagickImage(bytes, leitura);
 
-            // Tons de cinza em 8 bits, sem transparência.
+            // Tons de cinza em 8 bits, sem transparência. Rec709Luma calcula o cinza sobre
+            // os valores com gama (Y'), então uma digital que já chega em cinza passa sem
+            // nenhuma alteração. Rec709Luminance trabalharia em luz linear e, ao gravar como
+            // cinza sRGB, clarearia os tons (1 → 13, 2 → 22): o modelo veria em produção
+            // imagens diferentes das do treino (ADR-0001).
             imagem.Alpha(AlphaAction.Remove);
-            imagem.Grayscale(PixelIntensityMethod.Rec709Luminance);
+            imagem.Grayscale(PixelIntensityMethod.Rec709Luma);
             imagem.ColorSpace = ColorSpace.Gray;
             imagem.Depth = 8;
 

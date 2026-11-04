@@ -330,6 +330,13 @@ flowchart LR
   reforçam isso.
 - Resolução lida dos metadados da imagem; ausente → rejeita com orientação
   (o método de captura do protocolo precisa gravar a resolução).
+- Cinza calculado como luma Rec. 709 (Y') sobre os valores com gama
+  (`PixelIntensityMethod.Rec709Luma`): **uma imagem que já chega em cinza passa sem
+  nenhuma alteração de tom**, e o modelo vê em produção os mesmos valores que viu no
+  treino. A primeira versão usava `Rec709Luminance` (luz linear), que clareava os
+  tons ao gravar (1 → 13, 2 → 22); o defeito apareceu no teste de ponta a ponta com
+  o serviço de IA e foi corrigido antes de qualquer coleta real. Teste:
+  `Imagem_em_cinza_mantem_os_tons_originais`.
 - O PNG normalizado tem apenas os blocos `IHDR`, `pHYs` (resolução), `IDAT` e
   `IEND`: perfis, comentários, textos e datas são descartados, e a mesma imagem
   gera sempre o mesmo SHA-256.

@@ -168,6 +168,40 @@ public sealed class ColetaTestes(AmbienteApi ambiente)
     }
 
     [Fact]
+    public async Task Imagem_em_cinza_mantem_os_tons_originais()
+    {
+        // Treino e inferência precisam ver os mesmos tons (ADR-0001): uma digital que já
+        // chega em cinza não pode ser clareada nem escurecida pela normalização.
+        var (medico, _, sessaoId) = await SessaoIniciadaAsync();
+        var tons = Enumerable.Range(0, 120).SelectMany(_ => Enumerable.Range(0, 256).Select(x => (byte)x)).ToArray();
+        using var gradiente = new MagickImage(tons, new MagickReadSettings { Width = 256, Height = 120, Format = MagickFormat.Gray, Depth = 8 });
+        gradiente.Density = new Density(500, 500, DensityUnit.PixelsPerInch);
+
+        await EnviarAsync(medico.Cliente, sessaoId, "DIREITA", "POLEGAR", gradiente.ToByteArray(MagickFormat.Png));
+
+        var (caminho, _) = Assert.Single(await ArquivosNoBancoAsync(sessaoId));
+        var claro = await ambiente.Fabrica.Services.GetRequiredService<IArmazenamentoImagens>().AbrirAsync(caminho);
+        using var gravada = new MagickImage(claro);
+        Assert.Equal(tons, gravada.ToByteArray(MagickFormat.Gray));
+    }
+
+    [Fact]
+    public async Task Imagem_colorida_vira_luma_rec709()
+    {
+        var (medico, _, sessaoId) = await SessaoIniciadaAsync();
+        using var laranja = new MagickImage(new MagickColor("#FFA500"), 120, 120);
+        laranja.Density = new Density(500, 500, DensityUnit.PixelsPerInch);
+
+        await EnviarAsync(medico.Cliente, sessaoId, "DIREITA", "POLEGAR", laranja.ToByteArray(MagickFormat.Png));
+
+        var (caminho, _) = Assert.Single(await ArquivosNoBancoAsync(sessaoId));
+        var claro = await ambiente.Fabrica.Services.GetRequiredService<IArmazenamentoImagens>().AbrirAsync(caminho);
+        using var gravada = new MagickImage(claro);
+        // Y' = 0,2126·R' + 0,7152·G' + 0,0722·B' sobre os valores com gama: 0,2126·255 + 0,7152·165 ≈ 172.
+        Assert.All(gravada.ToByteArray(MagickFormat.Gray), v => Assert.InRange(v, (byte)171, (byte)173));
+    }
+
+    [Fact]
     public async Task Imagem_colorida_e_convertida_para_tons_de_cinza()
     {
         var (medico, _, sessaoId) = await SessaoIniciadaAsync();
