@@ -15,7 +15,6 @@ body {
   font-family: var(--fonte);
   font-size: var(--t-1);
   line-height: 1.5;
-  font-variant-numeric: tabular-nums;
 }
 
 h1,

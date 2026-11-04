@@ -49,9 +49,10 @@ para texto.
 **Tipografia:** uma família, **Atkinson Hyperlegible Next** (variável, hospedada no
 app), desenhada para baixa visão, com 0/O e 1/l/I inconfundíveis. A escolha é
 funcional: o médico lê contagens, indicadores e versões de modelo. Escala modular
-1,25 a partir de 1 rem (16 px): 0,8 · 1 · 1,25 · 1,563 · 1,953 rem; algarismos
-tabulares em tabelas e indicadores; linhas de até ~70 caracteres; altura de linha
-1,5 no corpo e 1,2 nos títulos.
+1,25 a partir de 1 rem (16 px): 0,8 · 1 · 1,25 · 1,563 · 1,953 rem; linhas de até
+~70 caracteres; altura de linha 1,5 no corpo e 1,2 nos títulos. Algarismos
+tabulares só em colunas de números a comparar (indicadores); em texto, CRM e datas
+ficam os proporcionais, porque os tabulares da Atkinson parecem fonte monoespaçada.
 
 **Forma:** raio de 3 px em campos e botões, 0 nos quadros da ficha (são linhas
 impressas). Nada de sombras decorativas. Movimento só em resposta a ação (o quadro
