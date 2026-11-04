@@ -189,6 +189,18 @@ voltando depois para a página pedida.
   nunca guardada.
 - Nenhum dado de paciente vai para logs do console ou para serviços de terceiros;
   nenhum script ou fonte de fora.
+- **Build de produção** (`npm run build`) traz uma Content-Security-Policy em
+  `<meta>`: tudo da própria origem (`'self'`), `blob:` só em `img-src` (prévia das
+  digitais), `object-src 'none'`, sem script ou estilo inline. Conferido no
+  `npm run preview`: login, rota aberta por link direto, fonte, prévia e
+  resultado sem nenhuma violação.
+- **Publicação.** Os arquivos de `dist/` são estáticos e vão no mesmo domínio da
+  API, atrás de um proxy reverso que repassa `/api` para o .NET e devolve
+  `index.html` para as demais rotas (o roteamento é do navegador). O servidor deve
+  enviar por cabeçalho o que a `<meta>` não consegue: `frame-ancestors 'none'`
+  (ou `X-Frame-Options: DENY`), HSTS, `X-Content-Type-Options: nosniff` e
+  `Referrer-Policy: no-referrer`. Se a API ficar em outra origem, `VITE_API_URL`
+  entra no build e a CSP passa a liberar essa origem em `connect-src`.
 
 ## 6. Erros, carregamento e vazios
 
@@ -207,6 +219,23 @@ rótulos ligados aos campos; erros anunciados (`role="alert"`) e ligados ao camp
 (`aria-describedby`); títulos de página atualizados a cada rota; nada depende só de
 cor (estado do dedo também por texto); `prefers-reduced-motion` respeitado; alvo de
 toque de pelo menos 44 px; uso confortável a partir de 360 px de largura.
+
+**Como foi conferido (marco F6, 04/11/2026):**
+
+| Verificação | Como | Resultado |
+|---|---|---|
+| Regras automáticas WCAG 2.1 A/AA e boas práticas | axe-core 4.14.0 no Chromium, contra a API real, em 15 estados (formulários com erro, painéis abertos, confirmações, coleta com prévia, resultado) a 1280 e a 320 px | Nenhuma violação; o axe foi testado antes com erros plantados para garantir que estava detectando |
+| Regressão | axe-core nos testes do Vitest, uma tela por caso (sem a regra de contraste, que o jsdom não calcula) | 8 casos no `npm test` |
+| Foco visível e ordem de tabulação | Tab em cinco telas, conferindo contorno ou sombra em cada elemento focado | Ordem segue a leitura; o botão de calendário do campo de data não mostrava foco: corrigido com `:focus-within` |
+| Alvo de toque | Elementos interativos com menos de 44 px de altura (links dentro do texto são isentos, WCAG 2.5.8) | A marca na barra tinha 30 px: corrigida |
+| Refluxo (1.4.10) | Largura de 320 px em todas as telas | A busca de pacientes vazava 27 px: corrigida; tabelas largas rolam dentro da própria região |
+| Texto a 200% (1.4.4) | Fonte da página dobrada a 1280 px | Sem rolagem lateral nem corte |
+| Movimento | `prefers-reduced-motion: reduce` | Animação da miniatura desligada |
+
+O `eslint-plugin-jsx-a11y` não foi adotado: a versão atual (6.10.2) ainda não
+declara suporte ao ESLint 10. O axe nos testes cobre o mesmo tipo de erro em tempo
+de execução. Falta uma rodada com leitor de tela real (NVDA ou VoiceOver), que
+nenhuma ferramenta automática substitui.
 
 ## 8. Estrutura
 
@@ -229,6 +258,12 @@ aplicacao/front/
 Vitest + Testing Library: componentes e telas renderizados com a API simulada
 (`fetch` substituído nos testes), verificando o que o usuário vê e faz — textos,
 rótulos acessíveis, navegação. Nenhum dado real; imagens de teste geradas na hora.
+`src/testes/acessibilidade.test.tsx` roda o axe-core em cada tela (seção 7).
+
+Além dos testes, cada marco foi conferido no Chromium contra a API real e um
+PostgreSQL local, com usuários e imagens sintéticos; no F5, com um serviço de IA
+falso que devolve padrões fixos. Esses roteiros e o serviço falso ficam fora do
+repositório: o serviço de inferência real é o próximo módulo (ADR-0001).
 
 ## 10. Marcos
 
@@ -239,7 +274,7 @@ rótulos acessíveis, navegação. Nenhum dado real; imagens de teste geradas na
 | F3 | Pacientes: lista, novo, detalhe e consentimentos (UC04, UC05) | Concluído: 83 testes no total; conferido contra a API real |
 | F4 | Coleta com a ficha decadactilar (UC06) | Concluído: 96 testes no total; conferido contra a API real com imagens sintéticas |
 | F5 | Resultado da análise (UC07, UC08) | Concluído: 108 testes no total; conferido contra a API real com um serviço de IA falso, fora do repositório |
-| F6 | Revisão de acessibilidade, build de produção, ajustes de texto | — |
+| F6 | Revisão de acessibilidade, build de produção, ajustes de texto | Concluído: 116 testes; ver seções 5 e 7 |
 
 Telas de marcos ainda não feitos existem como reserva (`EmConstrucao`), já
 protegidas pelo papel certo, para que as rotas e a navegação sejam testadas desde o F1.

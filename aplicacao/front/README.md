@@ -34,7 +34,15 @@ uma origem só. O CORS da API já aceita `http://localhost:5173`.
 | `npm test` | testes (Vitest, jsdom) |
 | `npm run lint` | ESLint (inclui proibição de `console` e de `dangerouslySetInnerHTML`) |
 | `npm run typecheck` | TypeScript estrito |
-| `npm run build` | build de produção em `dist/` (não versionado) |
+| `npm run build` | build de produção em `dist/` (não versionado), com Content-Security-Policy |
+| `npm run preview` | serve o build em http://localhost:4173, com o mesmo repasse de `/api` |
+
+## Publicação
+
+`dist/` é estático. Ele vai no mesmo domínio da API, atrás de um proxy reverso que
+repassa `/api` para o .NET e devolve `index.html` nas outras rotas. O servidor deve
+mandar por cabeçalho `frame-ancestors 'none'`, HSTS, `nosniff` e
+`Referrer-Policy: no-referrer` (detalhes no doc 09, seção 5).
 
 ## Variáveis
 
@@ -62,4 +70,4 @@ Nenhum segredo vai para o front: tudo que começa com `VITE_` fica visível no n
 | F3 | Pacientes e consentimentos (UC04, UC05) | Concluído |
 | F4 | Coleta com a ficha decadactilar (UC06) | Concluído |
 | F5 | Resultado da análise (UC07, UC08) | Concluído |
-| F6 | Revisão de acessibilidade e build | — |
+| F6 | Revisão de acessibilidade e build | Concluído |
