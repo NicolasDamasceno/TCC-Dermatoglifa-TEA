@@ -64,16 +64,18 @@ Dependências apontam para dentro: `Api → Aplicacao → Dominio`;
 
 ```
 aplicacao/front/src/
-  paginas/        Login, CadastroMedico, Pacientes, NovoPaciente, Coleta, Resultado
-  componentes/    SeletorDedo, PreviaImagem, AvisoNaoDiagnostico, TabelaPadroes
-  servicos/       cliente da API (fetch/axios + token)
-  rotas/          rotas protegidas por papel
+  api/            cliente HTTP (fetch + token + problem+json), um módulo por recurso
+  sessao/         sessão da aba, rotas protegidas por papel
+  componentes/    Layout, AvisoPesquisa, FichaDecadactilar, Campo, Botao, Mensagem
+  paginas/        Entrar, Pacientes, Paciente, Coleta, Resultado...
 ```
 
-`AvisoNaoDiagnostico` é obrigatório em toda tela que mostre resultado (RN04) e
-exibe o texto enviado pela API, para que a versão mostrada seja a registrada na análise.
+A faixa de pesquisa (`AvisoPesquisa`) aparece em todas as telas. Na tela de
+resultado, além dela, o aviso de não diagnóstico (RN04) exibe o texto enviado pela
+API, para que a versão mostrada seja a registrada na análise.
 
-O desenho detalhado do back-end está em [08-back-end.md](08-back-end.md).
+O desenho detalhado do back-end está em [08-back-end.md](08-back-end.md); o do
+front-end, em [09-front-end.md](09-front-end.md) e no ADR-0007.
 
 ## API REST — primeira versão
 

@@ -12,6 +12,7 @@ Ler na ordem abaixo antes de criar ou alterar qualquer módulo (`CLAUDE.md`, Reg
 | 06 | [Arquitetura](06-arquitetura.md) | Componentes, organização do back e do front, API REST, segurança |
 | 07 | [Fundamentos da pesquisa](07-fundamentos-pesquisa.md) | Evidência científica, IA, hardware e normas, com fontes e itens a verificar |
 | 08 | [Desenho do back-end](08-back-end.md) | Solução .NET 10, domínio, serviços, contratos da API, upload cifrado, cliente da IA, testes, ordem de implementação |
+| 09 | [Desenho do front-end](09-front-end.md) | Direção visual (ficha decadactilar), tokens, rotas, telas, sessão, acessibilidade, marcos F1–F6 |
 
 ## Decisões de arquitetura (ADRs)
 
