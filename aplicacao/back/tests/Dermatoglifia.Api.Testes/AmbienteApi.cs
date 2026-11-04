@@ -3,10 +3,13 @@ using System.Net.Http.Json;
 using System.Security.Cryptography;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Dermatoglifia.Dominio.Entidades;
+using Dermatoglifia.Dominio.Enums;
 using Dermatoglifia.Infraestrutura;
 using Dermatoglifia.Infraestrutura.Persistencia;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.AspNetCore.TestHost;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Npgsql;
@@ -27,6 +30,9 @@ public sealed class AmbienteApi : IAsyncLifetime
     public const string EmailAdmin = "admin@teste.local";
     public const string SenhaAdmin = "senhaadmin123";
 
+    /// <summary>Modelo sintético ativo cadastrado no banco de testes.</summary>
+    public const string VersaoModeloTeste = "teste_sintetico_v1";
+
     public static readonly JsonSerializerOptions Json = new(JsonSerializerDefaults.Web)
     {
         Converters = { new JsonStringEnumConverter(JsonNamingPolicy.SnakeCaseUpper) },
@@ -37,6 +43,9 @@ public sealed class AmbienteApi : IAsyncLifetime
     private string _nomeBanco = null!;
 
     public WebApplicationFactory<Program> Fabrica { get; private set; } = null!;
+
+    /// <summary>Serviço de IA falso: recebe as chamadas HTTP no lugar do serviço Python.</summary>
+    public IaFalsa Ia { get; } = new();
 
     /// <summary>Pasta temporária das imagens cifradas desta execução (apagada no fim).</summary>
     public string DiretorioImagens { get; } = Path.Combine(Path.GetTempPath(), $"dermatoglifia-testes-{Guid.NewGuid():N}");
@@ -55,6 +64,12 @@ public sealed class AmbienteApi : IAsyncLifetime
         await using (var contexto = new AppDbContext(opcoes.Options))
         {
             await contexto.Database.MigrateAsync();
+
+            var modelo = ModeloIA.Registrar(VersaoModeloTeste, "CNN 2 blocos (teste)", OrigemDados.Sintetico,
+                escoreValidado: false, new string('a', 64), "{\"acuraciaBalanceada\": 0.9}", new DateOnly(2026, 11, 1));
+            modelo.Ativar(DateTimeOffset.UtcNow);
+            contexto.ModelosIA.Add(modelo);
+            await contexto.SaveChangesAsync();
         }
         var configuracao = new Dictionary<string, string?>
         {
@@ -65,6 +80,8 @@ public sealed class AmbienteApi : IAsyncLifetime
             ["AdminInicial:Senha"] = SenhaAdmin,
             ["Armazenamento:Diretorio"] = DiretorioImagens,
             ["Armazenamento:Chaves:1"] = Convert.ToBase64String(RandomNumberGenerator.GetBytes(32)),
+            ["Inferencia:UrlBase"] = "http://ia-falsa.teste/",
+            ["Inferencia:TimeoutSegundos"] = "2",
         };
 
         Fabrica = new WebApplicationFactory<Program>().WithWebHostBuilder(host =>
@@ -74,6 +91,11 @@ public sealed class AmbienteApi : IAsyncLifetime
             {
                 host.UseSetting(chave, valor);
             }
+
+            // Nenhuma chamada sai da máquina: o HttpClient do Serviço de IA fala com a IA falsa.
+            host.ConfigureTestServices(servicos => servicos
+                .AddHttpClient(InjecaoDeDependencia.NomeClienteInferencia)
+                .ConfigurePrimaryHttpMessageHandler(() => new HandlerIaFalsa(Ia)));
         });
 
         _ = Fabrica.Server; // sobe a API agora: falhas de configuração aparecem aqui

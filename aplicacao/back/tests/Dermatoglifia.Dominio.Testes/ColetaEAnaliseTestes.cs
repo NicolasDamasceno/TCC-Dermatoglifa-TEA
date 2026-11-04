@@ -88,7 +88,7 @@ public class AnaliseTestes
     {
         var sessao = SessaoCompleta();
         var analise = Analise.Solicitar(sessao, "v1", Agora);
-        analise.IniciarProcessamento();
+        analise.IniciarProcessamento(Agora);
         return (sessao, analise);
     }
 
@@ -210,7 +210,7 @@ public class AnaliseTestes
         analise.Falhar("Serviço de IA indisponível");
         Assert.Equal(StatusAnalise.Erro, analise.Status);
 
-        analise.IniciarProcessamento();
+        analise.IniciarProcessamento(Agora);
         Assert.Equal(StatusAnalise.Processando, analise.Status);
         Assert.Null(analise.MensagemErro);
     }
@@ -227,5 +227,47 @@ public class AnaliseTestes
 
         Assert.Equal(Agora, analise.RegistradoProntuarioEm);
         Assert.Throws<RegraDeNegocioException>(() => analise.ConfirmarRegistroProntuario(Agora));
+    }
+
+    [Fact]
+    public void Processando_recente_nao_aceita_nova_tentativa()
+    {
+        var (_, analise) = AnaliseEmProcessamento();
+
+        Assert.False(analise.PodeProcessar(Agora.AddMinutes(4)));
+        Assert.Throws<RegraDeNegocioException>(() => analise.IniciarProcessamento(Agora.AddMinutes(4)));
+    }
+
+    [Fact]
+    public void Processando_travado_aceita_nova_tentativa()
+    {
+        var (_, analise) = AnaliseEmProcessamento();
+        var depois = Agora + Analise.TempoMaximoProcessamento + TimeSpan.FromSeconds(1);
+
+        analise.IniciarProcessamento(depois);
+
+        Assert.Equal(StatusAnalise.Processando, analise.Status);
+        Assert.Equal(depois, analise.ProcessamentoIniciadoEm);
+    }
+
+    [Fact]
+    public void Concluida_nao_volta_a_processar()
+    {
+        var (sessao, analise) = AnaliseEmProcessamento();
+        var resposta = RespostaConsistente();
+        analise.Concluir(sessao, ModeloAtivo(), TabelaConversaoAlca.Impressao, resposta, IndicadoresDe(resposta), null, Agora);
+
+        Assert.False(analise.PodeProcessar(Agora.AddHours(1)));
+        Assert.Throws<RegraDeNegocioException>(() => analise.IniciarProcessamento(Agora.AddHours(1)));
+    }
+
+    [Fact]
+    public void Mensagem_de_erro_longa_e_truncada()
+    {
+        var (_, analise) = AnaliseEmProcessamento();
+
+        analise.Falhar(new string('x', 800));
+
+        Assert.Equal(500, analise.MensagemErro!.Length);
     }
 }
