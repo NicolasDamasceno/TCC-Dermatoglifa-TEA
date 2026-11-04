@@ -132,6 +132,9 @@ Etapa 2 se houver modelo validado, senão `escore_risco: null`.
 | Reidentificação pelo modelo publicado | Pesos treinados com dados reais fora do Git, em local controlado; versão pública só com dados sintéticos (ADR-0005) |
 | Uso fora do protocolo | Só médicos vinculados ao protocolo do CEP são aprovados |
 | Uso não rastreado | Log de auditoria somente-inserção |
+| Dados sensíveis em cache | `Cache-Control: no-store` em toda resposta da API |
+| Chamadas de sites de terceiros | CORS só para as origens configuradas do front, sem curinga |
+| Descoberta de rotas | Toda rota exige login; sem login, até rota inexistente responde 401 |
 
 ## Ambiente de desenvolvimento
 

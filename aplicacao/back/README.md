@@ -87,7 +87,12 @@ depois. A versão de modelo que o serviço informa precisa estar cadastrada e at
 na tabela `modelo_ia`; o cadastro pela API (UC10) ainda não existe — por ora é feito
 direto no banco, conforme `modelo_producao/README.md`.
 
-Paciente de outro médico responde `404`, como se não existisse.
+Paciente de outro médico responde `404`, como se não existisse. Todo erro vem em
+`application/problem+json` com título em português e `traceId`; sem login, até
+rota inexistente responde `401`.
+
+**Front-end local.** Em desenvolvimento, o CORS já libera `http://localhost:5173`
+(porta padrão do Vite); outras origens vão em `Cors:OrigensPermitidas`.
 
 ## Testes
 
@@ -126,4 +131,8 @@ o doc 05 se a estrutura do banco mudar.
 | M3 — pacientes, identificação separada, consentimento e auditoria | concluído |
 | M4 — sessão de coleta, upload, normalização e cifragem das digitais | concluído |
 | M5 — cliente do Serviço de IA, verificação de consistência e análise | concluído |
-| M6 — ProblemDetails completo, CORS, revisão dos testes de integração | próximo |
+| M6 — ProblemDetails completo, CORS, cabeçalhos de segurança, testes transversais | concluído |
+
+Com o M6, os fluxos do MVP do back-end (UC01–UC08) estão implementados. Ficam
+para depois: cadastro de modelo pela API (UC10), histórico do paciente (UC09),
+situação diagnóstica (UC13) e exportação para treino (UC14).

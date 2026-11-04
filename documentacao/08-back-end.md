@@ -286,10 +286,23 @@ português para exibição e `errors` por campo nas validações:
 | `FormatoNaoSuportadoException` (imagem não é PNG/BMP/TIFF válido) | 415 |
 | `ConteudoMuitoGrandeException` / corpo acima do limite | 413 |
 | `RegraDeNegocioException` | 422 |
-| Falha da IA ao concluir | 200 com `analiseStatus: "ERRO"` (não é erro da requisição) |
+| Falha da IA ao concluir, inclusive erro inesperado no processamento | 200 com `analiseStatus: "ERRO"` (não é erro da requisição; reprocessável na hora) |
 | Inesperada | 500 sem detalhes internos; detalhe só no log |
 
-Um `IExceptionHandler` faz esse mapeamento em um só lugar.
+Um `IExceptionHandler` faz esse mapeamento em um só lugar. As respostas que o
+próprio ASP.NET Core gera sem corpo também saem em `problem+json` com título em
+português (`ConfiguracaoProblemas` + `UseStatusCodePages`):
+
+| Status | Título | Quando |
+|---|---|---|
+| 401 | Autenticação necessária. Faça login novamente. | sem token, token inválido/expirado — e **qualquer rota inexistente para quem não está logado**, para não revelar quais rotas existem |
+| 403 | Acesso não permitido para o seu perfil. | papel errado (ex.: médico em rota de admin) |
+| 404 | Recurso não encontrado. | rota inexistente, com login |
+| 405 | Método não permitido para esta rota. | ex.: `DELETE` numa rota que não aceita |
+| 415 | Tipo de conteúdo não suportado. | corpo que não é JSON numa rota JSON |
+| 429 | Muitas tentativas. Aguarde um minuto e tente novamente. | limite de 10/min por IP no login e na solicitação de cadastro |
+
+Todo erro traz `traceId` (para cruzar com o log) e nunca traz pilha de exceção.
 
 ## 6. Pipeline de upload e armazenamento cifrado
 
@@ -380,13 +393,23 @@ análise) também são registradas. O IP vem do `HttpContext` via `IUsuarioAtual
 | `Armazenamento:Diretorio` | `/var/lib/dermatoglifia/imagens` | `appsettings.{Ambiente}.json` |
 | `Armazenamento:Chaves:1` | 256 bits em base64 | user-secrets / variável de ambiente |
 | `Inferencia:UrlBase`, `Inferencia:TimeoutSegundos`, `Inferencia:ConvencaoAlca` | `http://localhost:8000`, `30`, `IMPRESSAO` | `appsettings.json` |
-| `Cors:OrigensPermitidas` | `http://localhost:5173` | `appsettings.{Ambiente}.json` |
+| `Cors:OrigensPermitidas` | `["http://localhost:5173"]` | `appsettings.{Ambiente}.json` (desenvolvimento já vem com a porta padrão do Vite) |
 | `AdminInicial:Email`, `AdminInicial:Senha` | — | só variável de ambiente, só na primeira execução |
 
 O repositório terá `aplicacao/back/.env.example` com as chaves e valores
 fictícios. A aplicação **não inicia** se faltar `Jwt:Chave`,
 `Armazenamento:Diretorio`, `Armazenamento:Chaves:1` ou um `Inferencia:UrlBase`
 válido (falha rápida, em vez de rodar com configuração incompleta).
+
+**CORS:** só as origens listadas, exatas (esquema, host e porta). Curinga, caminho
+ou barra final impedem a API de subir — as respostas carregam dados sensíveis.
+Métodos `GET`, `POST`, `PUT`, `PATCH`; cabeçalhos `Authorization` e `Content-Type`;
+`Location` exposto ao front; sem cookies (o token vai no cabeçalho).
+
+**Cabeçalhos de segurança** em toda resposta: `Cache-Control: no-store` (dados
+pessoais e de saúde não ficam em cache de navegador ou proxy),
+`X-Content-Type-Options: nosniff` e `Referrer-Policy: no-referrer`; HSTS fora do
+ambiente de desenvolvimento.
 
 **Logs:** `ILogger` estruturado; corpo de requisições nunca é registrado; nomes e
 contatos de pacientes nunca aparecem em log (apenas `uuid`).
@@ -412,7 +435,7 @@ resolução gravada); nenhuma digital real em `tests/` (RNF08).
 | M3 ✅ | Pacientes, identificação separada e consentimento (UC04–UC05) + auditoria | `feat(back)` |
 | M4 ✅ | Sessão de coleta, upload, normalização e cifragem (UC06) | `feat(back)` |
 | M5 ✅ | Cliente da IA com serviço falso, verificação de consistência, análise (UC07–UC08) | `feat(back)` |
-| M6 | ProblemDetails completo, CORS, testes de integração, `.env.example` | `feat(back)`, `test(back)` |
+| M6 ✅ | ProblemDetails completo, CORS, testes de integração, `.env.example` | `feat(back)`, `test(back)` |
 
 Cada marco termina com testes passando e o doc correspondente atualizado se algo
 mudou (`CLAUDE.md`, Regra 2).
