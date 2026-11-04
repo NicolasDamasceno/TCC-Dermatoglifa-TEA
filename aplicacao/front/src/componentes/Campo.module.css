@@ -21,6 +21,13 @@
   border-radius: var(--raio);
 }
 
+/* Campos mostram o foco sempre, inclusive no botão de calendário do campo de data. */
+.entrada:focus,
+.entrada:focus-within {
+  outline: 2px solid var(--tinta);
+  outline-offset: 2px;
+}
+
 .entrada:hover {
   border-color: var(--tinta-suave);
 }

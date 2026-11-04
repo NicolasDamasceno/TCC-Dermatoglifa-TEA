@@ -39,6 +39,9 @@
 }
 
 .marca {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--alvo-toque);
   font-weight: 700;
   font-size: var(--t-2);
   text-decoration: none;
