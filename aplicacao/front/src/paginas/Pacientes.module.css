@@ -1,0 +1,115 @@
+.pagina {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-5);
+}
+
+.cabecalho {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--esp-4);
+}
+
+.busca {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--esp-3);
+  max-width: 34rem;
+}
+
+.campoBusca {
+  flex: 1;
+}
+
+.vazio {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--esp-3);
+  padding: var(--esp-5) 0;
+  border-top: 1px solid var(--linha-fina);
+  border-bottom: 1px solid var(--linha-fina);
+}
+
+.rolagem {
+  position: relative;
+  overflow-x: auto;
+}
+
+.tabela {
+  width: 100%;
+  min-width: 40rem;
+  border-collapse: collapse;
+  background: var(--papel-ficha);
+  border: 1px solid var(--linha);
+}
+
+.tabela[aria-busy='true'] {
+  opacity: 0.6;
+}
+
+.legenda {
+  padding-bottom: var(--esp-2);
+  text-align: left;
+  color: var(--tinta-suave);
+  font-size: var(--t-0);
+}
+
+.tabela th,
+.tabela td {
+  padding: var(--esp-3) var(--esp-4);
+  text-align: left;
+  border-bottom: 1px solid var(--linha-fina);
+}
+
+.tabela tbody tr:last-child > * {
+  border-bottom: 0;
+}
+
+.tabela thead th {
+  font-size: var(--t-0);
+  font-weight: 600;
+  color: var(--tinta-suave);
+  border-bottom-color: var(--linha);
+}
+
+.tabela tbody th {
+  font-weight: 400;
+}
+
+.nome {
+  font-weight: 700;
+}
+
+/* Estado por texto e por marca, nunca só por cor (doc 09, seção 7). */
+.liberada,
+.bloqueada {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--esp-2);
+}
+
+.liberada {
+  color: var(--coletado);
+  font-weight: 600;
+}
+
+.liberada::before {
+  content: '';
+  width: 0.625rem;
+  height: 0.625rem;
+  background: currentColor;
+}
+
+.bloqueada {
+  color: var(--tinta-suave);
+}
+
+.bloqueada::before {
+  content: '';
+  width: 0.625rem;
+  height: 0.625rem;
+  border: 1px solid currentColor;
+}

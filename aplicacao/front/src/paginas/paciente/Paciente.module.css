@@ -1,0 +1,206 @@
+.pagina {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-6);
+}
+
+.cabecalho {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-3);
+}
+
+.voltar {
+  font-size: var(--t-0);
+}
+
+/* Ficha de identificação: rótulo pequeno acima do valor, em linha. */
+.resumo {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--esp-3) var(--esp-6);
+  margin: 0;
+}
+
+.resumo dt,
+.dados dt {
+  font-size: var(--t-0);
+  color: var(--tinta-suave);
+}
+
+.resumo dd,
+.dados dd {
+  margin: 0;
+  font-weight: 600;
+}
+
+.dados {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+  gap: var(--esp-3) var(--esp-6);
+  margin: 0;
+  max-width: 48rem;
+}
+
+.secao {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--esp-4);
+  padding-top: var(--esp-5);
+  border-top: 1px solid var(--linha-fina);
+}
+
+.secao > * {
+  max-width: 100%;
+}
+
+/* A seção de coleta é a ação principal: traço de tinta à esquerda, como no painel de decisão. */
+.coleta {
+  padding: var(--esp-5);
+  background: var(--papel-ficha);
+  border: 1px solid var(--linha);
+  border-left: 4px solid var(--tinta);
+}
+
+.cabecalhoSecao {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--esp-3);
+  width: 100%;
+}
+
+.nota {
+  color: var(--tinta-suave);
+}
+
+.formulario {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-5);
+  width: 100%;
+  max-width: 40rem;
+}
+
+.linha {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: var(--esp-4);
+  align-items: start;
+}
+
+.acoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--esp-3);
+}
+
+.autorizacoesGrupo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-1);
+  margin: 0;
+  padding: var(--esp-4);
+  background: var(--papel-ficha);
+  border: 1px solid var(--linha);
+  min-width: 0;
+}
+
+.autorizacoesGrupo legend {
+  padding: 0 var(--esp-2);
+  font-weight: 700;
+}
+
+.alertaLibera {
+  margin-top: var(--esp-2);
+  padding: var(--esp-2) var(--esp-3);
+  background: var(--pesquisa-fundo);
+  color: var(--pesquisa);
+  font-size: var(--t-0);
+  font-weight: 600;
+}
+
+.rolagem {
+  position: relative;
+  overflow-x: auto;
+  width: 100%;
+}
+
+.tabela {
+  width: 100%;
+  min-width: 36rem;
+  border-collapse: collapse;
+  background: var(--papel-ficha);
+  border: 1px solid var(--linha);
+}
+
+.tabela th,
+.tabela td {
+  padding: var(--esp-3) var(--esp-4);
+  text-align: left;
+  vertical-align: top;
+  border-bottom: 1px solid var(--linha-fina);
+}
+
+.tabela tbody tr:last-child > * {
+  border-bottom: 0;
+}
+
+.tabela thead th {
+  font-size: var(--t-0);
+  font-weight: 600;
+  color: var(--tinta-suave);
+  border-bottom-color: var(--linha);
+}
+
+.tabela tbody th {
+  font-weight: 400;
+}
+
+.linhaAberta > * {
+  border-bottom-color: transparent;
+}
+
+.acao {
+  width: 1%;
+  white-space: nowrap;
+  text-align: right;
+}
+
+.termo {
+  display: block;
+  font-weight: 700;
+}
+
+.versao {
+  display: block;
+  font-size: var(--t-0);
+  color: var(--tinta-suave);
+}
+
+.autorizacoes {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--t-0);
+}
+
+.confirmacao {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-3);
+  padding-left: var(--esp-4);
+  border-left: 3px solid var(--erro);
+}
+
+@media (max-width: 36rem) {
+  .linha {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .coleta {
+    padding: var(--esp-4);
+  }
+}

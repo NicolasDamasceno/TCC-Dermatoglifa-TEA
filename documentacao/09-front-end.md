@@ -133,13 +133,19 @@ voltando depois para a página pedida.
   "Analisar" abre, logo abaixo do pedido, a decisão (aprovar com o vínculo ao
   protocolo ou recusar com o motivo). Se outro administrador decidiu antes
   (404/409/422), a mensagem aparece e a lista é recarregada.
-- **Pacientes.** Tabela (nome, idade, sexo, situação, coleta liberada); busca por nome;
+- **Pacientes.** Tabela (nome, idade, sexo, situação, coleta liberada) do cadastro
+  mais recente ao mais antigo; busca por nome guardada no endereço (`?busca=`);
   estado vazio convida a cadastrar o primeiro paciente.
-- **Novo paciente.** Campos do responsável aparecem obrigatórios quando a data de
-  nascimento indica menor de 18 anos (a API confere de novo).
-- **Paciente.** Consentimentos com estado vigente/revogado; formulário de TCLE/TALE
-  com as três autorizações descritas por extenso (UC05); "Iniciar coleta" só
-  habilitado com coleta liberada, explicando o motivo quando não está.
+- **Novo paciente.** O grupo do responsável passa a obrigatório quando a data de
+  nascimento indica menor de 18 anos (a API confere de novo); parentesco em lista
+  fechada (a API aceita texto livre). Ao concluir, abre o paciente pedindo o TCLE.
+- **Paciente.** Identificação; bloco **Coleta das digitais** com a única ação
+  possível no momento: continuar a coleta em andamento, iniciar (método, tipo de
+  impressão e dispositivo), ou explicar por que não está liberada — inclusive
+  quando há coleta em andamento e o TCLE foi revogado. Depois, as coletas (com
+  link para o resultado), os consentimentos (registrar TCLE/TALE com as três
+  autorizações por extenso, revogar com confirmação) e o responsável legal. As
+  sessões vêm do próprio `GET /api/pacientes/{id}` (campo `sessoes`, doc 08).
 - **Coleta.** A ficha; ao escolher um dedo: arquivo, **pré-visualização local**
   (RNF13 — a imagem só existe no navegador até o envio; a API nunca a devolve),
   confirmar envio; "Dedo não pode ser coletado" com motivo; "Concluir coleta"
@@ -206,7 +212,7 @@ rótulos acessíveis, navegação. Nenhum dado real; imagens de teste geradas na
 |---|---|---|
 | F1 | Projeto, tokens e fonte, cliente da API, sessão, rotas protegidas por papel, layout com faixa de pesquisa, tela Entrar | Concluído: 45 testes; conferido contra a API real |
 | F2 | Solicitar cadastro (UC02) e cadastros pendentes do admin (UC03) | Concluído: 63 testes no total; conferido contra a API real |
-| F3 | Pacientes: lista, novo, detalhe e consentimentos (UC04, UC05) | — |
+| F3 | Pacientes: lista, novo, detalhe e consentimentos (UC04, UC05) | Concluído: 83 testes no total; conferido contra a API real |
 | F4 | Coleta com a ficha decadactilar (UC06) | — |
 | F5 | Resultado da análise (UC07, UC08) | — |
 | F6 | Revisão de acessibilidade, build de produção, ajustes de texto | — |

@@ -1,0 +1,70 @@
+.grupo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-2);
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+
+.legenda {
+  padding: 0;
+  margin-bottom: var(--esp-1);
+  font-weight: 600;
+}
+
+.dica {
+  color: var(--tinta-suave);
+  font-size: var(--t-0);
+}
+
+.emLinha {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--esp-1) var(--esp-5);
+}
+
+.empilhadas {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-2);
+}
+
+.opcao {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--esp-3);
+  min-height: var(--alvo-toque);
+  padding: var(--esp-2) 0;
+  cursor: pointer;
+}
+
+.opcao input {
+  flex: none;
+  width: 1.25rem;
+  height: 1.25rem;
+  margin: 0.125rem 0 0;
+  accent-color: var(--tinta);
+  cursor: pointer;
+}
+
+.rotulo {
+  display: block;
+}
+
+.descricao {
+  display: block;
+  color: var(--tinta-suave);
+  font-size: var(--t-0);
+}
+
+.marcacao .rotulo {
+  font-weight: 600;
+}
+
+.erro {
+  color: var(--erro);
+  font-size: var(--t-0);
+  font-weight: 600;
+}

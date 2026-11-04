@@ -1,0 +1,127 @@
+import type { ClienteApi } from './cliente';
+
+export type Sexo = 'MASCULINO' | 'FEMININO';
+export type Situacao = 'SUSPEITA' | 'TEA_CONFIRMADO' | 'TEA_DESCARTADO' | 'CONTROLE';
+export type TipoTermo = 'TCLE' | 'TALE';
+export type StatusSessao = 'EM_ANDAMENTO' | 'COMPLETA' | 'INCOMPLETA' | 'CANCELADA';
+export type StatusAnalise = 'PENDENTE' | 'PROCESSANDO' | 'CONCLUIDA' | 'ERRO';
+export type MetodoCaptura = 'LEITOR_OPTICO' | 'TINTA_DIGITALIZADA';
+export type TipoImpressao = 'ROLADA' | 'PLANA';
+
+/** Item de GET /api/pacientes e bloco `paciente` do detalhe (doc 08, seção 5). */
+export interface PacienteResumo {
+  id: string;
+  /** null quando o titular pediu a eliminação dos dados (UC12). */
+  nome: string | null;
+  dataNascimento: string | null;
+  idadeAnos: number | null;
+  sexo: Sexo;
+  situacao: Situacao;
+  podeColetar: boolean;
+  anonimizado: boolean;
+  criadoEm: string;
+}
+
+export interface Responsavel {
+  nome: string;
+  parentesco: string | null;
+  contato: string | null;
+}
+
+export interface Consentimento {
+  id: string;
+  tipo: TipoTermo;
+  versaoTermo: string;
+  assinadoEm: string;
+  autorizaAnalise: boolean;
+  cienteUsoIA: boolean;
+  autorizaUsoTreino: boolean;
+  vigente: boolean;
+  revogadoEm: string | null;
+}
+
+export interface SessaoDoPaciente {
+  id: string;
+  status: StatusSessao;
+  iniciadaEm: string;
+  concluidaEm: string | null;
+  analiseId: string | null;
+  analiseStatus: StatusAnalise | null;
+}
+
+export interface PacienteDetalhe {
+  paciente: PacienteResumo;
+  responsavel: Responsavel | null;
+  fonteDiagnostico: string | null;
+  consentimentos: Consentimento[];
+  sessoes: SessaoDoPaciente[];
+}
+
+export interface NovoPaciente {
+  nome: string;
+  dataNascimento: string;
+  sexo: Sexo;
+  responsavel: Responsavel | null;
+}
+
+export interface NovoConsentimento {
+  tipo: TipoTermo;
+  versaoTermo: string;
+  assinadoEm: string;
+  autorizaAnalise: boolean;
+  cienteUsoIA: boolean;
+  autorizaUsoTreino: boolean;
+}
+
+export interface ResultadoConsentimento {
+  consentimentoId: string;
+  podeColetar: boolean;
+}
+
+export interface NovaSessao {
+  metodo: MetodoCaptura;
+  tipoImpressao: TipoImpressao;
+  dispositivo: string | null;
+}
+
+export const chavesPacientes = {
+  todas: ['pacientes'] as const,
+  lista: (busca: string) => ['pacientes', 'lista', busca] as const,
+  detalhe: (id: string) => ['pacientes', 'detalhe', id] as const,
+};
+
+const caminho = (id: string) => `/api/pacientes/${encodeURIComponent(id)}`;
+
+export function listarPacientes(api: ClienteApi, busca: string): Promise<PacienteResumo[]> {
+  const consulta = busca ? `?busca=${encodeURIComponent(busca)}` : '';
+  return api.requisitar('GET', `/api/pacientes${consulta}`);
+}
+
+export function obterPaciente(api: ClienteApi, id: string): Promise<PacienteDetalhe> {
+  return api.requisitar('GET', caminho(id));
+}
+
+export function cadastrarPaciente(api: ClienteApi, dados: NovoPaciente): Promise<{ id: string; podeColetar: boolean }> {
+  return api.requisitar('POST', '/api/pacientes', dados);
+}
+
+export function registrarConsentimento(
+  api: ClienteApi,
+  pacienteId: string,
+  dados: NovoConsentimento,
+): Promise<ResultadoConsentimento> {
+  return api.requisitar('POST', `${caminho(pacienteId)}/consentimentos`, dados);
+}
+
+export function revogarConsentimento(
+  api: ClienteApi,
+  pacienteId: string,
+  consentimentoId: string,
+): Promise<ResultadoConsentimento> {
+  return api.requisitar('POST', `${caminho(pacienteId)}/consentimentos/${encodeURIComponent(consentimentoId)}/revogacao`);
+}
+
+/** Inicia a sessão de coleta (UC06); a resposta traz o id para abrir a ficha. */
+export function iniciarSessao(api: ClienteApi, pacienteId: string, dados: NovaSessao): Promise<{ id: string }> {
+  return api.requisitar('POST', `${caminho(pacienteId)}/sessoes`, dados);
+}

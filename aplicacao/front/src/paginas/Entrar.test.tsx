@@ -13,7 +13,7 @@ async function preencherEEntrar(email = 'medica@exemplo.test', senha = 'Senha-si
 
 describe('Entrar (UC01)', () => {
   it('leva o médico à lista de pacientes e guarda a sessão', async () => {
-    const fetchMock = simularFetch(json(200, respostaEntrada(MEDICO)));
+    const fetchMock = simularFetch(json(200, respostaEntrada(MEDICO)), json(200, []));
     renderizarApp('/entrar');
 
     await preencherEEntrar();

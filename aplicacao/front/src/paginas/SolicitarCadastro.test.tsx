@@ -110,6 +110,7 @@ describe('Solicitar cadastro (UC02)', () => {
 
   it('quem já entrou vai para a sua tela', () => {
     comSessao(MEDICO);
+    simularFetch(json(200, []));
     renderizarApp('/cadastro');
     expect(screen.getByRole('heading', { name: 'Pacientes', level: 1 })).toBeInTheDocument();
   });

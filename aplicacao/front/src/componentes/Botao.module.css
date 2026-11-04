@@ -31,3 +31,9 @@
 .secundario:hover:not(:disabled) {
   background: var(--papel-ficha);
 }
+
+.link {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+}

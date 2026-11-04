@@ -61,3 +61,13 @@
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+.voltar {
+  font-size: var(--t-0);
+}
+
+.nota {
+  color: var(--tinta-suave);
+  font-size: var(--t-0);
+  margin-top: calc(-1 * var(--esp-2));
+}

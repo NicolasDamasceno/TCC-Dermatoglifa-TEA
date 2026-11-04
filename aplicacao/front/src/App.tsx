@@ -5,10 +5,13 @@ import { EmConstrucao } from './paginas/EmConstrucao';
 import { Entrar } from './paginas/Entrar';
 import { Inicio } from './paginas/Inicio';
 import { NaoEncontrada } from './paginas/NaoEncontrada';
+import { NovoPaciente } from './paginas/NovoPaciente';
+import { Paciente } from './paginas/paciente/Paciente';
+import { Pacientes } from './paginas/Pacientes';
 import { SolicitarCadastro } from './paginas/SolicitarCadastro';
 import { RotaProtegida } from './sessao/RotaProtegida';
 
-/** Rotas do doc 09, seção 3. Telas dos marcos F3–F5 ainda são reservas. */
+/** Rotas do doc 09, seção 3. Telas dos marcos F4 e F5 ainda são reservas. */
 export function App() {
   return (
     <Routes>
@@ -25,26 +28,9 @@ export function App() {
         </Route>
 
         <Route element={<RotaProtegida papel="MEDICO" />}>
-          <Route
-            path="/pacientes"
-            element={
-              <EmConstrucao
-                titulo="Pacientes"
-                marco="F3"
-                descricao="Aqui ficarão a lista e a busca de pacientes, o cadastro e o registro dos consentimentos."
-              />
-            }
-          />
-          <Route
-            path="/pacientes/*"
-            element={
-              <EmConstrucao
-                titulo="Paciente"
-                marco="F3"
-                descricao="Dados do paciente, consentimentos e sessões de coleta."
-              />
-            }
-          />
+          <Route path="/pacientes" element={<Pacientes />} />
+          <Route path="/pacientes/novo" element={<NovoPaciente />} />
+          <Route path="/pacientes/:id" element={<Paciente />} />
           <Route
             path="/sessoes/:id"
             element={

@@ -28,6 +28,7 @@ describe('rotas protegidas e sessão', () => {
 
   it('quem já entrou e abre /entrar vai para a sua tela', async () => {
     comSessao(MEDICO);
+    simularFetch(json(200, []));
     renderizarApp('/entrar');
     expect(await screen.findByRole('heading', { name: 'Pacientes', level: 1 })).toBeInTheDocument();
   });
@@ -41,6 +42,7 @@ describe('rotas protegidas e sessão', () => {
 
   it('sai ao clicar em Sair e limpa a sessão', async () => {
     comSessao(MEDICO);
+    simularFetch(json(200, []));
     renderizarApp('/pacientes');
 
     await userEvent.setup().click(screen.getByRole('button', { name: 'Sair' }));
@@ -53,6 +55,7 @@ describe('rotas protegidas e sessão', () => {
   it('sai sozinho quando o token expira', () => {
     vi.useFakeTimers();
     comSessao(MEDICO, 5_000);
+    simularFetch(json(200, []));
     renderizarApp('/pacientes');
     expect(screen.getByRole('heading', { name: 'Pacientes', level: 1 })).toBeInTheDocument();
 
@@ -78,8 +81,9 @@ describe('rotas protegidas e sessão', () => {
       );
     }
 
+    // Rota sem consultas próprias: a única chamada é a do botão.
     render(
-      <Provedores rota="/pacientes">
+      <Provedores rota="/sessoes/abc">
         <ChamaApi />
         <App />
       </Provedores>,
