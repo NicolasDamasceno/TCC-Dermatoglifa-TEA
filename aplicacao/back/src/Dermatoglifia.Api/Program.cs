@@ -1,6 +1,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Dermatoglifia.Api.Autenticacao;
+using Dermatoglifia.Api.Configuracao;
 using Dermatoglifia.Api.Erros;
 using Dermatoglifia.Aplicacao;
 using Dermatoglifia.Infraestrutura;
@@ -26,15 +27,23 @@ builder.Services
         });
 
 builder.Services.AdicionarProblemas();
+builder.Services.AdicionarCors(builder.Configuration);
 builder.Services.AdicionarAplicacao();
 builder.Services.AdicionarInfraestrutura(builder.Configuration);
 builder.Services.AdicionarAutenticacaoJwt(builder.Configuration);
 
 var app = builder.Build();
 
+app.UsarCabecalhosSeguranca();
 app.UseExceptionHandler();
 app.UseStatusCodePages(); // 401, 403, 404, 405, 429... sem corpo ganham problem+json
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHsts();
+}
+
 app.UseHttpsRedirection();
+app.UseCors(ConfiguracaoHttp.PoliticaCors); // antes da autenticação: o preflight não leva token
 app.UseRateLimiter();
 app.UseAuthentication();
 app.UseAuthorization();
