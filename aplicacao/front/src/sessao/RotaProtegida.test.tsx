@@ -14,6 +14,7 @@ describe('rotas protegidas e sessão', () => {
 
   it('leva "/" à tela do papel', async () => {
     comSessao(ADMIN);
+    simularFetch(json(200, []));
     renderizarApp('/');
     expect(await screen.findByRole('heading', { name: 'Cadastros pendentes', level: 1 })).toBeInTheDocument();
   });

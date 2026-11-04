@@ -35,3 +35,12 @@
   font-size: var(--t-0);
   font-weight: 600;
 }
+
+textarea.entrada {
+  resize: vertical;
+  line-height: 1.5;
+}
+
+select.entrada {
+  cursor: pointer;
+}

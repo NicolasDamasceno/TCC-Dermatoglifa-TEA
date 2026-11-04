@@ -1,43 +1,27 @@
 import { Route, Routes } from 'react-router';
 import { Layout } from './componentes/Layout';
+import { CadastrosPendentes } from './paginas/CadastrosPendentes';
 import { EmConstrucao } from './paginas/EmConstrucao';
 import { Entrar } from './paginas/Entrar';
 import { Inicio } from './paginas/Inicio';
 import { NaoEncontrada } from './paginas/NaoEncontrada';
+import { SolicitarCadastro } from './paginas/SolicitarCadastro';
 import { RotaProtegida } from './sessao/RotaProtegida';
 
-/** Rotas do doc 09, seção 3. Telas dos marcos F2–F5 ainda são reservas. */
+/** Rotas do doc 09, seção 3. Telas dos marcos F3–F5 ainda são reservas. */
 export function App() {
   return (
     <Routes>
       <Route element={<Layout />}>
         <Route path="/entrar" element={<Entrar />} />
-        <Route
-          path="/cadastro"
-          element={
-            <EmConstrucao
-              titulo="Solicitar cadastro de médico"
-              marco="F2"
-              descricao="Aqui o médico pedirá acesso informando CRM, UF e especialidade. O acesso depende de aprovação da administração do protocolo."
-            />
-          }
-        />
+        <Route path="/cadastro" element={<SolicitarCadastro />} />
 
         <Route element={<RotaProtegida />}>
           <Route index element={<Inicio />} />
         </Route>
 
         <Route element={<RotaProtegida papel="ADMIN" />}>
-          <Route
-            path="/admin/solicitacoes"
-            element={
-              <EmConstrucao
-                titulo="Cadastros pendentes"
-                marco="F2"
-                descricao="Aqui a administração aprovará ou recusará os pedidos de cadastro de médicos."
-              />
-            }
-          />
+          <Route path="/admin/solicitacoes" element={<CadastrosPendentes />} />
         </Route>
 
         <Route element={<RotaProtegida papel="MEDICO" />}>

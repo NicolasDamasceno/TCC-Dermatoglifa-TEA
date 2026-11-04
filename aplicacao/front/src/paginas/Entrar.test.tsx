@@ -28,7 +28,7 @@ describe('Entrar (UC01)', () => {
   });
 
   it('leva o administrador aos cadastros pendentes', async () => {
-    simularFetch(json(200, respostaEntrada(ADMIN)));
+    simularFetch(json(200, respostaEntrada(ADMIN)), json(200, []));
     renderizarApp('/entrar');
 
     await preencherEEntrar('admin@exemplo.test');

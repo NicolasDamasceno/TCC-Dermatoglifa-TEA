@@ -1,0 +1,153 @@
+.pagina {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-4);
+}
+
+.introducao {
+  color: var(--tinta-suave);
+}
+
+.resultado:focus {
+  outline: none;
+}
+
+.carregando,
+.vazio {
+  color: var(--tinta-suave);
+}
+
+.vazio {
+  padding: var(--esp-5) 0;
+  border-top: 1px solid var(--linha-fina);
+  border-bottom: 1px solid var(--linha-fina);
+}
+
+.tentar {
+  margin-top: var(--esp-3);
+}
+
+.rolagem {
+  /* Contém o texto só para leitor de tela (position: absolute) dentro da rolagem. */
+  position: relative;
+  overflow-x: auto;
+  margin-top: var(--esp-2);
+}
+
+.tabela {
+  width: 100%;
+  min-width: 40rem;
+  border-collapse: collapse;
+  background: var(--papel-ficha);
+  border: 1px solid var(--linha);
+}
+
+.legenda {
+  padding-bottom: var(--esp-2);
+  text-align: left;
+  color: var(--tinta-suave);
+  font-size: var(--t-0);
+}
+
+.tabela th,
+.tabela td {
+  padding: var(--esp-3) var(--esp-4);
+  text-align: left;
+  vertical-align: middle;
+  border-bottom: 1px solid var(--linha-fina);
+}
+
+.tabela thead th {
+  font-size: var(--t-0);
+  font-weight: 600;
+  color: var(--tinta-suave);
+  border-bottom: 1px solid var(--linha);
+}
+
+.tabela tbody th {
+  min-width: 13rem;
+  font-weight: 400;
+}
+
+.nome {
+  display: block;
+  font-weight: 700;
+}
+
+.email {
+  display: block;
+  font-size: var(--t-0);
+  color: var(--tinta-suave);
+  overflow-wrap: anywhere;
+}
+
+.numero {
+  white-space: nowrap;
+}
+
+.acao {
+  text-align: right;
+  width: 1%;
+}
+
+/* A última linha usa a borda da própria tabela. */
+.tabela tbody tr:last-child > * {
+  border-bottom: 0;
+}
+
+.linhaAberta > * {
+  border-bottom-color: transparent;
+}
+
+.painelLinha > td {
+  padding-top: 0;
+}
+
+.painelLinha:not(:last-child) > td {
+  border-bottom: 1px solid var(--linha);
+}
+
+/* O painel de decisão fica "preso" ao pedido pela margem esquerda. */
+.painel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-4);
+  max-width: 34rem;
+  padding: var(--esp-2) 0 var(--esp-2) var(--esp-4);
+  border-left: 3px solid var(--tinta);
+}
+
+.painel > button {
+  align-self: flex-start;
+}
+
+.decisao {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--esp-2) var(--esp-5);
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.decisao legend {
+  width: 100%;
+  margin-bottom: var(--esp-2);
+  padding: 0;
+  font-weight: 600;
+}
+
+.opcao {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--esp-2);
+  min-height: var(--alvo-toque);
+  cursor: pointer;
+}
+
+.opcao input {
+  width: 1.25rem;
+  height: 1.25rem;
+  margin: 0;
+  accent-color: var(--tinta);
+}

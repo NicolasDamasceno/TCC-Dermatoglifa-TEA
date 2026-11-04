@@ -123,11 +123,16 @@ voltando depois para a página pedida.
 
 - **Entrar.** E-mail e senha. Mensagens da API exibidas como vêm (`title` do
   `problem+json`): senha errada, cadastro pendente, bloqueio, excesso de tentativas.
-- **Solicitar cadastro.** Nome, e-mail, senha, CRM, UF, especialidade; erros por
-  campo (400) e regras (409/422) junto do campo ou no topo; ao concluir, explica
-  que o acesso depende de aprovação.
-- **Cadastros pendentes (admin).** Tabela; aprovar pede o vínculo com o protocolo;
-  recusar pede o motivo.
+- **Solicitar cadastro.** Nome, e-mail, senha (repetida, para evitar erro de
+  digitação), CRM, UF, especialidade. As regras do back (senha com 10+ caracteres,
+  minúscula e número; CRM só com números; UF válida) são conferidas antes do envio,
+  com o foco levado ao primeiro campo com erro; erros por campo (400) aparecem no
+  campo e regras (409/422) no topo. Ao concluir, explica que o acesso depende de
+  aprovação.
+- **Cadastros pendentes (admin).** Tabela do pedido mais antigo ao mais recente;
+  "Analisar" abre, logo abaixo do pedido, a decisão (aprovar com o vínculo ao
+  protocolo ou recusar com o motivo). Se outro administrador decidiu antes
+  (404/409/422), a mensagem aparece e a lista é recarregada.
 - **Pacientes.** Tabela (nome, idade, sexo, situação, coleta liberada); busca por nome;
   estado vazio convida a cadastrar o primeiro paciente.
 - **Novo paciente.** Campos do responsável aparecem obrigatórios quando a data de
@@ -200,7 +205,7 @@ rótulos acessíveis, navegação. Nenhum dado real; imagens de teste geradas na
 | Marco | Entrega | Situação |
 |---|---|---|
 | F1 | Projeto, tokens e fonte, cliente da API, sessão, rotas protegidas por papel, layout com faixa de pesquisa, tela Entrar | Concluído: 45 testes; conferido contra a API real |
-| F2 | Solicitar cadastro (UC02) e cadastros pendentes do admin (UC03) | — |
+| F2 | Solicitar cadastro (UC02) e cadastros pendentes do admin (UC03) | Concluído: 63 testes no total; conferido contra a API real |
 | F3 | Pacientes: lista, novo, detalhe e consentimentos (UC04, UC05) | — |
 | F4 | Coleta com a ficha decadactilar (UC06) | — |
 | F5 | Resultado da análise (UC07, UC08) | — |
