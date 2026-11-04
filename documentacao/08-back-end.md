@@ -228,29 +228,48 @@ revogado · `413` acima de 5 MB · `400` mão ou dedo inválidos.
 `POST /api/sessoes/{id}/digitais/{mao}/{dedo}/nao-coletavel` com `{ "motivo": "…" }`.
 
 `POST /api/sessoes/{id}/conclusao` → `200` com `status` `COMPLETA` (10 dedos) ou
-`INCOMPLETA` (algum não coletável); `422` com dedos pendentes. No M5 a resposta
-passa a incluir a análise solicitada.
+`INCOMPLETA` (algum não coletável); `422` com dedos pendentes. Sessão `COMPLETA`
+gera a análise na mesma requisição, e a resposta (como a de `GET /api/sessoes/{id}`)
+traz `"analiseId"` e `"analiseStatus"` (`CONCLUIDA` ou `ERRO`); sessão
+`INCOMPLETA` não gera análise (RN09) e esses campos vêm nulos.
 
 `POST /api/sessoes/{id}/cancelamento` → `200` com `status` `CANCELADA`.
 
 ### Análise
 `GET /api/analises/{id}`
 ```json
-{ "id": "…", "status": "CONCLUIDA",
+{ "id": "…", "sessaoId": "…", "pacienteId": "…", "status": "CONCLUIDA",
   "aviso": { "versao": "v1", "texto": "Protótipo de pesquisa, não validado…" },
-  "alertas": ["SEM_PONTO_DE_CORTE_VALIDADO", "POUCOS_DADOS_FEMININOS"],
+  "alertas": [ { "codigo": "SEM_PONTO_DE_CORTE_VALIDADO", "texto": "Não existe ponto de corte…" },
+               { "codigo": "ESCORE_NAO_VALIDADO", "texto": "…" } ],
   "modelo": { "versao": "2026-11-15_padroes_v1", "origemDados": "SINTETICO",
+              "escoreValidado": false, "treinadoEm": "2026-11-15",
               "metricas": { "acuraciaBalanceada": 0.88 } },
   "digitais": [ { "mao": "DIREITA", "dedo": "POLEGAR", "padrao": "VERTICILO",
                   "confianca": 0.91, "alertaQualidade": false } ],
-  "indicadores": { "qtdVerticilos": 4, "qtdAlcasUlnares": 5, "qtdAlcasRadiais": 0,
-                   "qtdArcos": 1, "qtdArcosTendidos": 0,
+  "indicadores": { "qtdArcos": 1, "qtdArcosTendidos": 0, "qtdAlcasUlnares": 5,
+                   "qtdAlcasRadiais": 0, "qtdVerticilos": 4,
                    "discordanciaBilateral": 2, "discordanciaBilateralComPolegar": 2 },
-  "escoreRisco": null,
-  "registradoProntuarioEm": null }
+  "escoreRisco": null, "observacaoMedico": null, "registradoProntuarioEm": null,
+  "mensagemErro": null, "solicitadaEm": "…", "concluidaEm": "…" }
 ```
-O texto do aviso vem do back-end (não fica fixo no front), para que a versão
-exibida seja exatamente a gravada em `analise.versao_aviso`.
+O aviso e os textos dos alertas vêm do back-end (não ficam fixos no front) e são
+versionados (`AvisosResultado`): a análise guarda a versão (`versao_aviso`) e
+sempre volta com os textos daquela versão.
+
+| Alerta | Quando aparece |
+|---|---|
+| `SEM_PONTO_DE_CORTE_VALIDADO` | sempre — nenhum estudo publicou acurácia diagnóstica (doc 07) |
+| `ESCORE_NAO_VALIDADO` | análise concluída sem escore (Etapa 2 não validada, RN10) |
+| `MODELO_SINTETICO` | o modelo que respondeu foi treinado só com dados sintéticos (ADR-0005) |
+| `POUCOS_DADOS_FEMININOS` | paciente do sexo feminino (RN04) |
+| `QUALIDADE_IMAGEM` | a IA sinalizou baixa qualidade em algum dedo (UC07, 3a) |
+
+`POST /api/analises/{id}/nova-tentativa` → a análise reprocessada · `422` se já
+concluída ou em processamento há menos de 5 minutos.
+`PATCH /api/analises/{id}/observacao` com `{ "observacao": "…" }` → a análise.
+`POST /api/analises/{id}/registro-prontuario` → a análise · `422` se não concluída
+ou já confirmada. Análise de outro médico → `404`; administrador → `403`.
 
 ### Erros
 Todos os erros usam `application/problem+json` (`ProblemDetails`), com `title` em
@@ -313,9 +332,20 @@ flowchart LR
 
 ## 7. Cliente do Serviço de IA
 
-- `HttpClient` tipado (`ClienteInferenciaHttp`), `BaseAddress` e timeout
-  (padrão 30 s, RNF04) em configuração. Uma nova tentativa automática em erro de
-  rede; depois disso, a análise vai para `ERRO` e o médico pode repetir.
+- `HttpClient` nomeado (`servico-ia`) usado por `ClienteInferenciaHttp`;
+  `BaseAddress` e timeout (padrão 30 s, RNF04) em configuração. Uma nova tentativa
+  automática só em erro de rede; erro HTTP, tempo esgotado ou JSON inválido vão
+  direto para `ERRO`, e o médico pode repetir. Contrato no ADR-0001.
+- Antes do envio, cada imagem decifrada tem o SHA-256 conferido com o gravado em
+  `digital.hash_sha256`; arquivo ausente, adulterado ou divergente → `ERRO` sem
+  chamar a IA.
+- **Análise travada:** se a API cair entre gravar `PROCESSANDO` e gravar o
+  resultado, a análise fica em `PROCESSANDO`. Depois de 5 minutos
+  (`Analise.TempoMaximoProcessamento`, bem acima do tempo limite da chamada) ela
+  aceita nova tentativa; antes disso a nova tentativa responde `422`.
+- `Inferencia:ConvencaoAlca` (`IMPRESSAO`, padrão, ou `ESPELHADA`) define a tabela
+  de conversão usada na verificação de consistência; precisa ser a mesma do
+  serviço Python e do dispositivo de captura (ADR-0002, ADR-0004).
 - Antes do envio, as 10 imagens são decifradas **em memória**; nada é gravado em
   disco temporário.
 - A resposta só é aceita se passar nas verificações de consistência, feitas pelo
@@ -326,7 +356,8 @@ flowchart LR
   4. indicadores **recalculados no C#** a partir dos 10 padrões e iguais aos recebidos;
   5. `versao_modelo` cadastrada em `modelo_ia` e ativa.
 
-  Qualquer falha → análise `ERRO` com a mensagem "resposta do modelo inconsistente".
+  Qualquer falha → análise `ERRO` com a mensagem "Resposta do modelo inconsistente: …"
+  e nenhum resultado gravado.
   Isso protege contra um modelo trocado no servidor ou um erro no serviço Python.
 - `escore_risco` é aceito só se `modelo_ia` indicar Etapa 2 validada; caso
   contrário é gravado nulo mesmo que venha preenchido (RN10).
@@ -348,13 +379,14 @@ análise) também são registradas. O IP vem do `HttpContext` via `IUsuarioAtual
 | `Jwt:Emissor`, `Jwt:Audiencia`, `Jwt:ValidadeMinutos` | `dermatoglifia-api`, `…`, `60` | `appsettings.json` |
 | `Armazenamento:Diretorio` | `/var/lib/dermatoglifia/imagens` | `appsettings.{Ambiente}.json` |
 | `Armazenamento:Chaves:1` | 256 bits em base64 | user-secrets / variável de ambiente |
-| `Inferencia:UrlBase`, `Inferencia:TimeoutSegundos` | `http://localhost:8000`, `30` | `appsettings.json` |
+| `Inferencia:UrlBase`, `Inferencia:TimeoutSegundos`, `Inferencia:ConvencaoAlca` | `http://localhost:8000`, `30`, `IMPRESSAO` | `appsettings.json` |
 | `Cors:OrigensPermitidas` | `http://localhost:5173` | `appsettings.{Ambiente}.json` |
 | `AdminInicial:Email`, `AdminInicial:Senha` | — | só variável de ambiente, só na primeira execução |
 
 O repositório terá `aplicacao/back/.env.example` com as chaves e valores
-fictícios. A aplicação **não inicia** se faltar `Jwt:Chave` ou
-`Armazenamento:Chaves:1` (falha rápida, em vez de rodar com segredo vazio).
+fictícios. A aplicação **não inicia** se faltar `Jwt:Chave`,
+`Armazenamento:Diretorio`, `Armazenamento:Chaves:1` ou um `Inferencia:UrlBase`
+válido (falha rápida, em vez de rodar com configuração incompleta).
 
 **Logs:** `ILogger` estruturado; corpo de requisições nunca é registrado; nomes e
 contatos de pacientes nunca aparecem em log (apenas `uuid`).
@@ -379,7 +411,7 @@ resolução gravada); nenhuma digital real em `tests/` (RNF08).
 | M2 ✅ | Identity + JWT, solicitação e aprovação de médico, admin inicial (UC01–UC03) | `feat(back)` |
 | M3 ✅ | Pacientes, identificação separada e consentimento (UC04–UC05) + auditoria | `feat(back)` |
 | M4 ✅ | Sessão de coleta, upload, normalização e cifragem (UC06) | `feat(back)` |
-| M5 | Cliente da IA com serviço falso, verificação de consistência, análise (UC07–UC08) | `feat(back)` |
+| M5 ✅ | Cliente da IA com serviço falso, verificação de consistência, análise (UC07–UC08) | `feat(back)` |
 | M6 | ProblemDetails completo, CORS, testes de integração, `.env.example` | `feat(back)`, `test(back)` |
 
 Cada marco termina com testes passando e o doc correspondente atualizado se algo

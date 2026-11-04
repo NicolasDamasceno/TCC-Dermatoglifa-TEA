@@ -68,11 +68,17 @@ descartada por desempenho e por gravar imagens temporárias.
 - Mais difícil: subir dois serviços (resolvido com `docker compose` ou scripts).
 - Revisitar: se a entrega exigir um único executável, reavaliar a opção B.
 
-## Contrato (rascunho)
+## Contrato
+
+Implementado do lado do back-end no M5 (`ClienteInferenciaHttp`); o serviço Python
+deve seguir exatamente este formato.
 
 `POST /inferencia` — `multipart/form-data`
-- 10 arquivos nomeados `<MAO>_<DEDO>` (ex.: `DIREITA_POLEGAR`);
-- campos `sexo` (`MASCULINO|FEMININO`) e `idade_anos` (inteiro).
+- 10 arquivos, campo e nome de arquivo `<MAO>_<DEDO>` / `<MAO>_<DEDO>.png`
+  (ex.: `DIREITA_POLEGAR`), `Content-Type: image/png` — PNG em tons de cinza de
+  8 bits já normalizado pela API (doc 08, seção 6);
+- campos `sexo` (`MASCULINO|FEMININO`) e `idade_meses` (inteiro);
+- nenhum outro campo: nome, data de nascimento e identificadores nunca trafegam.
 
 Resposta `200`:
 ```json
@@ -96,9 +102,23 @@ Resposta `200`:
 `escore_risco` é `null` enquanto não houver modelo de risco validado (ver ADR-0002).
 Nenhum identificador do paciente trafega nessa chamada.
 
+Todos os campos da resposta são obrigatórios, exceto `escore_risco` e
+`alerta_qualidade` (padrão `false`); enums em MAIÚSCULAS_COM_SUBLINHADO. Campo
+ausente ou valor desconhecido → a API trata como resposta em formato inválido.
+
+**Comportamento da API diante do serviço**
+- Tempo limite de 30 s (`Inferencia:TimeoutSegundos`).
+- Uma nova tentativa automática só em erro de rede; erro HTTP (4xx/5xx), tempo
+  esgotado ou JSON inválido não são repetidos — a análise vai para `ERRO` e o
+  médico pode pedir nova tentativa.
+- A API confere a resposta de forma independente (doc 08, seção 7) e recusa
+  versões de modelo não registradas ou inativas.
+- A conexão é HTTP simples porque o serviço roda na mesma máquina ou rede interna;
+  se ele for para outro servidor, usar HTTPS (as imagens são dado biométrico).
+
 ## Ações
 
 1. [ ] Criar o serviço FastAPI em `modelo_producao/servico/`, junto do modelo que
    ele carrega (mantém as quatro pastas definidas para o repositório).
 2. [ ] Compartilhar o módulo de pré-processamento entre treino e serviço.
-3. [ ] Implementar `ClienteInferenciaHttp` no back-end com timeout e tratamento de erro.
+3. [x] Implementar `ClienteInferenciaHttp` no back-end com timeout e tratamento de erro (M5).

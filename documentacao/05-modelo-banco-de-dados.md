@@ -152,6 +152,7 @@ erDiagram
         timestamptz registrado_prontuario_em
         varchar mensagem_erro
         timestamptz solicitada_em
+        timestamptz processamento_iniciado_em
         timestamptz concluida_em
     }
     RESULTADO_DIGITAL {
@@ -277,6 +278,9 @@ convertido para ulnar/radial pela mão registrada (ADR-0002).
 - `versao_aviso`: versão do texto de aviso exibido com o resultado (RN04).
 - `registrado_prontuario_em`: quando o médico confirmou ter registrado no
   prontuário o uso da IA como apoio (Res. CFM 2.454/2026).
+- `processamento_iniciado_em`: início da última tentativa de processamento; uma
+  análise em `PROCESSANDO` há mais de 5 minutos é considerada travada e pode ser
+  processada de novo (migration `AnaliseInicioProcessamento`, M5).
 
 ### resultado_digital
 - `confianca` `numeric(5,4)` entre 0 e 1; `probabilidades` guarda a saída bruta
@@ -311,7 +315,7 @@ variável de ambiente no servidor). Cada envio gera um nome novo (`<uuid>`), e
 `digital.caminho_arquivo` aponta para o arquivo vigente. Nenhum nome de arquivo
 contém dado do paciente. Detalhes no doc 08, seção 6.
 
-## Implementação (migration `Inicial`)
+## Implementação (migrations `Inicial` e `AnaliseInicioProcessamento`)
 
 O modelo acima está implementado em `aplicacao/back/src/Dermatoglifia.Infraestrutura/Persistencia`
 e foi aplicado e conferido num PostgreSQL 16 em 20/10/2026 (gravação e leitura

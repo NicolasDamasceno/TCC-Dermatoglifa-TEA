@@ -51,7 +51,8 @@ dotnet run --project src/Dermatoglifia.Api
 ```
 
 A API não inicia sem a connection string, sem uma chave JWT de pelo menos 32
-bytes, sem a pasta e a chave de armazenamento, nem com migrations pendentes — falha rápida de propósito, com a instrução
+bytes, sem a pasta e a chave de armazenamento, sem um endereço válido do Serviço de
+IA (`Inferencia:UrlBase`, padrão `http://localhost:8000`), nem com migrations pendentes — falha rápida de propósito, com a instrução
 na mensagem. O modelo de variáveis está em `.env.example`.
 
 ## Rotas disponíveis
@@ -72,8 +73,19 @@ na mensagem. O modelo de variáveis está em `.env.example`.
 | `GET /api/sessoes/{id}` | médico | situação de cada dedo |
 | `PUT /api/sessoes/{id}/digitais/{mao}/{dedo}` | médico | envia ou refaz a imagem de um dedo (PNG, BMP ou TIFF, ≥ 500 ppi, até 5 MB) |
 | `POST /api/sessoes/{id}/digitais/{mao}/{dedo}/nao-coletavel` | médico | registra dedo que não pode ser coletado |
-| `POST /api/sessoes/{id}/conclusao` | médico | conclui a sessão |
+| `POST /api/sessoes/{id}/conclusao` | médico | conclui a sessão; se completa, já pede e devolve a análise |
 | `POST /api/sessoes/{id}/cancelamento` | médico | cancela a sessão |
+| `GET /api/analises/{id}` | médico | resultado com aviso, alertas, padrões, indicadores e modelo |
+| `POST /api/analises/{id}/nova-tentativa` | médico | reprocessa uma análise com erro |
+| `PATCH /api/analises/{id}/observacao` | médico | registra observação sobre o resultado |
+| `POST /api/analises/{id}/registro-prontuario` | médico | confirma o registro do uso de IA no prontuário |
+
+**Serviço de IA.** A análise chama o serviço Python do ADR-0001 em
+`Inferencia:UrlBase`. Enquanto ele não existir, sessões concluídas geram análises
+com status `ERRO` ("Serviço de IA indisponível"), que podem ser reprocessadas
+depois. A versão de modelo que o serviço informa precisa estar cadastrada e ativa
+na tabela `modelo_ia`; o cadastro pela API (UC10) ainda não existe — por ora é feito
+direto no banco, conforme `modelo_producao/README.md`.
 
 Paciente de outro médico responde `404`, como se não existisse.
 
@@ -84,7 +96,8 @@ dotnet test
 ```
 
 Os testes de integração sobem a API contra um PostgreSQL real, num banco criado e
-apagado a cada execução. Por padrão usam um contêiner (Testcontainers, exige
+apagado a cada execução, com uma IA falsa (`tests/.../IaFalsa.cs`) no lugar do
+serviço Python: nenhuma chamada sai da máquina. Por padrão usam um contêiner (Testcontainers, exige
 Docker). Sem Docker, aponte para um PostgreSQL existente:
 
 ```sh
@@ -112,5 +125,5 @@ o doc 05 se a estrutura do banco mudar.
 | M2 — Identity + JWT, solicitação e aprovação de médico, admin inicial | concluído |
 | M3 — pacientes, identificação separada, consentimento e auditoria | concluído |
 | M4 — sessão de coleta, upload, normalização e cifragem das digitais | concluído |
-| M5 — cliente do Serviço de IA, verificação de consistência e análise | próximo |
-| M6 | pendente |
+| M5 — cliente do Serviço de IA, verificação de consistência e análise | concluído |
+| M6 — ProblemDetails completo, CORS, revisão dos testes de integração | próximo |

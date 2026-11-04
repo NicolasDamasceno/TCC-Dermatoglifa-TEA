@@ -23,8 +23,10 @@ o hash conferir; caso contrário, usa `demo/` e informa isso em `GET /saude`.
 2. Copiar o `modelo.keras` do local controlado para esta pasta **no servidor** e
    conferir o hash com `modelo.sha256` da versão.
 3. Atualizar a tabela abaixo (a linha anterior permanece como histórico).
-4. Registrar a versão na tabela `modelo_ia` do banco (doc 05), para que cada
-   análise saiba qual modelo a produziu.
+4. Registrar a versão na tabela `modelo_ia` do banco (doc 05) e marcá-la como a
+   única ativa. A API recusa respostas de versões não registradas ou inativas
+   (doc 08, seção 7). Enquanto o cadastro pela API (UC10) não existe, o registro é
+   feito direto no banco.
 
 ## Versão ativa
 

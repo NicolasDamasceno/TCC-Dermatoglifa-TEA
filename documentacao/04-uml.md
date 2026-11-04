@@ -351,7 +351,8 @@ stateDiagram-v2
     [*] --> PENDENTE : sessão COMPLETA
     PENDENTE --> PROCESSANDO : enviada ao Serviço de IA
     PROCESSANDO --> CONCLUIDA : resposta válida
-    PROCESSANDO --> ERRO : falha ou timeout
+    PROCESSANDO --> ERRO : falha, timeout ou resposta inconsistente
     ERRO --> PROCESSANDO : nova tentativa
+    PROCESSANDO --> PROCESSANDO : nova tentativa (travada há mais de 5 min)
     CONCLUIDA --> [*]
 ```
