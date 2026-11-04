@@ -1,0 +1,12 @@
+.faixa {
+  background: var(--pesquisa-fundo);
+  border-bottom: 1px solid var(--pesquisa);
+  color: var(--pesquisa);
+}
+
+.texto {
+  max-width: var(--largura-conteudo);
+  margin: 0 auto;
+  padding: var(--esp-2) var(--esp-5);
+  font-size: var(--t-0);
+}

@@ -1,0 +1,37 @@
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-1);
+}
+
+.rotulo {
+  font-weight: 600;
+}
+
+.dica {
+  color: var(--tinta-suave);
+  font-size: var(--t-0);
+}
+
+.entrada {
+  min-height: var(--alvo-toque);
+  padding: var(--esp-2) var(--esp-3);
+  background: var(--papel-ficha);
+  border: 1px solid var(--linha);
+  border-radius: var(--raio);
+}
+
+.entrada:hover {
+  border-color: var(--tinta-suave);
+}
+
+.entrada[aria-invalid='true'] {
+  border-color: var(--erro);
+  border-width: 2px;
+}
+
+.erro {
+  color: var(--erro);
+  font-size: var(--t-0);
+  font-weight: 600;
+}

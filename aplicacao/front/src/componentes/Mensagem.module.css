@@ -1,0 +1,20 @@
+.mensagem {
+  padding: var(--esp-3) var(--esp-4);
+  border-left: 4px solid;
+  border-radius: 0 var(--raio) var(--raio) 0;
+}
+
+.titulo {
+  font-weight: 700;
+}
+
+.erro {
+  background: var(--erro-fundo);
+  border-color: var(--erro);
+  color: var(--erro);
+}
+
+.informacao {
+  background: var(--papel-ficha);
+  border-color: var(--tinta-suave);
+}

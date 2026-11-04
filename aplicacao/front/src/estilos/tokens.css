@@ -1,0 +1,36 @@
+/* Tokens do doc 09, seção 2 — "tinta sobre ficha". Contrastes conferidos (WCAG 2.1 AA). */
+:root {
+  --papel: #f6f7f5;
+  --papel-ficha: #ffffff;
+  --tinta: #1f2a44;
+  --tinta-suave: #4a5670;
+  --linha: #738499;
+  --linha-fina: #d3dae3;
+  --pesquisa: #7a5200;
+  --pesquisa-fundo: #fbf0d4;
+  --coletado: #2f6b4f;
+  --erro: #a3261c;
+  --erro-fundo: #fbe9e7;
+
+  --fonte: 'Atkinson Hyperlegible Next Variable', system-ui, sans-serif;
+
+  /* Escala modular 1,25 a partir de 1 rem. */
+  --t-0: 0.8rem;
+  --t-1: 1rem;
+  --t-2: 1.25rem;
+  --t-3: 1.563rem;
+  --t-4: 1.953rem;
+
+  --esp-1: 0.25rem;
+  --esp-2: 0.5rem;
+  --esp-3: 0.75rem;
+  --esp-4: 1rem;
+  --esp-5: 1.5rem;
+  --esp-6: 2rem;
+  --esp-7: 3rem;
+
+  --raio: 3px;
+  --largura-conteudo: 72rem;
+  --largura-texto: 40rem;
+  --alvo-toque: 44px;
+}

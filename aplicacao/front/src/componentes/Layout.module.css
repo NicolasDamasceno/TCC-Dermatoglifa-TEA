@@ -1,0 +1,106 @@
+.pular {
+  position: absolute;
+  left: var(--esp-4);
+  top: -10rem;
+  z-index: 1;
+  padding: var(--esp-2) var(--esp-4);
+  background: var(--papel-ficha);
+  border: 2px solid var(--tinta);
+}
+
+.pular:focus {
+  top: var(--esp-2);
+}
+
+.barra {
+  background: var(--tinta);
+  color: var(--papel-ficha);
+}
+
+.barraInterna {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--esp-2) var(--esp-6);
+  max-width: var(--largura-conteudo);
+  /* Mesma altura com ou sem o botão Sair (44 px + respiro). */
+  min-height: 3.75rem;
+  margin: 0 auto;
+  padding: var(--esp-1) var(--esp-5);
+}
+
+.barra a,
+.barra button {
+  color: inherit;
+}
+
+.barra :focus-visible {
+  outline-color: var(--papel-ficha);
+}
+
+.marca {
+  font-weight: 700;
+  font-size: var(--t-2);
+  text-decoration: none;
+}
+
+.navegacao {
+  display: flex;
+  gap: var(--esp-5);
+}
+
+.link {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--alvo-toque);
+  text-decoration: none;
+  border-bottom: 2px solid transparent;
+}
+
+.link:hover {
+  border-bottom-color: currentColor;
+}
+
+/* Página atual: sublinhado grosso e permanente (não depende só da cor). */
+.ativo {
+  font-weight: 700;
+  border-bottom-color: currentColor;
+}
+
+.usuario {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-4);
+  margin-left: auto;
+}
+
+.sair {
+  min-height: var(--alvo-toque);
+  padding: 0 var(--esp-4);
+  background: transparent;
+  border: 1px solid currentColor;
+  border-radius: var(--raio);
+  cursor: pointer;
+}
+
+.sair:hover {
+  background: var(--tinta-suave);
+}
+
+.conteudo {
+  max-width: var(--largura-conteudo);
+  margin: 0 auto;
+  padding: var(--esp-6) var(--esp-5) var(--esp-7);
+}
+
+.conteudo:focus {
+  outline: none;
+}
+
+@media (max-width: 40rem) {
+  .barraInterna,
+  .conteudo {
+    padding-left: var(--esp-4);
+    padding-right: var(--esp-4);
+  }
+}

@@ -198,7 +198,7 @@ rótulos acessíveis, navegação. Nenhum dado real; imagens de teste geradas na
 
 | Marco | Entrega | Situação |
 |---|---|---|
-| F1 | Projeto, tokens e fonte, cliente da API, sessão, rotas protegidas por papel, layout com faixa de pesquisa, tela Entrar | — |
+| F1 | Projeto, tokens e fonte, cliente da API, sessão, rotas protegidas por papel, layout com faixa de pesquisa, tela Entrar | Concluído: 45 testes; conferido contra a API real |
 | F2 | Solicitar cadastro (UC02) e cadastros pendentes do admin (UC03) | — |
 | F3 | Pacientes: lista, novo, detalhe e consentimentos (UC04, UC05) | — |
 | F4 | Coleta com a ficha decadactilar (UC06) | — |

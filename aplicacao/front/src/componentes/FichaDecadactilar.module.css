@@ -1,0 +1,45 @@
+/* Linhas impressas: canto vivo, sem sombra, traço contínuo como numa ficha em papel. */
+.ficha {
+  border-collapse: collapse;
+  width: 100%;
+  table-layout: fixed;
+}
+
+.legenda {
+  text-align: left;
+  font-weight: 700;
+  padding-bottom: var(--esp-2);
+}
+
+.canto {
+  width: 5.5rem;
+}
+
+.dedo {
+  padding: 0 0 var(--esp-2);
+  font-size: var(--t-0);
+  font-weight: 600;
+  color: var(--tinta-suave);
+  text-align: center;
+}
+
+.mao {
+  padding-right: var(--esp-3);
+  font-size: var(--t-0);
+  font-weight: 600;
+  color: var(--tinta-suave);
+  text-align: right;
+}
+
+.quadro {
+  height: 7.5rem;
+  padding: var(--esp-2);
+  background: var(--papel-ficha);
+  border: 1px solid var(--linha);
+  vertical-align: top;
+}
+
+/* Linha mais grossa entre as mãos, como nas fichas impressas. */
+tbody tr + tr .quadro {
+  border-top-width: 2px;
+}
