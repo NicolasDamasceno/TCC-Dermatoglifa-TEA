@@ -30,6 +30,9 @@ public sealed class AmbienteApi : IAsyncLifetime
     public const string EmailAdmin = "admin@teste.local";
     public const string SenhaAdmin = "senhaadmin123";
 
+    /// <summary>Origem do front aceita pelo CORS nos testes.</summary>
+    public const string OrigemFront = "http://localhost:5173";
+
     /// <summary>Modelo sintético ativo cadastrado no banco de testes.</summary>
     public const string VersaoModeloTeste = "teste_sintetico_v1";
 
@@ -82,6 +85,7 @@ public sealed class AmbienteApi : IAsyncLifetime
             ["Armazenamento:Chaves:1"] = Convert.ToBase64String(RandomNumberGenerator.GetBytes(32)),
             ["Inferencia:UrlBase"] = "http://ia-falsa.teste/",
             ["Inferencia:TimeoutSegundos"] = "2",
+            ["Cors:OrigensPermitidas:0"] = OrigemFront,
         };
 
         Fabrica = new WebApplicationFactory<Program>().WithWebHostBuilder(host =>

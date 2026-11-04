@@ -179,6 +179,29 @@ public sealed class AnaliseTestes : IDisposable
     }
 
     [Fact]
+    public async Task Erro_inesperado_vira_erro_reprocessavel_sem_expor_detalhes()
+    {
+        _ambiente.Ia.Responder = (_, _) => throw new InvalidOperationException("detalhe interno 7f3a");
+        var (medico, sessaoId) = await SessaoProntaAsync();
+
+        var conclusao = await medico.Cliente.PostAsync($"/api/sessoes/{sessaoId}/conclusao", null);
+
+        Assert.Equal(HttpStatusCode.OK, conclusao.StatusCode);
+        var sessao = await JsonAsync(conclusao);
+        Assert.Equal("ERRO", sessao.GetProperty("analiseStatus").GetString());
+        var analiseId = sessao.GetProperty("analiseId").GetGuid();
+        var corpo = await medico.Cliente.GetStringAsync($"/api/analises/{analiseId}");
+        Assert.Contains("Erro inesperado ao processar a análise", corpo, StringComparison.Ordinal);
+        Assert.DoesNotContain("7f3a", corpo, StringComparison.Ordinal);
+        Assert.DoesNotContain("InvalidOperationException", corpo, StringComparison.Ordinal);
+
+        // Não fica presa em PROCESSANDO: a nova tentativa vale na hora.
+        _ambiente.Ia.Responder = null;
+        var novaTentativa = await JsonAsync(await medico.Cliente.PostAsync($"/api/analises/{analiseId}/nova-tentativa", null));
+        Assert.Equal("CONCLUIDA", novaTentativa.GetProperty("status").GetString());
+    }
+
+    [Fact]
     public async Task Erro_http_da_ia_nao_e_repetido_automaticamente()
     {
         _ambiente.Ia.Responder = (_, _) => Task.FromResult(new HttpResponseMessage(HttpStatusCode.InternalServerError));
