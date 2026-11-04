@@ -72,6 +72,16 @@ public sealed partial class ServicoAnalises(
                 new Dictionary<string, string> { ["motivo"] = CodigoMotivo(e) });
             LogAnaliseComErro(logger, analise.Id, CodigoMotivo(e));
         }
+        catch (Exception e) when (e is not OperationCanceledException)
+        {
+            // Defeito inesperado: a análise não pode ficar presa em PROCESSANDO nem o
+            // detalhe interno chegar ao médico. Vai para ERRO (reprocessável) e o
+            // detalhe completo fica só no log.
+            analise.Falhar(MensagemErroInesperado);
+            auditoria.Registrar("ANALISE_ERRO", "analise", analise.Id,
+                new Dictionary<string, string> { ["motivo"] = "ERRO_INESPERADO" });
+            LogErroInesperado(logger, analise.Id, e);
+        }
 
         await contexto.SalvarAsync(cancelamento);
         return analise.Status;
@@ -234,10 +244,15 @@ public sealed partial class ServicoAnalises(
         _ => "RESPOSTA_INCONSISTENTE",
     };
 
+    private const string MensagemErroInesperado = "Erro inesperado ao processar a análise. Tente novamente.";
+
     private static NaoEncontradoException NaoEncontrada() => new("Análise não encontrada.");
 
     [LoggerMessage(Level = LogLevel.Warning, Message = "Análise {AnaliseId} terminou com erro ({Motivo}).")]
     private static partial void LogAnaliseComErro(ILogger logger, Guid analiseId, string motivo);
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "Erro inesperado ao processar a análise {AnaliseId}.")]
+    private static partial void LogErroInesperado(ILogger logger, Guid analiseId, Exception excecao);
 
     private sealed class ImagemIlegivelException(string mensagem, Exception? causa = null) : Exception(mensagem, causa);
 }
