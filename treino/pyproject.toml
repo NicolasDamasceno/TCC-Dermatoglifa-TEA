@@ -1,0 +1,22 @@
+# Só configuração de ferramentas: os scripts de treino não são um pacote instalável.
+[tool.pytest.ini_options]
+testpaths = ["testes"]
+pythonpath = ["scripts"]
+addopts = "-q"
+filterwarnings = ["ignore::DeprecationWarning", "ignore::UserWarning"]
+
+[tool.ruff]
+line-length = 120
+target-version = "py311"
+extend-exclude = ["referencia"]  # o modelo_arroz fica como veio das aulas
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "S", "BLE", "SIM", "RUF"]
+ignore = ["RUF001", "RUF002", "RUF003", "S311"]  # acentos; random só para dados sintéticos
+
+[tool.ruff.lint.per-file-ignores]
+"testes/*" = ["S101", "E402"]
+"scripts/etapa1.py" = ["E402", "S608"]  # imports depois de configurar o TF; SQL montado com versão validada
+
+[tool.ruff.format]
+quote-style = "single"

@@ -1,0 +1,7 @@
+# Treino da Etapa 1. Reaproveita as versões do serviço (o mesmo TensorFlow/Keras e o
+# mesmo pré-processamento) e acrescenta avaliação e gráficos. Versões publicadas há
+# mais de duas semanas em 04/11/2026.
+-r ../modelo_producao/servico/requirements.txt
+scikit-learn==1.9.1
+matplotlib==3.11.2
+pillow==13.0.0

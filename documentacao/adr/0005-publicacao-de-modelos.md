@@ -31,8 +31,8 @@ Adotar duas precauções:
   separado (sugestão: `TCC-Dermatoglifa-TEA-modelos`) ou armazenamento da
   instituição. Até essa definição, na máquina local de treino (disco cifrado) com
   backup cifrado.
-- No servidor do site, o arquivo é copiado para `modelo_producao/` e conferido
-  pelo hash registrado em `modelo_producao/README.md`.
+- No servidor do site, o arquivo é copiado para `modelo_producao/producao/` e
+  conferido pelo hash registrado em `modelo_producao/README.md`.
 
 **2. Versão pública da Etapa 1 treinada só com dados sintéticos.**
 - Fica em `treino/modelos/sinteticos/<versao>/` e uma cópia em
@@ -42,8 +42,11 @@ Adotar duas precauções:
   direita e verticilo, com distribuição configurável;
   [tese do IISc](https://dsl.cds.iisc.ac.in/publications/thesis/sachin.pdf)) e
   **SFinGe** (usado por Peralta et al. 2017). Licenças e resolução **a verificar**
-  antes do uso.
-- O modelo sintético também serve como pré-treino da versão real.
+  antes do uso. **Atualização (04/11/2026):** enquanto essa verificação não é
+  feita, o modelo público usa um gerador próprio, sem dependência de terceiros
+  (ADR-0008).
+- O modelo sintético pode servir de pré-treino da versão real; o ganho precisa ser
+  medido (ADR-0008).
 
 **Etapa 2:** os coeficientes podem ser versionados abertamente, salvos em JSON
 (`coeficientes.json`), nunca em `.pkl`.
@@ -72,6 +75,6 @@ Adotar duas precauções:
 ## Ações
 
 1. [x] `.gitignore` e `pre-commit` bloqueiam pesos fora de `treino/modelos/sinteticos/` e `modelo_producao/demo/`.
-2. [ ] Verificar licença e resolução do Anguli e do SFinGe; escolher um.
+2. [ ] Verificar licença e resolução do Anguli e do SFinGe. Até lá, gerador próprio (ADR-0008).
 3. [ ] Definir o local controlado dos pesos reais (repositório privado ou instituição).
 4. [ ] Incluir no rascunho do TCLE o tratamento do modelo treinado (não publicado).

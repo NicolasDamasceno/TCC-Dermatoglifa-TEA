@@ -11,6 +11,41 @@ treino/
     reais/           modelos treinados com dados reais — só metadados, pesos fora do Git
 ```
 
+## Como treinar a Etapa 1
+
+Scripts em `scripts/` (testes em `testes/`, só com dados sintéticos):
+
+| Script | Faz |
+|---|---|
+| `sinteticos.py` | gera digitais **sintéticas** rotuladas, 10 dedos por participante (ADR-0008) |
+| `divisao.py` | divide treino/validação/teste **por participante** (`StratifiedGroupKFold`) e monta uma pasta por classe com links |
+| `etapa1.py` | treina a CNN de padrões na estrutura do `modelo_arroz_keras`, avalia no teste e grava a versão |
+
+```sh
+python -m venv .venv && . .venv/bin/activate      # Windows: .venv\Scripts\activate
+pip install -r treino/requirements.txt
+pip install -e modelo_producao/servico --no-deps  # pré-processamento comum (ADR-0001)
+export TCC_DADOS_DIR=/caminho/local/fora/do/repositorio
+
+# modelo de demonstração (dados sintéticos)
+python treino/scripts/sinteticos.py --participantes 400
+python treino/scripts/etapa1.py --origem SINTETICO --promover-demo
+
+# com a coleta aprovada pelo CEP: $TCC_DADOS_DIR/reais/rotulos.csv
+# (colunas arquivo, participante, classe; arquivo relativo ao CSV)
+python treino/scripts/etapa1.py --dados "$TCC_DADOS_DIR/reais" --origem REAL \
+    --pesos-reais /local/controlado/modelos
+```
+
+Cada execução grava `modelos/<sinteticos|reais>/<versao>/` (tabela abaixo) e, na
+pasta de dados local, `saidas/<versao>/` com a divisão por participante e uma figura
+de previsões. Essas duas ficam fora do Git: têm códigos de participante e imagens.
+O treino imprime a matriz de confusão e a sensibilidade, a especificidade e a AUC
+de cada classe; `registro.sql` registra a versão na tabela `modelo_ia` da API.
+
+Em CPU (Ryzen 5 5600, ADR-0002) o treino é viável; o tempo depende do tamanho de
+entrada (`--tamanho`, padrão 128 px) e do número de imagens.
+
 ## Os dados não ficam aqui
 
 As imagens de digitais e os metadados dos participantes ficam **apenas na máquina
@@ -61,12 +96,13 @@ Cada treino gera uma pasta `AAAA-MM-DD_<nome>_v<N>/` em `sinteticos/` ou `reais/
 
 | Arquivo | Conteúdo |
 |---|---|
-| `modelo.keras` | pesos e arquitetura (só no Git em `sinteticos/`) |
+| `modelo.keras` | pesos e arquitetura (só no Git em `sinteticos/`; em `reais/`, vai para `--pesos-reais`) |
 | `modelo.sha256` | hash SHA-256 do `modelo.keras` |
 | `metricas.json` | matriz de confusão, recall por classe; na Etapa 2, sensibilidade, especificidade, AUC |
 | `config.json` | hiperparâmetros, seed, versão do Keras e, obrigatoriamente, o que o serviço lê: `versao`, `classes` (na ordem da saída), `tamanho_imagem`, `ajuste_proporcao`, `interpolacao`, `origem_dados` (formato em `modelo_producao/servico/README.md`) |
 | `coeficientes.json` | apenas na Etapa 2 |
-| `graficos/` | curvas de acurácia/perda em **SVG** (PNG é bloqueado pelo `.gitignore`) |
+| `graficos/` | curvas de acurácia/perda e matriz de confusão em **SVG** (PNG é bloqueado pelo `.gitignore`) |
+| `registro.sql` | registra e ativa a versão na tabela `modelo_ia` da API |
 | `NOTAS.md` | o que mudou em relação à versão anterior |
 
 Métricas, configurações e notas não podem conter identificadores de participantes.
