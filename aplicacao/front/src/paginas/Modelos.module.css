@@ -1,0 +1,146 @@
+.pagina {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-6);
+}
+
+.nota {
+  color: var(--tinta-suave);
+}
+
+.foco:focus {
+  outline: none;
+}
+
+.secao {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--esp-4);
+  padding-top: var(--esp-5);
+  border-top: 1px solid var(--linha-fina);
+}
+
+.secao > * {
+  max-width: 100%;
+}
+
+.dados {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+  gap: var(--esp-3) var(--esp-6);
+  width: 100%;
+  margin: 0;
+}
+
+.dados dt {
+  font-size: var(--t-0);
+  color: var(--tinta-suave);
+}
+
+.dados dd {
+  margin: 0;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.largo {
+  grid-column: 1 / -1;
+}
+
+/* O hash é conferido caractere a caractere: largura fixa só aqui. */
+.hash {
+  font-family: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+  font-size: var(--t-0);
+  font-weight: 400;
+}
+
+.situacaoOk {
+  padding-left: var(--esp-3);
+  border-left: 4px solid var(--coletado);
+  font-weight: 600;
+}
+
+.situacaoAlerta {
+  padding: var(--esp-2) var(--esp-3);
+  background: var(--pesquisa-fundo);
+  color: var(--pesquisa);
+  font-weight: 600;
+}
+
+.formulario {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-4);
+  width: 100%;
+  max-width: 44rem;
+  padding: var(--esp-5);
+  background: var(--papel-ficha);
+  border: 1px solid var(--linha);
+  border-left: 4px solid var(--tinta);
+}
+
+.formulario h3 {
+  margin: 0;
+}
+
+.linha {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: var(--esp-4);
+  align-items: start;
+}
+
+.rolagem {
+  position: relative;
+  overflow-x: auto;
+  width: 100%;
+}
+
+.tabela {
+  width: 100%;
+  min-width: 44rem;
+  border-collapse: collapse;
+  background: var(--papel-ficha);
+  border: 1px solid var(--linha);
+}
+
+.tabela th,
+.tabela td {
+  padding: var(--esp-3) var(--esp-4);
+  text-align: left;
+  vertical-align: top;
+  border-bottom: 1px solid var(--linha-fina);
+}
+
+.tabela tbody tr:last-child > * {
+  border-bottom: 0;
+}
+
+.tabela thead th {
+  font-size: var(--t-0);
+  font-weight: 600;
+  color: var(--tinta-suave);
+  border-bottom-color: var(--linha);
+}
+
+.tabela tbody th {
+  font-weight: 700;
+}
+
+.versao {
+  white-space: nowrap;
+}
+
+.arquitetura {
+  display: block;
+  font-size: var(--t-0);
+  font-weight: 400;
+  color: var(--tinta-suave);
+}
+
+@media (max-width: 36rem) {
+  .linha {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

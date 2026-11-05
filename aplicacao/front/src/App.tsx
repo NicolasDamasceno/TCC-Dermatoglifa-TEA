@@ -4,6 +4,7 @@ import { CadastrosPendentes } from './paginas/CadastrosPendentes';
 import { Coleta } from './paginas/coleta/Coleta';
 import { Entrar } from './paginas/Entrar';
 import { Inicio } from './paginas/Inicio';
+import { Modelos } from './paginas/Modelos';
 import { NaoEncontrada } from './paginas/NaoEncontrada';
 import { NovoPaciente } from './paginas/NovoPaciente';
 import { Resultado } from './paginas/resultado/Resultado';
@@ -26,6 +27,7 @@ export function App() {
 
         <Route element={<RotaProtegida papel="ADMIN" />}>
           <Route path="/admin/solicitacoes" element={<CadastrosPendentes />} />
+          <Route path="/admin/modelos" element={<Modelos />} />
         </Route>
 
         <Route element={<RotaProtegida papel="MEDICO" />}>

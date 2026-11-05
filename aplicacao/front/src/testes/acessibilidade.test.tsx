@@ -49,6 +49,21 @@ describe('acessibilidade (axe)', () => {
     await semViolacoes();
   });
 
+  it('Modelos de IA, com a promoção aberta e erros', async () => {
+    comSessao(ADMIN);
+    simularApi({
+      'GET /api/modelos': json(200, {
+        servico: { disponivel: true, versaoModelo: 'v2_sintetico', origemDados: 'SINTETICO', sha256: 'b'.repeat(64), pastaOrigem: 'DEMO', motivo: null, registrado: false, ativo: false, hashConfere: true },
+        modelos: [
+          { id: 'm1', versao: 'v1_sintetico', arquitetura: 'CNN', origemDados: 'SINTETICO', escoreValidado: false, hashSha256: 'a'.repeat(64), metricas: { acuraciaBalanceada: 0.98, nTeste: 570 }, treinadoEm: '2026-11-04', ativo: true, promovidoEm: '2026-11-04T22:40:00Z', analises: 3 },
+        ],
+      }),
+    });
+    renderizarApp('/admin/modelos');
+    await userEvent.setup().click(await screen.findByRole('button', { name: 'Promover v2_sintetico' }));
+    await semViolacoes();
+  });
+
   it('Pacientes', async () => {
     comSessao();
     simularApi({ 'GET /api/pacientes': json(200, [pacienteResumo({ podeColetar: true }), pacienteResumo({ id: 'b' })]) });

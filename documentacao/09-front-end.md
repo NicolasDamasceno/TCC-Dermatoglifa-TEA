@@ -98,6 +98,7 @@ ulnar") e a confiança, sem a imagem.
 | `/cadastro` | público | Solicitar cadastro de médico | UC02 |
 | `/` | logado | redireciona: médico → `/pacientes`; admin → `/admin/solicitacoes` | — |
 | `/admin/solicitacoes` | admin | Cadastros pendentes: aprovar ou recusar | UC03 |
+| `/admin/modelos` | admin | Modelos de IA: o que o serviço carregou, versões registradas e promoção | UC10 |
 | `/pacientes` | médico | Lista e busca | UC04 |
 | `/pacientes/novo` | médico | Cadastrar paciente | UC04 |
 | `/pacientes/:id` | médico | Paciente: dados, consentimentos, sessões; registrar TCLE/TALE; iniciar coleta | UC04, UC05 |
@@ -134,6 +135,12 @@ voltando depois para a página pedida.
   "Analisar" abre, logo abaixo do pedido, a decisão (aprovar com o vínculo ao
   protocolo ou recusar com o motivo). Se outro administrador decidiu antes
   (404/409/422), a mensagem aparece e a lista é recarregada.
+- **Modelos de IA (admin).** Mostra o que o Serviço de IA carregou (versão,
+  origem dos dados, pasta e SHA-256) e se está registrado e ativo. Quando não está,
+  oferece promover com o `config.json` e o `metricas.json` da versão, avisando se o
+  modelo é sintético. A tabela lista as versões com a acurácia balanceada no teste,
+  o número de análises e a situação. O hash usa fonte de largura fixa, porque é
+  conferido caractere a caractere.
 - **Pacientes.** Tabela (nome, idade, sexo, situação, coleta liberada) do cadastro
   mais recente ao mais antigo; busca por nome guardada no endereço (`?busca=`);
   estado vazio convida a cadastrar o primeiro paciente.
@@ -278,6 +285,7 @@ repositório: o serviço de inferência real é o próximo módulo (ADR-0001).
 | F5 | Resultado da análise (UC07, UC08) | Concluído: 108 testes no total; conferido contra a API real com um serviço de IA falso, fora do repositório |
 | F6 | Revisão de acessibilidade, build de produção, ajustes de texto | Concluído: 116 testes; ver seções 5 e 7 |
 | F7 | Situação diagnóstica na página do paciente (UC13; ADR-0009) | Concluído: 121 testes; conferido contra a API real, no computador e no celular |
+| F8 | Modelos de IA para o administrador (UC10) | Concluído: 127 testes; conferido contra a API e o Serviço de IA reais |
 
 Telas de marcos ainda não feitos existem como reserva (`EmConstrucao`), já
 protegidas pelo papel certo, para que as rotas e a navegação sejam testadas desde o F1.

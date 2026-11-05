@@ -31,9 +31,14 @@ export function Layout() {
                     Pacientes
                   </NavLink>
                 ) : (
-                  <NavLink to="/admin/solicitacoes" className={classeLink}>
-                    Cadastros pendentes
-                  </NavLink>
+                  <>
+                    <NavLink to="/admin/solicitacoes" className={classeLink}>
+                      Cadastros pendentes
+                    </NavLink>
+                    <NavLink to="/admin/modelos" className={classeLink}>
+                      Modelos de IA
+                    </NavLink>
+                  </>
                 )}
               </nav>
               <div className={estilos.usuario}>
