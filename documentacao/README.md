@@ -26,6 +26,7 @@ Ler na ordem abaixo antes de criar ou alterar qualquer módulo (`CLAUDE.md`, Reg
 | [0006](adr/0006-autenticacao-identity-jwt.md) | Autenticação com ASP.NET Core Identity (Core) e JWT | Implementado (aceite pendente) |
 | [0007](adr/0007-stack-front-end.md) | Front-end com Vite, React, TypeScript e TanStack Query; sessão na aba | Proposto |
 | [0008](adr/0008-gerador-sintetico-proprio.md) | Gerador próprio de digitais sintéticas para o modelo de demonstração | Proposto |
+| [0009](adr/0009-situacao-diagnostica-como-referencia.md) | Situação diagnóstica como padrão de referência: data da avaliação e declaração de independência | Proposto |
 
 Os ADRs ficam "Propostos" até a revisão com o orientador; ao serem aceitos,
 muda-se o status no próprio arquivo. Uma decisão nova que contrarie uma antiga
