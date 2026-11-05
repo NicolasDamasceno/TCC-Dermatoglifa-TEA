@@ -288,6 +288,27 @@ concluída ou em processamento há menos de 5 minutos.
 `POST /api/analises/{id}/registro-prontuario` → a análise · `422` se não concluída
 ou já confirmada. Análise de outro médico → `404`; administrador → `403`.
 
+### Modelos (UC10)
+`GET /api/modelos` (ADMIN) →
+```json
+{ "servico": { "disponivel": true, "versaoModelo": "2026-11-05_padroes_sintetico_v2",
+               "origemDados": "SINTETICO", "sha256": "…", "pastaOrigem": "DEMO", "motivo": null,
+               "registrado": false, "ativo": false, "hashConfere": true },
+  "modelos": [ { "id": "…", "versao": "…", "arquitetura": "…", "origemDados": "SINTETICO",
+                 "escoreValidado": false, "hashSha256": "…", "metricas": { "acuraciaBalanceada": 0.986 },
+                 "treinadoEm": "2026-11-04", "ativo": true, "promovidoEm": "…", "analises": 6 } ] }
+```
+`servico` vem do `GET /saude` do Serviço de IA (seção 7); com o serviço fora do ar,
+`disponivel` é falso e `motivo` explica, mas a lista de versões continua.
+
+`POST /api/modelos/promocao` (ADMIN), `multipart/form-data` com `config` e
+`metricas` (os JSON da pasta da versão, até 1 MB cada) → `200` com a versão, já
+ativa · `422` serviço sem modelo ou fora do ar, versão ou origem diferente da
+carregada, versão já registrada com outro hash, já ativa, JSON inválido. A versão e
+o hash gravados vêm do serviço, não do arquivo enviado. Desativar a anterior e
+ativar a nova acontece numa transação (índice parcial único em `ativo`). Auditoria:
+`MODELO_PROMOVIDO` com `versao_modelo` e `resultado` (`REGISTRADO` ou `REATIVADO`).
+
 ### Erros
 Todos os erros usam `application/problem+json` (`ProblemDetails`), com `title` em
 português para exibição e `errors` por campo nas validações:
@@ -461,6 +482,7 @@ resolução gravada); nenhuma digital real em `tests/` (RNF08).
 | M5 ✅ | Cliente da IA com serviço falso, verificação de consistência, análise (UC07–UC08) | `feat(back)` |
 | M6 ✅ | ProblemDetails completo, CORS, testes de integração, `.env.example` | `feat(back)`, `test(back)` |
 | M7 ✅ | Situação diagnóstica (UC13): data da avaliação, declaração de independência, auditoria | `feat(back)` |
+| M8 ✅ | Promoção de versão do modelo (UC10), conferida com o `GET /saude` do Serviço de IA | `feat(back)` |
 
 Cada marco termina com testes passando e o doc correspondente atualizado se algo
 mudou (`CLAUDE.md`, Regra 2).

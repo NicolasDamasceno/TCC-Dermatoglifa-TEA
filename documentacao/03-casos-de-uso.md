@@ -251,11 +251,25 @@ são exigidos para o consentimento de menores. Nenhum outro dado é pedido.
 O médico vê as sessões de coleta e análises anteriores do paciente, em ordem
 cronológica, com a versão de modelo de cada uma.
 
-## UC10 — Promover versão do modelo *(pós-MVP)*
+## UC10 — Promover versão do modelo *(implementado em 2026-11-05)*
 
 O administrador registra uma nova versão (arquivo, hash, métricas de teste) e a
 marca como ativa; a anterior é desativada mas mantida para rastreabilidade.
-No MVP isso é feito manualmente conforme `modelo_producao/README.md`.
+
+1. A tela "Modelos de IA" mostra o modelo que o Serviço de IA carregou (versão,
+   origem dos dados, pasta, SHA-256) e se ele está registrado e ativo.
+2. O administrador envia o `config.json` e o `metricas.json` da pasta da versão
+   (`treino/modelos/...`).
+3. O sistema confere a versão e a origem do `config.json` com o Serviço de IA e
+   usa o hash informado por ele, que já conferiu o arquivo ao carregar. Registra a
+   versão (ou reativa uma já registrada com o mesmo hash), desativa a anterior e
+   grava na auditoria.
+
+Exceções: serviço fora do ar ou sem modelo; versão do `config.json` diferente da
+carregada; versão já registrada com outro hash; versão já ativa; JSON inválido.
+Em todas, nada muda e a tela explica o motivo. `escore_validado` fica falso: a
+validação da Etapa 2 (RN10) não passa por esta tela. O `registro.sql` gerado pelo
+treino continua valendo como alternativa sem interface.
 
 ## UC11 — Consultar trilha de auditoria *(pós-MVP)*
 

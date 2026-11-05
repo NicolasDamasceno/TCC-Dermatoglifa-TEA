@@ -108,7 +108,7 @@ Cada treino gera uma pasta `AAAA-MM-DD_<nome>_v<N>/` em `sinteticos/` ou `reais/
 | `config.json` | hiperparâmetros, seed, versão do Keras e, obrigatoriamente, o que o serviço lê: `versao`, `classes` (na ordem da saída), `tamanho_imagem`, `ajuste_proporcao`, `interpolacao`, `origem_dados` (formato em `modelo_producao/servico/README.md`) |
 | `coeficientes.json` | apenas na Etapa 2 |
 | `graficos/` | curvas de acurácia/perda e matriz de confusão em **SVG** (PNG é bloqueado pelo `.gitignore`) |
-| `registro.sql` | registra e ativa a versão na tabela `modelo_ia` da API |
+| `registro.sql` | registra e ativa a versão na tabela `modelo_ia` da API, sem interface (a tela **Modelos de IA**, UC10, faz o mesmo com o `config.json` e o `metricas.json`) |
 | `NOTAS.md` | o que mudou em relação à versão anterior |
 
 Métricas, configurações e notas não podem conter identificadores de participantes.

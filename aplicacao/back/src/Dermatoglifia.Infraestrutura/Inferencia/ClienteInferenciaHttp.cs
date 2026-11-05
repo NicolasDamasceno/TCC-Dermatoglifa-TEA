@@ -106,6 +106,46 @@ internal sealed partial class ClienteInferenciaHttp(HttpClient http, ILogger<Cli
         }
     }
 
+    public async Task<SaudeInferencia> ConsultarSaudeAsync(CancellationToken cancelamento = default)
+    {
+        try
+        {
+            using var resposta = await http.GetAsync("saude", cancelamento);
+            var corpo = await resposta.Content.ReadFromJsonAsync<SaudeJson>(Json, cancelamento)
+                        ?? throw new FalhaInferenciaException("O Serviço de IA devolveu uma resposta vazia.");
+
+            if (resposta.StatusCode == System.Net.HttpStatusCode.ServiceUnavailable)
+            {
+                return new SaudeInferencia(false, null, null, null, null, corpo.Motivo ?? "Serviço de IA sem modelo.");
+            }
+
+            if (!resposta.IsSuccessStatusCode || corpo.VersaoModelo is null || corpo.Sha256 is null || corpo.OrigemDados is null)
+            {
+                throw new FalhaInferenciaException("Resposta do Serviço de IA em formato inválido.");
+            }
+
+            var origemDados = corpo.OrigemDados switch
+            {
+                "SINTETICO" => OrigemDados.Sintetico,
+                "REAL" => OrigemDados.Real,
+                _ => throw new FalhaInferenciaException("Resposta do Serviço de IA em formato inválido."),
+            };
+            return new SaudeInferencia(true, corpo.VersaoModelo, corpo.Sha256.ToLowerInvariant(), origemDados, corpo.Origem, null);
+        }
+        catch (HttpRequestException e)
+        {
+            throw new FalhaInferenciaException("Serviço de IA indisponível.", e);
+        }
+        catch (TaskCanceledException e) when (!cancelamento.IsCancellationRequested)
+        {
+            throw new FalhaInferenciaException("O Serviço de IA não respondeu dentro do tempo limite.", e);
+        }
+        catch (JsonException e)
+        {
+            throw new FalhaInferenciaException("Resposta do Serviço de IA em formato inválido.", e);
+        }
+    }
+
     /// <summary>10 arquivos <c>MAO_DEDO</c> em PNG + <c>sexo</c> + <c>idade_meses</c>, nada mais.</summary>
     private static MultipartFormDataContent MontarConteudo(RequisicaoInferencia requisicao)
     {
@@ -159,6 +199,16 @@ internal sealed partial class ClienteInferenciaHttp(HttpClient http, ILogger<Cli
     private static partial void LogNovaTentativa(ILogger logger, string motivo);
 
     // Formato JSON do ADR-0001 (snake_case). "required": campo ausente → JsonException.
+    private sealed record SaudeJson
+    {
+        public string? Status { get; init; }
+        public string? VersaoModelo { get; init; }
+        public string? Origem { get; init; }
+        public string? OrigemDados { get; init; }
+        public string? Sha256 { get; init; }
+        public string? Motivo { get; init; }
+    }
+
     private sealed record RespostaJson
     {
         public required string VersaoModelo { get; init; }

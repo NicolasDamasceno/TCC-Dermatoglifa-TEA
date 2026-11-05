@@ -34,6 +34,13 @@ public sealed class IaFalsa
     public string Versao { get; set; } = AmbienteApi.VersaoModeloTeste;
     public decimal? Escore { get; set; }
 
+    /// <summary>O que <c>GET /saude</c> informa (UC10). O hash é o do modelo semeado no banco de teste.</summary>
+    public string Sha256 { get; set; } = HashModeloTeste;
+    public string OrigemDados { get; set; } = "SINTETICO";
+    public string? MotivoSemModelo { get; set; }
+
+    public static readonly string HashModeloTeste = new('a', 64);
+
     public IReadOnlyList<ChamadaIa> Chamadas => [.. _chamadas];
 
     public void Reiniciar()
@@ -44,15 +51,41 @@ public sealed class IaFalsa
         AlertaQualidadeEm.Clear();
         Versao = AmbienteApi.VersaoModeloTeste;
         Escore = null;
+        Sha256 = HashModeloTeste;
+        OrigemDados = "SINTETICO";
+        MotivoSemModelo = null;
         _chamadas.Clear();
     }
 
     internal async Task<HttpResponseMessage> AtenderAsync(ChamadaIa chamada, CancellationToken cancelamento)
     {
         _chamadas.Enqueue(chamada);
-        return Responder is null
-            ? Json(RespostaConsistente(chamada))
-            : await Responder(chamada, cancelamento);
+        if (Responder is not null)
+        {
+            return await Responder(chamada, cancelamento);
+        }
+
+        return chamada.Caminho.EndsWith("/saude", StringComparison.Ordinal) ? Saude() : Json(RespostaConsistente(chamada));
+    }
+
+    private HttpResponseMessage Saude()
+    {
+        if (MotivoSemModelo is not null)
+        {
+            return Json(new Dictionary<string, object?> { ["status"] = "INDISPONIVEL", ["motivo"] = MotivoSemModelo },
+                HttpStatusCode.ServiceUnavailable);
+        }
+
+        return Json(new Dictionary<string, object?>
+        {
+            ["status"] = "OK",
+            ["versao_modelo"] = Versao,
+            ["origem"] = "DEMO",
+            ["origem_dados"] = OrigemDados,
+            ["sha256"] = Sha256,
+            ["tamanho_imagem"] = new[] { 128, 128 },
+            ["convencao_alca"] = "IMPRESSAO",
+        });
     }
 
     /// <summary>Resposta coerente com as regras do ADR-0002 para as imagens recebidas.</summary>

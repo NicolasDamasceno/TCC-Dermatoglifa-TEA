@@ -27,8 +27,10 @@ errado, ele **não** cai para o `demo/`: fica indisponível e explica o motivo e
 3. Atualizar a tabela abaixo (a linha anterior permanece como histórico).
 4. Registrar a versão na tabela `modelo_ia` do banco (doc 05) e marcá-la como a
    única ativa. A API recusa respostas de versões não registradas ou inativas
-   (doc 08, seção 7). Enquanto o cadastro pela API (UC10) não existe, o registro é
-   feito direto no banco.
+   (doc 08, seção 7). Pela tela **Modelos de IA** do administrador (UC10): ela
+   mostra o que o serviço carregou e pede o `config.json` e o `metricas.json` da
+   versão; o hash vem do próprio serviço. Sem interface, o `registro.sql` da pasta
+   da versão faz o mesmo direto no banco.
 
 ## Versão ativa
 

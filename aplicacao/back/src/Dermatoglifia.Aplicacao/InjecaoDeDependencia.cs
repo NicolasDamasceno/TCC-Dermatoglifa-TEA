@@ -2,6 +2,7 @@ using Dermatoglifia.Aplicacao.Analises;
 using Dermatoglifia.Aplicacao.Autenticacao;
 using Dermatoglifia.Aplicacao.Coletas;
 using Dermatoglifia.Aplicacao.Medicos;
+using Dermatoglifia.Aplicacao.Modelos;
 using Dermatoglifia.Aplicacao.Pacientes;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -16,6 +17,7 @@ public static class InjecaoDeDependencia
         services.AddScoped<ServicoPacientes>();
         services.AddScoped<ServicoColetas>();
         services.AddScoped<ServicoAnalises>();
+        services.AddScoped<ServicoModelos>();
         return services;
     }
 }
