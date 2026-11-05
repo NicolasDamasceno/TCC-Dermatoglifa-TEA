@@ -15,11 +15,16 @@ internal sealed class PacienteConfiguracao : IEntityTypeConfiguration<Paciente>
             t.HasCheckConstraint("ck_paciente_sexo", EnumComoTexto.Check<SexoBiologico>("sexo"));
             t.HasCheckConstraint("ck_paciente_situacao_diagnostica",
                 EnumComoTexto.Check<SituacaoDiagnostica>("situacao_diagnostica"));
+            // Fonte e data da avaliação: ambas nulas só na suspeita (ADR-0009).
+            t.HasCheckConstraint("ck_paciente_diagnostico_completo",
+                "(\"situacao_diagnostica\" = 'SUSPEITA' AND \"fonte_diagnostico\" IS NULL AND \"diagnostico_avaliado_em\" IS NULL)"
+                + " OR (\"situacao_diagnostica\" <> 'SUSPEITA' AND \"fonte_diagnostico\" IS NOT NULL AND \"diagnostico_avaliado_em\" IS NOT NULL)");
         });
         builder.Property(p => p.Id).ValueGeneratedNever();
 
         builder.Property(p => p.Situacao).HasColumnName("situacao_diagnostica");
         builder.Property(p => p.FonteDiagnostico).HasMaxLength(200);
+        builder.Property(p => p.DiagnosticoAvaliadoEm).HasColumnName("diagnostico_avaliado_em");
 
         builder.HasOne<Medico>().WithMany().HasForeignKey(p => p.MedicoResponsavelId).OnDelete(DeleteBehavior.Restrict);
         builder.HasIndex(p => p.MedicoResponsavelId);

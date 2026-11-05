@@ -8,8 +8,8 @@ using Microsoft.AspNetCore.Mvc;
 namespace Dermatoglifia.Api.Controllers;
 
 /// <summary>
-/// UC04 — Cadastrar paciente; UC05 — Registrar consentimento. Só médicos acessam;
-/// o administrador não vê dados de pacientes.
+/// UC04 — Cadastrar paciente; UC05 — Registrar consentimento; UC13 — Atualizar
+/// situação diagnóstica. Só médicos acessam; o administrador não vê dados de pacientes.
 /// </summary>
 [ApiController]
 [Route("api/pacientes")]
@@ -53,6 +53,13 @@ public sealed class PacientesController(ServicoPacientes servico) : ControllerBa
         return StatusCode(StatusCodes.Status201Created, resultado);
     }
 
+    [HttpPatch("{id:guid}/situacao-diagnostica")]
+    public Task<SituacaoAtualizada> AtualizarSituacao(Guid id, RequisicaoSituacao requisicao, CancellationToken cancelamento)
+        => servico.AtualizarSituacaoAsync(
+            id,
+            new NovaSituacao(requisicao.Situacao!.Value, requisicao.Fonte, requisicao.AvaliadoEm, requisicao.IndependenteDoSistema),
+            cancelamento);
+
     [HttpPost("{id:guid}/consentimentos/{consentimentoId:guid}/revogacao")]
     public Task<ResultadoConsentimento> RevogarConsentimento(Guid id, Guid consentimentoId, CancellationToken cancelamento)
         => servico.RevogarConsentimentoAsync(id, consentimentoId, cancelamento);
@@ -79,3 +86,9 @@ public sealed record RequisicaoConsentimento(
     bool AutorizaAnalise,
     bool CienteUsoIA,
     bool AutorizaUsoTreino);
+
+public sealed record RequisicaoSituacao(
+    [Required(ErrorMessage = "Informe a situação diagnóstica.")] SituacaoDiagnostica? Situacao,
+    [StringLength(200, ErrorMessage = "Fonte com no máximo 200 caracteres.")] string? Fonte,
+    DateOnly? AvaliadoEm,
+    bool IndependenteDoSistema);

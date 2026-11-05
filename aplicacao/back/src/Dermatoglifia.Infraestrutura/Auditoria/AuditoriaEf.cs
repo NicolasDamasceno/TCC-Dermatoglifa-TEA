@@ -16,7 +16,8 @@ internal sealed class AuditoriaEf(AppDbContext contexto, IUsuarioAtual usuarioAt
     /// senhas cheguem ao log por descuido (doc 08, seção 8).
     /// </summary>
     private static readonly HashSet<string> ChavesPermitidas =
-        ["status", "motivo", "resultado", "versao_modelo", "mao", "dedo", "tipo", "quantidade"];
+        ["status", "motivo", "resultado", "versao_modelo", "mao", "dedo", "tipo", "quantidade",
+         "situacao_anterior", "situacao_nova"];
 
     public void Registrar(
         string acao,

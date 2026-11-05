@@ -132,7 +132,8 @@ o doc 05 se a estrutura do banco mudar.
 | M4 — sessão de coleta, upload, normalização e cifragem das digitais | concluído |
 | M5 — cliente do Serviço de IA, verificação de consistência e análise | concluído |
 | M6 — ProblemDetails completo, CORS, cabeçalhos de segurança, testes transversais | concluído |
+| M7 — situação diagnóstica (UC13; ADR-0009) | concluído |
 
-Com o M6, os fluxos do MVP do back-end (UC01–UC08) estão implementados. Ficam
-para depois: cadastro de modelo pela API (UC10), histórico do paciente (UC09),
-situação diagnóstica (UC13) e exportação para treino (UC14).
+Com o M6, os fluxos do MVP do back-end (UC01–UC08) estão implementados; o M7
+acrescenta a UC13. Ficam para depois: cadastro de modelo pela API (UC10),
+histórico do paciente (UC09) e exportação para treino (UC14).

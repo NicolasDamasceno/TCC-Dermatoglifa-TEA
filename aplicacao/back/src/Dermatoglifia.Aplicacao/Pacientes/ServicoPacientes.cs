@@ -8,8 +8,8 @@ using Microsoft.EntityFrameworkCore;
 namespace Dermatoglifia.Aplicacao.Pacientes;
 
 /// <summary>
-/// UC04 — Cadastrar paciente; UC05 — Registrar consentimento.
-/// Toda consulta parte de <see cref="DoMedico"/>: um médico só enxerga os
+/// UC04 — Cadastrar paciente; UC05 — Registrar consentimento; UC13 — Atualizar
+/// situação diagnóstica. Toda consulta parte de <see cref="DoMedico"/>: um médico só enxerga os
 /// próprios pacientes, e o de outro médico é tratado como inexistente (RN05).
 /// </summary>
 public sealed class ServicoPacientes(
@@ -92,7 +92,9 @@ public sealed class ServicoPacientes(
         return new PacienteDetalhe(
             Resumir(paciente, Hoje()),
             responsavel,
-            paciente.FonteDiagnostico,
+            paciente.Situacao == SituacaoDiagnostica.Suspeita
+                ? null
+                : new DiagnosticoDto(paciente.FonteDiagnostico!, paciente.DiagnosticoAvaliadoEm, paciente.SituacaoAtualizadaEm),
             paciente.Consentimentos
                 .OrderByDescending(c => c.AssinadoEm)
                 .Select(c => new ConsentimentoDto(
@@ -136,6 +138,31 @@ public sealed class ServicoPacientes(
         return new ResultadoConsentimento(consentimentoId, paciente.PodeColetar);
     }
 
+    /// <summary>
+    /// UC13 — registra a situação definida pelo diagnóstico clínico, feito fora do
+    /// sistema (ADR-0009). A auditoria guarda a transição, não a fonte (texto livre).
+    /// </summary>
+    public async Task<SituacaoAtualizada> AtualizarSituacaoAsync(
+        Guid pacienteId, NovaSituacao dados, CancellationToken cancelamento = default)
+    {
+        ArgumentNullException.ThrowIfNull(dados);
+        var paciente = await DoMedico().SingleOrDefaultAsync(p => p.Id == pacienteId, cancelamento) ?? throw NaoEncontrado();
+
+        var anterior = paciente.Situacao;
+        paciente.AtualizarSituacao(dados.Situacao, dados.Fonte, dados.AvaliadoEm, dados.IndependenteDoSistema, relogio.Agora);
+
+        auditoria.Registrar("SITUACAO_DIAGNOSTICA_ATUALIZADA", "paciente", paciente.Id,
+            new Dictionary<string, string>
+            {
+                ["situacao_anterior"] = TextoEnum(anterior),
+                ["situacao_nova"] = TextoEnum(paciente.Situacao),
+            });
+        await contexto.SalvarAsync(cancelamento);
+
+        return new SituacaoAtualizada(
+            paciente.Situacao, paciente.FonteDiagnostico, paciente.DiagnosticoAvaliadoEm, paciente.SituacaoAtualizadaEm!.Value);
+    }
+
     /// <summary>Ponto único de acesso aos pacientes: só os do médico logado.</summary>
     private IQueryable<Paciente> DoMedico()
     {
@@ -147,6 +174,16 @@ public sealed class ServicoPacientes(
     }
 
     private DateOnly Hoje() => DateOnly.FromDateTime(relogio.Agora.UtcDateTime);
+
+    /// <summary>Mesmo texto que a API usa para o enum (TEA_CONFIRMADO).</summary>
+    private static string TextoEnum(SituacaoDiagnostica situacao) => situacao switch
+    {
+        SituacaoDiagnostica.Suspeita => "SUSPEITA",
+        SituacaoDiagnostica.TeaConfirmado => "TEA_CONFIRMADO",
+        SituacaoDiagnostica.TeaDescartado => "TEA_DESCARTADO",
+        SituacaoDiagnostica.Controle => "CONTROLE",
+        _ => throw new ArgumentOutOfRangeException(nameof(situacao)),
+    };
 
     private static NaoEncontradoException NaoEncontrado() => new("Paciente não encontrado.");
 
@@ -174,6 +211,14 @@ public sealed record NovoConsentimento(
     TipoTermo Tipo, string VersaoTermo, DateOnly AssinadoEm, bool AutorizaAnalise, bool CienteUsoIA, bool AutorizaUsoTreino);
 
 public sealed record ResultadoConsentimento(Guid ConsentimentoId, bool PodeColetar);
+
+public sealed record NovaSituacao(SituacaoDiagnostica Situacao, string? Fonte, DateOnly? AvaliadoEm, bool IndependenteDoSistema);
+
+public sealed record SituacaoAtualizada(
+    SituacaoDiagnostica Situacao, string? FonteDiagnostico, DateOnly? AvaliadoEm, DateTimeOffset AtualizadaEm);
+
+/// <summary>Como a situação foi definida; nulo enquanto o paciente é suspeita.</summary>
+public sealed record DiagnosticoDto(string Fonte, DateOnly? AvaliadoEm, DateTimeOffset? AtualizadoEm);
 
 /// <summary>
 /// <see cref="Nome"/> e <see cref="DataNascimento"/> são nulos quando o titular pediu
@@ -206,7 +251,7 @@ public sealed record ConsentimentoDto(
 public sealed record PacienteDetalhe(
     PacienteResumo Paciente,
     ResponsavelDto? Responsavel,
-    string? FonteDiagnostico,
+    DiagnosticoDto? Diagnostico,
     IReadOnlyList<ConsentimentoDto> Consentimentos,
     IReadOnlyList<SessaoDoPaciente> Sessoes);
 

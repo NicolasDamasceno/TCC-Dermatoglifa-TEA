@@ -466,6 +466,10 @@ namespace Dermatoglifia.Infraestrutura.Persistencia.Migracoes
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("criado_em");
 
+                    b.Property<DateOnly?>("DiagnosticoAvaliadoEm")
+                        .HasColumnType("date")
+                        .HasColumnName("diagnostico_avaliado_em");
+
                     b.Property<string>("FonteDiagnostico")
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)")
@@ -499,6 +503,8 @@ namespace Dermatoglifia.Infraestrutura.Persistencia.Migracoes
 
                     b.ToTable("paciente", null, t =>
                         {
+                            t.HasCheckConstraint("ck_paciente_diagnostico_completo", "(\"situacao_diagnostica\" = 'SUSPEITA' AND \"fonte_diagnostico\" IS NULL AND \"diagnostico_avaliado_em\" IS NULL) OR (\"situacao_diagnostica\" <> 'SUSPEITA' AND \"fonte_diagnostico\" IS NOT NULL AND \"diagnostico_avaliado_em\" IS NOT NULL)");
+
                             t.HasCheckConstraint("ck_paciente_sexo", "\"sexo\" IN ('MASCULINO', 'FEMININO')");
 
                             t.HasCheckConstraint("ck_paciente_situacao_diagnostica", "\"situacao_diagnostica\" IN ('SUSPEITA', 'TEA_CONFIRMADO', 'TEA_DESCARTADO', 'CONTROLE')");

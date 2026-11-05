@@ -178,7 +178,7 @@ login por padrão; as públicas são marcadas com `[AllowAnonymous]`.
                 "sexo": "MASCULINO", "situacao": "SUSPEITA", "podeColetar": true,
                 "anonimizado": false, "criadoEm": "…" },
   "responsavel": { "nome": "…", "parentesco": "MAE", "contato": "…" },
-  "fonteDiagnostico": null,
+  "diagnostico": null,
   "consentimentos": [ { "id": "…", "tipo": "TCLE", "versaoTermo": "CEP-v1.0", "assinadoEm": "2026-11-03",
                         "autorizaAnalise": true, "cienteUsoIA": true, "autorizaUsoTreino": false,
                         "vigente": true, "revogadoEm": null } ],
@@ -188,6 +188,8 @@ login por padrão; as públicas são marcadas com `[AllowAnonymous]`.
 `sessoes` vem da mais recente para a mais antiga, com a análise de cada uma
 (`null` enquanto a sessão não foi concluída): é por ela que o front retoma uma
 coleta em andamento ou abre um resultado a partir do paciente.
+`diagnostico` fica `null` enquanto a situação é `SUSPEITA`; depois traz
+`{ "fonte": "…", "avaliadoEm": "2026-10-20", "atualizadoEm": "…" }` (UC13).
 `GET /api/pacientes?busca=ana` devolve a lista com o mesmo formato de `paciente`.
 Listar e abrir paciente ficam registrados na auditoria (leitura de dado pessoal).
 Só o papel MEDICO acessa estas rotas; o administrador não vê dados de pacientes.
@@ -203,6 +205,16 @@ criança e, sozinho, não libera.
 
 `POST /api/pacientes/{id}/consentimentos/{consentimentoId}/revogacao` → `200`
 `{ "consentimentoId": "…", "podeColetar": false }`; revogar de novo → `422`.
+
+`PATCH /api/pacientes/{id}/situacao-diagnostica` (UC13; ADR-0009)
+```json
+{ "situacao": "TEA_CONFIRMADO", "fonte": "avaliação multiprofissional, DSM-5-TR",
+  "avaliadoEm": "2026-10-20", "independenteDoSistema": true }
+```
+`200` → `{ "situacao": "TEA_CONFIRMADO", "fonteDiagnostico": "…", "avaliadoEm": "2026-10-20",
+"atualizadaEm": "…" }` · `422` sem fonte, data ou declaração de independência, data
+no futuro ou antes do nascimento, nada mudou ou dados eliminados · `400` situação
+inválida. Para voltar a `SUSPEITA` (correção), `fonte` e `avaliadoEm` vão nulos.
 
 ### Coleta
 `POST /api/pacientes/{id}/sessoes`
@@ -448,6 +460,7 @@ resolução gravada); nenhuma digital real em `tests/` (RNF08).
 | M4 ✅ | Sessão de coleta, upload, normalização e cifragem (UC06) | `feat(back)` |
 | M5 ✅ | Cliente da IA com serviço falso, verificação de consistência, análise (UC07–UC08) | `feat(back)` |
 | M6 ✅ | ProblemDetails completo, CORS, testes de integração, `.env.example` | `feat(back)`, `test(back)` |
+| M7 ✅ | Situação diagnóstica (UC13): data da avaliação, declaração de independência, auditoria | `feat(back)` |
 
 Cada marco termina com testes passando e o doc correspondente atualizado se algo
 mudou (`CLAUDE.md`, Regra 2).

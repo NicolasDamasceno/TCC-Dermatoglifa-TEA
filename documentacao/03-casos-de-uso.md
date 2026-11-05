@@ -267,12 +267,23 @@ O administrador, a pedido do titular ou responsável, exporta, corrige ou elimin
 os dados de um paciente, ou registra a revogação de um consentimento. A
 eliminação apaga as imagens armazenadas e anonimiza os registros de análise.
 
-## UC13 — Atualizar situação diagnóstica *(pós-MVP, prioridade alta)*
+## UC13 — Atualizar situação diagnóstica *(implementado em 2026-11-05)*
 
 Quando o diagnóstico clínico do paciente é concluído fora do sistema, o médico
 atualiza a situação de `SUSPEITA` para `TEA_CONFIRMADO` ou `TEA_DESCARTADO` e
 informa a fonte (ex.: avaliação multiprofissional). Sem esse dado não é possível
 medir, no futuro, se os indicadores têm relação com o diagnóstico real.
+
+Detalhes (ADR-0009):
+1. Além da fonte, o médico informa a **data da avaliação clínica** e declara que o
+   diagnóstico foi fechado **sem considerar o resultado deste sistema**.
+2. `CONTROLE` registra participantes do grupo controle do protocolo.
+3. Voltar para `SUSPEITA` corrige um registro feito por engano e apaga fonte e data.
+4. Cada mudança fica na auditoria (situação anterior e nova, sem a fonte).
+
+Exceções: sem fonte, data ou declaração, ou com data no futuro ou antes do
+nascimento, o sistema recusa e explica o motivo; paciente com dados eliminados
+(UC12) não pode ser alterado.
 
 ## UC14 — Exportar dados pseudonimizados para treino *(pós-MVP)*
 

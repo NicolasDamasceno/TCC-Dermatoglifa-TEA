@@ -122,15 +122,63 @@ public class PacienteTestes
         => Assert.Throws<RegraDeNegocioException>(() => PacienteMenor().RegistrarConsentimento(TipoTermo.Tcle,
             "CEP-v1.0", new DateOnly(2026, 12, 1), true, true, false, MedicoId, Agora));
 
+    private static readonly DateOnly Avaliacao = new(2026, 10, 20);
+
     [Fact]
-    public void Situacao_diagnostica_definida_exige_fonte()
+    public void Situacao_diagnostica_definida_exige_fonte_data_e_independencia()
     {
         var paciente = PacienteMenor();
 
-        Assert.Throws<RegraDeNegocioException>(() => paciente.AtualizarSituacao(SituacaoDiagnostica.TeaConfirmado, null, Agora));
+        Assert.Throws<RegraDeNegocioException>(() =>
+            paciente.AtualizarSituacao(SituacaoDiagnostica.TeaConfirmado, null, Avaliacao, true, Agora));
+        Assert.Throws<RegraDeNegocioException>(() =>
+            paciente.AtualizarSituacao(SituacaoDiagnostica.TeaConfirmado, "Avaliação multiprofissional", null, true, Agora));
+        Assert.Throws<RegraDeNegocioException>(() =>
+            paciente.AtualizarSituacao(SituacaoDiagnostica.TeaConfirmado, "Avaliação multiprofissional", Avaliacao, false, Agora));
 
-        paciente.AtualizarSituacao(SituacaoDiagnostica.TeaConfirmado, "Avaliação multiprofissional", Agora);
+        paciente.AtualizarSituacao(SituacaoDiagnostica.TeaConfirmado, "  Avaliação multiprofissional ", Avaliacao, true, Agora);
+
         Assert.Equal(SituacaoDiagnostica.TeaConfirmado, paciente.Situacao);
+        Assert.Equal("Avaliação multiprofissional", paciente.FonteDiagnostico);
+        Assert.Equal(Avaliacao, paciente.DiagnosticoAvaliadoEm);
+        Assert.Equal(Agora, paciente.SituacaoAtualizadaEm);
+    }
+
+    [Theory]
+    [InlineData(2026, 11, 4)] // depois de "agora"
+    [InlineData(2022, 3, 13)] // antes do nascimento
+    public void Data_da_avaliacao_fora_do_intervalo_e_rejeitada(int ano, int mes, int dia)
+        => Assert.Throws<RegraDeNegocioException>(() => PacienteMenor().AtualizarSituacao(
+            SituacaoDiagnostica.TeaDescartado, "Avaliação", new DateOnly(ano, mes, dia), true, Agora));
+
+    [Fact]
+    public void Voltar_para_suspeita_apaga_fonte_e_data()
+    {
+        var paciente = PacienteMenor();
+        Assert.Throws<RegraDeNegocioException>(() =>
+            paciente.AtualizarSituacao(SituacaoDiagnostica.Suspeita, null, null, false, Agora));
+        paciente.AtualizarSituacao(SituacaoDiagnostica.TeaDescartado, "Avaliação", Avaliacao, true, Agora);
+
+        Assert.Throws<RegraDeNegocioException>(() =>
+            paciente.AtualizarSituacao(SituacaoDiagnostica.Suspeita, "Avaliação", null, false, Agora));
+        paciente.AtualizarSituacao(SituacaoDiagnostica.Suspeita, null, null, false, Agora);
+
+        Assert.Equal(SituacaoDiagnostica.Suspeita, paciente.Situacao);
+        Assert.Null(paciente.FonteDiagnostico);
+        Assert.Null(paciente.DiagnosticoAvaliadoEm);
+    }
+
+    [Fact]
+    public void Atualizacao_sem_mudanca_e_rejeitada_mas_correcao_da_fonte_e_aceita()
+    {
+        var paciente = PacienteMenor();
+        paciente.AtualizarSituacao(SituacaoDiagnostica.Controle, "Grupo controle do protocolo", Avaliacao, true, Agora);
+
+        Assert.Throws<RegraDeNegocioException>(() =>
+            paciente.AtualizarSituacao(SituacaoDiagnostica.Controle, "Grupo controle do protocolo", Avaliacao, true, Agora));
+
+        paciente.AtualizarSituacao(SituacaoDiagnostica.Controle, "Grupo controle do protocolo (corrigido)", Avaliacao, true, Agora);
+        Assert.Equal("Grupo controle do protocolo (corrigido)", paciente.FonteDiagnostico);
     }
 
     [Fact]
@@ -144,6 +192,6 @@ public class PacienteTestes
         Assert.False(paciente.PodeColetar);
         Assert.Throws<RegraDeNegocioException>(() => paciente.Anonimizar(Agora));
         Assert.Throws<RegraDeNegocioException>(() =>
-            paciente.AtualizarSituacao(SituacaoDiagnostica.TeaDescartado, "Avaliação", Agora));
+            paciente.AtualizarSituacao(SituacaoDiagnostica.TeaDescartado, "Avaliação", Avaliacao, true, Agora));
     }
 }

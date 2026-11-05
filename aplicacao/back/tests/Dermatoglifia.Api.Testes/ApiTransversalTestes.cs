@@ -56,7 +56,7 @@ public sealed class ApiTransversalTestes(AmbienteApi ambiente)
     {
         var rotas = Rotas();
         // Rota nova obriga a rever este teste: é o alarme contra rota pública criada por engano.
-        Assert.True(rotas.Count == 20, $"A API tem {rotas.Count} rotas; esperadas 20. Revise RotasPublicas e atualize.");
+        Assert.True(rotas.Count == 21, $"A API tem {rotas.Count} rotas; esperadas 21. Revise RotasPublicas e atualize.");
         var anonimo = ambiente.Cliente();
 
         foreach (var (metodo, modelo, rota) in rotas)

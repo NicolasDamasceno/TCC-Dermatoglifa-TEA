@@ -7,7 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Dermatoglifia.Api.Testes;
 
-/// <summary>UC04 e UC05 de ponta a ponta, com dados sintéticos.</summary>
+/// <summary>UC04, UC05 e UC13 de ponta a ponta, com dados sintéticos.</summary>
 [Collection(ColecaoApi.Nome)]
 public sealed class PacientesTestes(AmbienteApi ambiente)
 {
@@ -249,5 +249,94 @@ public sealed class PacientesTestes(AmbienteApi ambiente)
         Assert.All(registros, r => Assert.Equal(medico.Id, r.UsuarioId));
         // Nenhum registro de auditoria carrega o nome do paciente.
         Assert.DoesNotContain(registros, r => r.Detalhes != null && r.Detalhes.Contains("Sintética", StringComparison.Ordinal));
+    }
+
+    private static object Situacao(string situacao, string? fonte = "Avaliação multiprofissional (sintética)",
+        DateOnly? avaliadoEm = null, bool independente = true)
+        => new
+        {
+            situacao,
+            fonte,
+            avaliadoEm = situacao == "SUSPEITA"
+                ? null
+                : (avaliadoEm ?? Hoje.AddDays(-2)).ToString("yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture),
+            independenteDoSistema = independente,
+        };
+
+    [Fact]
+    public async Task Situacao_diagnostica_e_atualizada_e_aparece_no_detalhe()
+    {
+        var medico = await ambiente.MedicoAprovadoAsync();
+        var id = await CadastrarAsync(medico.Cliente);
+        var antes = await medico.Cliente.GetFromJsonAsync<JsonElement>($"/api/pacientes/{id}", AmbienteApi.Json);
+        Assert.Equal(JsonValueKind.Null, antes.GetProperty("diagnostico").ValueKind);
+
+        var resposta = await medico.Cliente.PatchAsJsonAsync($"/api/pacientes/{id}/situacao-diagnostica", Situacao("TEA_CONFIRMADO"));
+
+        Assert.Equal(HttpStatusCode.OK, resposta.StatusCode);
+        var corpo = await JsonAsync(resposta);
+        Assert.Equal("TEA_CONFIRMADO", corpo.GetProperty("situacao").GetString());
+        var detalhe = await medico.Cliente.GetFromJsonAsync<JsonElement>($"/api/pacientes/{id}", AmbienteApi.Json);
+        Assert.Equal("TEA_CONFIRMADO", detalhe.GetProperty("paciente").GetProperty("situacao").GetString());
+        var diagnostico = detalhe.GetProperty("diagnostico");
+        Assert.Equal("Avaliação multiprofissional (sintética)", diagnostico.GetProperty("fonte").GetString());
+        Assert.Equal(Hoje.AddDays(-2), DateOnly.Parse(diagnostico.GetProperty("avaliadoEm").GetString()!, System.Globalization.CultureInfo.InvariantCulture));
+
+        // Correção: volta para suspeita e apaga fonte e data.
+        var correcao = await medico.Cliente.PatchAsJsonAsync($"/api/pacientes/{id}/situacao-diagnostica", Situacao("SUSPEITA", fonte: null));
+        Assert.Equal(HttpStatusCode.OK, correcao.StatusCode);
+        var depois = await medico.Cliente.GetFromJsonAsync<JsonElement>($"/api/pacientes/{id}", AmbienteApi.Json);
+        Assert.Equal(JsonValueKind.Null, depois.GetProperty("diagnostico").ValueKind);
+    }
+
+    [Fact]
+    public async Task Situacao_sem_declaracao_de_independencia_ou_com_data_futura_e_recusada()
+    {
+        var medico = await ambiente.MedicoAprovadoAsync();
+        var id = await CadastrarAsync(medico.Cliente);
+        var rota = $"/api/pacientes/{id}/situacao-diagnostica";
+
+        Assert.Equal(HttpStatusCode.UnprocessableEntity,
+            (await medico.Cliente.PatchAsJsonAsync(rota, Situacao("TEA_DESCARTADO", independente: false))).StatusCode);
+        Assert.Equal(HttpStatusCode.UnprocessableEntity,
+            (await medico.Cliente.PatchAsJsonAsync(rota, Situacao("TEA_DESCARTADO", avaliadoEm: Hoje.AddDays(2)))).StatusCode);
+        Assert.Equal(HttpStatusCode.UnprocessableEntity,
+            (await medico.Cliente.PatchAsJsonAsync(rota, Situacao("TEA_DESCARTADO", fonte: " "))).StatusCode);
+        Assert.Equal(HttpStatusCode.BadRequest,
+            (await medico.Cliente.PatchAsJsonAsync(rota, new { situacao = "QUALQUER", fonte = "x" })).StatusCode);
+
+        var detalhe = await medico.Cliente.GetFromJsonAsync<JsonElement>($"/api/pacientes/{id}", AmbienteApi.Json);
+        Assert.Equal("SUSPEITA", detalhe.GetProperty("paciente").GetProperty("situacao").GetString());
+    }
+
+    [Fact]
+    public async Task Situacao_de_paciente_de_outro_medico_nao_e_alterada_e_admin_nao_acessa()
+    {
+        var dono = await ambiente.MedicoAprovadoAsync();
+        var outro = await ambiente.MedicoAprovadoAsync();
+        var id = await CadastrarAsync(dono.Cliente);
+        var rota = $"/api/pacientes/{id}/situacao-diagnostica";
+        var admin = ambiente.Cliente(await ambiente.TokenAsync(AmbienteApi.EmailAdmin, AmbienteApi.SenhaAdmin));
+
+        Assert.Equal(HttpStatusCode.NotFound, (await outro.Cliente.PatchAsJsonAsync(rota, Situacao("CONTROLE"))).StatusCode);
+        Assert.Equal(HttpStatusCode.Forbidden, (await admin.PatchAsJsonAsync(rota, Situacao("CONTROLE"))).StatusCode);
+    }
+
+    [Fact]
+    public async Task Auditoria_registra_a_transicao_sem_a_fonte()
+    {
+        var medico = await ambiente.MedicoAprovadoAsync();
+        var id = await CadastrarAsync(medico.Cliente);
+        await medico.Cliente.PatchAsJsonAsync($"/api/pacientes/{id}/situacao-diagnostica",
+            Situacao("CONTROLE", fonte: "Fonte com texto livre sintético"));
+
+        var registro = await ambiente.NoEscopoAsync(sp => sp.GetRequiredService<AppDbContext>().Auditoria
+            .SingleAsync(a => a.EntidadeId == id && a.Acao == "SITUACAO_DIAGNOSTICA_ATUALIZADA"));
+
+        Assert.Equal(medico.Id, registro.UsuarioId);
+        var detalhes = JsonDocument.Parse(registro.Detalhes!).RootElement;
+        Assert.Equal("SUSPEITA", detalhes.GetProperty("situacao_anterior").GetString());
+        Assert.Equal("CONTROLE", detalhes.GetProperty("situacao_nova").GetString());
+        Assert.DoesNotContain("texto livre", registro.Detalhes, StringComparison.Ordinal);
     }
 }

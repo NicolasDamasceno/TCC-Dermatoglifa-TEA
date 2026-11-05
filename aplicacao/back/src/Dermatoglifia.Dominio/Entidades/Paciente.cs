@@ -14,6 +14,9 @@ public sealed class Paciente : Entidade
     public SexoBiologico Sexo { get; private set; }
     public SituacaoDiagnostica Situacao { get; private set; }
     public string? FonteDiagnostico { get; private set; }
+
+    /// <summary>Dia da avaliação clínica que definiu a situação (intervalo até a coleta; QUADAS-2).</summary>
+    public DateOnly? DiagnosticoAvaliadoEm { get; private set; }
     public DateTimeOffset? SituacaoAtualizadaEm { get; private set; }
     public DateTimeOffset CriadoEm { get; private set; }
     public DateTimeOffset? AnonimizadoEm { get; private set; }
@@ -85,16 +88,48 @@ public sealed class Paciente : Entidade
     public bool AutorizaUsoEmTreino =>
         !Anonimizado && _consentimentos.Any(c => c.Tipo == TipoTermo.Tcle && c.EstaVigente && c.AutorizaUsoTreino);
 
-    /// <summary>Atualiza a situação após o diagnóstico clínico, feito fora do sistema (UC13).</summary>
-    public void AtualizarSituacao(SituacaoDiagnostica situacao, string? fonte, DateTimeOffset agora)
+    /// <summary>
+    /// Atualiza a situação após o diagnóstico clínico, feito fora do sistema (UC13; ADR-0009).
+    /// A situação é o padrão de referência de qualquer avaliação futura do sistema; por
+    /// isso exige fonte, data da avaliação e a declaração de que o diagnóstico foi
+    /// fechado sem o resultado deste sistema (QUADAS-2, domínios 3 e 4). Voltar para
+    /// <see cref="SituacaoDiagnostica.Suspeita"/> corrige um registro feito por engano
+    /// e apaga fonte e data.
+    /// </summary>
+    public void AtualizarSituacao(
+        SituacaoDiagnostica situacao,
+        string? fonte,
+        DateOnly? avaliadoEm,
+        bool independenteDoSistema,
+        DateTimeOffset agora)
     {
         GarantirNaoAnonimizado();
-        Regra.Exigir(situacao != SituacaoDiagnostica.Suspeita || fonte is null,
-            "A situação \"suspeita\" não tem fonte de diagnóstico.");
 
-        FonteDiagnostico = situacao == SituacaoDiagnostica.Suspeita
-            ? null
-            : Regra.TextoObrigatorio(fonte, "Fonte do diagnóstico", 200);
+        if (situacao == SituacaoDiagnostica.Suspeita)
+        {
+            Regra.Exigir(string.IsNullOrWhiteSpace(fonte) && avaliadoEm is null,
+                "A situação \"suspeita\" não tem fonte nem data de avaliação.");
+            Regra.Exigir(Situacao != SituacaoDiagnostica.Suspeita, "O paciente já está como suspeita.");
+            FonteDiagnostico = null;
+            DiagnosticoAvaliadoEm = null;
+        }
+        else
+        {
+            var textoFonte = Regra.TextoObrigatorio(fonte, "Fonte do diagnóstico", 200);
+            Regra.Exigir(avaliadoEm is not null, "Data da avaliação clínica é obrigatória.");
+            Regra.Exigir(avaliadoEm <= DateOnly.FromDateTime(agora.UtcDateTime),
+                "A data da avaliação clínica não pode estar no futuro.");
+            Regra.Exigir(Identificacao is null || avaliadoEm >= Identificacao.DataNascimento,
+                "A data da avaliação clínica é anterior ao nascimento.");
+            Regra.Exigir(independenteDoSistema,
+                "Confirme que o diagnóstico foi fechado sem considerar o resultado deste sistema.");
+            Regra.Exigir(
+                situacao != Situacao || textoFonte != FonteDiagnostico || avaliadoEm != DiagnosticoAvaliadoEm,
+                "Nada mudou: a situação, a fonte e a data já são essas.");
+            FonteDiagnostico = textoFonte;
+            DiagnosticoAvaliadoEm = avaliadoEm;
+        }
+
         Situacao = situacao;
         SituacaoAtualizadaEm = agora;
     }

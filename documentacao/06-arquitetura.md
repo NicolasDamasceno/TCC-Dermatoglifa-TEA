@@ -101,7 +101,7 @@ front-end, em [09-front-end.md](09-front-end.md) e no ADR-0007.
 | POST | `/api/analises/{id}/nova-tentativa` | MEDICO | UC07 (2a) |
 | PATCH | `/api/analises/{id}/observacao` | MEDICO | UC08 |
 | POST | `/api/analises/{id}/registro-prontuario` | MEDICO | UC08 (CFM 2.454/2026) |
-| PATCH | `/api/pacientes/{id}/situacao-diagnostica` | MEDICO | UC13 (pós-MVP) |
+| PATCH | `/api/pacientes/{id}/situacao-diagnostica` | MEDICO | UC13 (ADR-0009) |
 
 Regras transversais:
 - Toda rota de `MEDICO` verifica se o paciente pertence ao médico logado (RN05);

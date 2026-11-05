@@ -69,6 +69,7 @@ erDiagram
         sexo_biologico sexo
         situacao_diagnostica situacao_diagnostica
         varchar fonte_diagnostico
+        date diagnostico_avaliado_em
         timestamptz situacao_atualizada_em
         timestamptz criado_em
         timestamptz anonimizado_em
@@ -229,6 +230,11 @@ convertido para ulnar/radial pela mão registrada (ADR-0002).
   (ex.: "avaliação multiprofissional, DSM-5-TR"). Isso permite, no futuro, medir o
   desempenho do sistema contra o diagnóstico real. `CONTROLE` identifica
   participantes do grupo controle do protocolo.
+- `diagnostico_avaliado_em`: dia da avaliação clínica que definiu a situação
+  (permite calcular o intervalo entre coleta e diagnóstico; ADR-0009).
+  `situacao_atualizada_em` é só o momento do registro no sistema. A restrição
+  `ck_paciente_diagnostico_completo` exige fonte e data fora de `SUSPEITA` e as
+  duas vazias nela.
 - `anonimizado_em`: preenchido quando o titular pede eliminação (UC12).
 
 ### identificacao_paciente
