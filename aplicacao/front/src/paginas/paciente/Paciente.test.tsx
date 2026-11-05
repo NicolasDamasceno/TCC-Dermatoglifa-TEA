@@ -18,7 +18,7 @@ function corpo(fetchMock: ReturnType<typeof simularFetch>, chamada: number): unk
   return JSON.parse(fetchMock.mock.calls[chamada]![1]!.body as string);
 }
 
-describe('Paciente (UC04, UC05)', () => {
+describe('Paciente (UC04, UC05, UC09)', () => {
   it('mostra identificação, responsável e por que a coleta não está liberada', async () => {
     abrir(json(200, detalhe()));
 
@@ -176,6 +176,9 @@ describe('Paciente (UC04, UC05)', () => {
                 concluidaEm: '2026-10-01T13:20:00Z',
                 analiseId: 'analise-1',
                 analiseStatus: 'CONCLUIDA',
+                analiseConcluidaEm: '2026-10-01T13:21:00Z',
+                versaoModelo: '2026-11-04_padroes_sintetico_v1',
+                origemDadosModelo: 'SINTETICO',
               }),
             ],
           },
@@ -193,7 +196,12 @@ describe('Paciente (UC04, UC05)', () => {
       'href',
       '/analises/analise-1',
     );
-    expect(within(coletas).getByRole('row', { name: /Completa/ })).toHaveTextContent('Concluída');
+    const completa = within(coletas).getByRole('row', { name: /Completa/ });
+    expect(completa).toHaveTextContent('Concluída');
+    // UC09: a versão do modelo de cada análise, com a origem dos dados.
+    expect(completa).toHaveTextContent('2026-11-04_padroes_sintetico_v1');
+    expect(completa).toHaveTextContent('treinado com dados sintéticos');
+    expect(within(coletas).getByRole('row', { name: /Em andamento/ })).toHaveTextContent('—');
   });
 
   it('explica que a coleta em andamento não continua sem TCLE vigente', async () => {

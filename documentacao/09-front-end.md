@@ -151,7 +151,7 @@ voltando depois para a página pedida.
   possível no momento: continuar a coleta em andamento, iniciar (método, tipo de
   impressão e dispositivo), ou explicar por que não está liberada — inclusive
   quando há coleta em andamento e o TCLE foi revogado. Depois, as coletas (com
-  link para o resultado), a **situação diagnóstica** (UC13: situação, fonte, data
+  a versão do modelo de cada análise e link para o resultado; UC09), a **situação diagnóstica** (UC13: situação, fonte, data
   da avaliação clínica e a declaração de que o diagnóstico não considerou o
   resultado do sistema; ADR-0009), os consentimentos (registrar TCLE/TALE com as três
   autorizações por extenso, revogar com confirmação) e o responsável legal. As
@@ -286,6 +286,7 @@ repositório: o serviço de inferência real é o próximo módulo (ADR-0001).
 | F6 | Revisão de acessibilidade, build de produção, ajustes de texto | Concluído: 116 testes; ver seções 5 e 7 |
 | F7 | Situação diagnóstica na página do paciente (UC13; ADR-0009) | Concluído: 121 testes; conferido contra a API real, no computador e no celular |
 | F8 | Modelos de IA para o administrador (UC10) | Concluído: 127 testes; conferido contra a API e o Serviço de IA reais |
+| F9 | Histórico do paciente com a versão do modelo de cada análise (UC09) | Concluído: 127 testes; conferido contra a API real |
 
 Telas de marcos ainda não feitos existem como reserva (`EmConstrucao`), já
 protegidas pelo papel certo, para que as rotas e a navegação sejam testadas desde o F1.

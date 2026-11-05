@@ -41,6 +41,9 @@ export function sessao(extra: Partial<SessaoDoPaciente> = {}): SessaoDoPaciente 
     concluidaEm: null,
     analiseId: null,
     analiseStatus: null,
+    analiseConcluidaEm: null,
+    versaoModelo: null,
+    origemDadosModelo: null,
     ...extra,
   };
 }

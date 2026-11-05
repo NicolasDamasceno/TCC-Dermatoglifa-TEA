@@ -47,6 +47,10 @@ export interface SessaoDoPaciente {
   concluidaEm: string | null;
   analiseId: string | null;
   analiseStatus: StatusAnalise | null;
+  /** UC09: quando a análise foi concluída e com qual versão do modelo (RN06). */
+  analiseConcluidaEm: string | null;
+  versaoModelo: string | null;
+  origemDadosModelo: 'SINTETICO' | 'REAL' | null;
 }
 
 /** Como a situação foi definida (UC13); null enquanto o paciente é suspeita. */

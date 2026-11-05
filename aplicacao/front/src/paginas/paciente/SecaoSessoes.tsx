@@ -4,7 +4,10 @@ import { dataHora } from '../../componentes/formatos';
 import { NOME_STATUS_ANALISE, NOME_STATUS_SESSAO } from '../../dominio/pacientes';
 import estilos from './Paciente.module.css';
 
-/** Coletas do paciente, da mais recente para a mais antiga, com o caminho para o resultado. */
+/**
+ * UC09 — coletas do paciente, da mais recente para a mais antiga, com a versão do
+ * modelo de cada análise e o caminho para o resultado.
+ */
 export function SecaoSessoes({ sessoes }: { sessoes: SessaoDoPaciente[] }) {
   return (
     <section className={estilos.secao} aria-labelledby="titulo-sessoes">
@@ -19,6 +22,7 @@ export function SecaoSessoes({ sessoes }: { sessoes: SessaoDoPaciente[] }) {
                 <th scope="col">Iniciada em</th>
                 <th scope="col">Coleta</th>
                 <th scope="col">Análise</th>
+                <th scope="col">Modelo</th>
                 <th scope="col">
                   <span className="somente-leitor-de-tela">Abrir</span>
                 </th>
@@ -29,7 +33,16 @@ export function SecaoSessoes({ sessoes }: { sessoes: SessaoDoPaciente[] }) {
                 <tr key={s.id}>
                   <th scope="row">{dataHora(s.iniciadaEm)}</th>
                   <td>{NOME_STATUS_SESSAO[s.status]}</td>
-                  <td>{s.analiseStatus ? NOME_STATUS_ANALISE[s.analiseStatus] : '—'}</td>
+                  <td>
+                    {s.analiseStatus ? NOME_STATUS_ANALISE[s.analiseStatus] : '—'}
+                    {s.analiseConcluidaEm && <span className={estilos.versao}>em {dataHora(s.analiseConcluidaEm)}</span>}
+                  </td>
+                  <td>
+                    {s.versaoModelo ?? '—'}
+                    {s.origemDadosModelo === 'SINTETICO' && (
+                      <span className={estilos.versao}>treinado com dados sintéticos</span>
+                    )}
+                  </td>
                   <td className={estilos.acao}>
                     <LinkDaSessao sessao={s} />
                   </td>
