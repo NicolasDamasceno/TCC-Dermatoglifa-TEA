@@ -56,6 +56,11 @@ flowchart LR
 - Augmentation: rotação pequena (até ±15–20°, como em Michelsanti et al. 2017) e
   zoom leve. **Sem `RandomFlip` dentro do modelo.** Espelhamento só é permitido no
   pipeline de dados, trocando `ALCA_ESQUERDA ↔ ALCA_DIREITA` junto com a imagem.
+- `BatchNormalization` com estatísticas **exatas** (PreciseBN; Wu & Johnson, 2021,
+  arXiv:2105.07576): antes de cada validação e no fim do treino, média e variância
+  de cada camada são recalculadas sobre o treino sem augmentation, em vez de
+  ficar com a média móvel. Acrescentado em 2026-11-05, depois que a média móvel
+  fez a validação do modelo de demonstração v1 oscilar entre épocas (ADR-0008).
 - Variante a comparar depois: base pré-treinada (transferência de aprendizado),
   documentada como caminho para chegar a ~95% na literatura.
 

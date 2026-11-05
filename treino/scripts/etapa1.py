@@ -17,6 +17,8 @@ O que mudou em relação à referência, e por quê:
 - divisão treino/validação/teste por participante, nunca por imagem;
 - matriz de confusão impressa e sensibilidade, especificidade e AUC por classe;
 - caminhos por argumento ou variável de ambiente, nada fixo no Google Drive;
+- estatísticas do BatchNormalization recalculadas antes de cada validação e no fim
+  do treino (PreciseBN; Wu & Johnson, 2021), em vez da média móvel;
 - treino em CPU (a RX 6600 não tem suporte oficial no ROCm; ADR-0002).
 
 Uso típico (dados sintéticos, gera o modelo de demonstração):
@@ -121,6 +123,56 @@ def construir_cnn(
         Dense(len(CLASSES), activation='softmax'),
     ]
     return Sequential(camadas, name='cnn_padroes')
+
+
+# 6 - Treinamento: estatísticas exatas do BatchNormalization (PreciseBN) --------------
+#
+# O BatchNormalization guarda média e variância por média móvel exponencial
+# (momentum 0,99): o valor fica dominado por ativações de estados anteriores do
+# modelo. No modelo de demonstração v1 isso fez a validação oscilar entre 0,77 e
+# 0,98 de uma época para outra, com o treino estável em ~0,98, e enviesou os erros
+# para uma classe. Recalcular as estatísticas com os pesos fixos, sobre o treino
+# sem augmentation, é o "PreciseBN" de Wu & Johnson (2021, arXiv:2105.07576).
+
+
+def recalibrar_batchnorm(modelo: keras.Sequential, dados: tf.data.Dataset) -> None:
+    """Troca média e variância móveis de cada BatchNormalization pelas do conjunto
+    `dados` (lotes de imagens, sem augmentation), camada por camada: as estatísticas
+    de uma camada são medidas depois de recalibrar as anteriores."""
+    camadas = modelo.layers
+    for k, normalizacao in enumerate(camadas):
+        if not isinstance(normalizacao, BatchNormalization):
+            continue
+        soma = soma_quadrados = None
+        n = 0
+        for lote in dados:
+            imagens = lote[0] if isinstance(lote, tuple) else lote
+            ativacao = imagens
+            for camada in camadas[:k]:
+                ativacao = camada(ativacao, training=False)
+            ativacao = tf.reshape(tf.cast(ativacao, tf.float64), (-1, ativacao.shape[-1]))
+            parcial, parcial_quadrados = tf.reduce_sum(ativacao, 0), tf.reduce_sum(ativacao**2, 0)
+            soma = parcial if soma is None else soma + parcial
+            soma_quadrados = parcial_quadrados if soma_quadrados is None else soma_quadrados + parcial_quadrados
+            n += int(ativacao.shape[0])
+        if not n:
+            raise ValueError('Conjunto vazio: não há como recalcular o BatchNormalization.')
+        media = soma / n
+        variancia = tf.maximum(soma_quadrados / n - media**2, 0.0)
+        normalizacao.moving_mean.assign(tf.cast(media, normalizacao.moving_mean.dtype))
+        normalizacao.moving_variance.assign(tf.cast(variancia, normalizacao.moving_variance.dtype))
+
+
+class BatchNormPreciso(keras.callbacks.Callback):
+    """Recalibra o BatchNormalization antes de cada validação, para que
+    EarlyStopping e ReduceLROnPlateau reajam ao modelo, não ao ruído da média móvel."""
+
+    def __init__(self, dados: tf.data.Dataset) -> None:
+        super().__init__()
+        self.dados = dados
+
+    def on_test_begin(self, logs=None) -> None:
+        recalibrar_batchnorm(self.model, self.dados)
 
 
 # 8 - Avaliação ------------------------------------------------------------------------
@@ -343,6 +395,8 @@ def principal() -> Path:
 
     # 3 - Carregamento dos dados -------------------------------------------------------
     treino = keras.utils.image_dataset_from_directory(pastas['treino'], shuffle=True, **carga)
+    # o mesmo treino, sem augmentation nem espelho: base das estatísticas do BatchNorm
+    treino_limpo = keras.utils.image_dataset_from_directory(pastas['treino'], shuffle=False, **carga)
     validacao = keras.utils.image_dataset_from_directory(pastas['validacao'], shuffle=False, **carga)
     teste = keras.utils.image_dataset_from_directory(pastas['teste'], shuffle=False, **carga)
     nome_classes = treino.class_names
@@ -385,9 +439,13 @@ def principal() -> Path:
         epochs=args.epocas,
         validation_data=validacao,
         class_weight=pesos_classe,
-        callbacks=[callback_parada, callback_lr],
+        # BatchNormPreciso recalibra no início de cada validação (on_test_begin)
+        callbacks=[BatchNormPreciso(treino_limpo), callback_parada, callback_lr],
         verbose=2,
     )
+    # os pesos restaurados pelo EarlyStopping já vêm recalibrados; repetir garante o
+    # mesmo resultado caso o treino termine sem restaurar
+    recalibrar_batchnorm(classificador, treino_limpo)
     duracao = (datetime.now() - inicio).total_seconds()
 
     # 8 - Avaliação do modelo (no teste, que não foi usado em nenhuma decisão) ------------

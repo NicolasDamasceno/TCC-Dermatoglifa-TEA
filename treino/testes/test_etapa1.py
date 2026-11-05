@@ -7,6 +7,7 @@ import keras
 import numpy as np
 import pytest
 import sinteticos
+import tensorflow as tf
 from dermatoglifia_ia.modelo import OrigemModelo, carregar_pasta
 
 
@@ -22,6 +23,50 @@ def test_cnn_segue_a_referencia_com_os_ajustes_do_adr_0002():
     assert 'GlobalAveragePooling2D' in tipos
     saida = modelo.layers[-1]
     assert saida.units == 5 and saida.activation is keras.activations.softmax  # não sigmoid
+
+
+def _lotes_sinteticos(n=48, lado=16, semente=0):
+    rng = np.random.default_rng(semente)
+    imagens = rng.uniform(0, 255, (n, lado, lado, 1)).astype('float32')
+    rotulos = np.eye(5, dtype='float32')[rng.integers(0, 5, n)]
+    return tf.data.Dataset.from_tensor_slices((imagens, rotulos)).batch(16), imagens
+
+
+def test_recalibrar_batchnorm_usa_as_estatisticas_exatas_do_conjunto():
+    dados, imagens = _lotes_sinteticos()
+    modelo = etapa1.construir_cnn((16, 16), blocos=2, filtros=4)
+    # médias móveis propositalmente erradas
+    for bn in [c for c in modelo.layers if isinstance(c, keras.layers.BatchNormalization)]:
+        bn.moving_mean.assign(np.full(bn.moving_mean.shape, 5.0, 'float32'))
+        bn.moving_variance.assign(np.full(bn.moving_variance.shape, 9.0, 'float32'))
+
+    etapa1.recalibrar_batchnorm(modelo, dados)
+
+    # cada BN, aplicado em modo inferência, passa a normalizar exatamente o conjunto
+    ativacao = imagens
+    for camada in modelo.layers:
+        if isinstance(camada, keras.layers.BatchNormalization):
+            entrada = np.asarray(ativacao, dtype='float64').reshape(-1, ativacao.shape[-1])
+            np.testing.assert_allclose(camada.moving_mean.numpy(), entrada.mean(0), rtol=1e-4, atol=1e-5)
+            np.testing.assert_allclose(camada.moving_variance.numpy(), entrada.var(0), rtol=1e-3, atol=1e-5)
+        ativacao = camada(ativacao, training=False)
+
+
+def test_batchnorm_preciso_recalibra_antes_de_cada_validacao():
+    dados, _ = _lotes_sinteticos()
+    modelo = etapa1.construir_cnn((16, 16), blocos=1, filtros=4)
+    modelo.compile(optimizer='adam', loss='categorical_crossentropy')
+    chamadas = []
+
+    class Espiao(etapa1.BatchNormPreciso):
+        def on_test_begin(self, logs=None):
+            super().on_test_begin(logs)
+            bn = next(c for c in self.model.layers if isinstance(c, keras.layers.BatchNormalization))
+            chamadas.append(bn.moving_mean.numpy().copy())
+
+    modelo.fit(dados, epochs=2, validation_data=dados, callbacks=[Espiao(dados)], verbose=0)
+
+    assert len(chamadas) == 2  # uma por época, dentro do fit
 
 
 def test_avaliar_calcula_sensibilidade_e_especificidade():
