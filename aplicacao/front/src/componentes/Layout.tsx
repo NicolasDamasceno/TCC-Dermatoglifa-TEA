@@ -38,6 +38,9 @@ export function Layout() {
                     <NavLink to="/admin/modelos" className={classeLink}>
                       Modelos de IA
                     </NavLink>
+                    <NavLink to="/admin/auditoria" className={classeLink}>
+                      Auditoria
+                    </NavLink>
                   </>
                 )}
               </nav>

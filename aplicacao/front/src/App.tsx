@@ -1,5 +1,6 @@
 import { Route, Routes } from 'react-router';
 import { Layout } from './componentes/Layout';
+import { Auditoria } from './paginas/Auditoria';
 import { CadastrosPendentes } from './paginas/CadastrosPendentes';
 import { Coleta } from './paginas/coleta/Coleta';
 import { Entrar } from './paginas/Entrar';
@@ -28,6 +29,7 @@ export function App() {
         <Route element={<RotaProtegida papel="ADMIN" />}>
           <Route path="/admin/solicitacoes" element={<CadastrosPendentes />} />
           <Route path="/admin/modelos" element={<Modelos />} />
+          <Route path="/admin/auditoria" element={<Auditoria />} />
         </Route>
 
         <Route element={<RotaProtegida papel="MEDICO" />}>

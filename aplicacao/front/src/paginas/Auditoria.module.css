@@ -1,0 +1,145 @@
+.pagina {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-5);
+}
+
+.nota {
+  color: var(--tinta-suave);
+}
+
+.filtros {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  gap: var(--esp-4);
+  align-items: start;
+  padding: var(--esp-5);
+  background: var(--papel-ficha);
+  border: 1px solid var(--linha);
+}
+
+.periodo {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: var(--esp-3);
+}
+
+.acoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--esp-3);
+  grid-column: 1 / -1;
+}
+
+.vazio {
+  padding: var(--esp-5) 0;
+  color: var(--tinta-suave);
+  border-top: 1px solid var(--linha-fina);
+  border-bottom: 1px solid var(--linha-fina);
+}
+
+.rolagem {
+  position: relative;
+  overflow-x: auto;
+  width: 100%;
+}
+
+.rolagem[aria-busy='true'] {
+  opacity: 0.6;
+}
+
+.tabela {
+  width: 100%;
+  min-width: 60rem;
+  border-collapse: collapse;
+  background: var(--papel-ficha);
+  border: 1px solid var(--linha);
+}
+
+.legenda {
+  padding-bottom: var(--esp-2);
+  text-align: left;
+  color: var(--tinta-suave);
+  font-size: var(--t-0);
+}
+
+.tabela th,
+.tabela td {
+  padding: var(--esp-3) var(--esp-4);
+  text-align: left;
+  vertical-align: top;
+  border-bottom: 1px solid var(--linha-fina);
+}
+
+.tabela tbody tr:last-child > * {
+  border-bottom: 0;
+}
+
+.tabela thead th {
+  font-size: var(--t-0);
+  font-weight: 600;
+  color: var(--tinta-suave);
+  border-bottom-color: var(--linha);
+}
+
+.tabela tbody th {
+  font-weight: 400;
+}
+
+.quando {
+  white-space: nowrap;
+}
+
+.secundario {
+  display: block;
+  font-size: var(--t-0);
+  color: var(--tinta-suave);
+  overflow-wrap: anywhere;
+}
+
+/* Códigos e identificadores são conferidos caractere a caractere: largura fixa só neles. */
+.codigo {
+  display: block;
+  font-family: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+  font-size: var(--t-0);
+  color: var(--tinta-suave);
+  overflow-wrap: anywhere;
+}
+
+.codigoCelula {
+  font-family: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+  font-size: var(--t-0);
+  white-space: nowrap;
+}
+
+.filtrarPaciente {
+  display: inline-block;
+  margin-top: var(--esp-1);
+  font-size: var(--t-0);
+}
+
+.detalhes {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--t-0);
+}
+
+.paginas {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--esp-4);
+}
+
+.paginas a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--alvo-toque);
+}
+
+/* Em telas largas o período ocupa duas colunas, para as datas caberem inteiras. */
+@media (min-width: 60rem) {
+  .periodo {
+    grid-column: span 2;
+  }
+}

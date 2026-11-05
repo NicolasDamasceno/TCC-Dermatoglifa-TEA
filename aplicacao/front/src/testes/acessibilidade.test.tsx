@@ -1,7 +1,7 @@
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import axe from 'axe-core';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { analise, ID_ANALISE } from './analises';
 import { ID_SESSAO, sessaoColeta } from './coletas';
 import { detalhe, ID_PACIENTE, pacienteResumo, sessao, tcle } from './pacientes';
@@ -61,6 +61,34 @@ describe('acessibilidade (axe)', () => {
     });
     renderizarApp('/admin/modelos');
     await userEvent.setup().click(await screen.findByRole('button', { name: 'Promover v2_sintetico' }));
+    await semViolacoes();
+  });
+
+  it('Trilha de auditoria, com erros nos filtros', async () => {
+    comSessao(ADMIN);
+    const medico = { id: 'u1', nome: 'Dra. Sintética', email: 'dra@exemplo.test', papel: 'MEDICO' };
+    vi.stubGlobal(
+      'fetch',
+      vi.fn((url: string) =>
+        Promise.resolve(
+          url.startsWith('/api/auditoria/filtros')
+            ? json(200, { acoes: ['LOGIN_OK'], usuarios: [medico] })
+            : json(200, {
+                itens: [
+                  { id: 1, ocorridoEm: '2026-11-05T22:00:00Z', usuarioId: 'u1', usuario: medico, acao: 'PACIENTE_CRIADO', entidade: 'paciente', entidadeId: ID_PACIENTE, ip: '127.0.0.1', detalhes: { quantidade: '1' } },
+                ],
+                total: 120,
+                pagina: 1,
+                tamanho: 50,
+              }),
+        ),
+      ),
+    );
+    renderizarApp('/admin/auditoria');
+    const usuario = userEvent.setup();
+    await screen.findByRole('table');
+    await usuario.type(screen.getByLabelText('Paciente'), 'x');
+    await usuario.click(screen.getByRole('button', { name: 'Filtrar' }));
     await semViolacoes();
   });
 

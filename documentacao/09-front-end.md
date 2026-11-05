@@ -99,6 +99,7 @@ ulnar") e a confiança, sem a imagem.
 | `/` | logado | redireciona: médico → `/pacientes`; admin → `/admin/solicitacoes` | — |
 | `/admin/solicitacoes` | admin | Cadastros pendentes: aprovar ou recusar | UC03 |
 | `/admin/modelos` | admin | Modelos de IA: o que o serviço carregou, versões registradas e promoção | UC10 |
+| `/admin/auditoria` | admin | Trilha de auditoria com filtros (usuário, ação, paciente, período) no endereço | UC11 |
 | `/pacientes` | médico | Lista e busca | UC04 |
 | `/pacientes/novo` | médico | Cadastrar paciente | UC04 |
 | `/pacientes/:id` | médico | Paciente: dados, consentimentos, sessões; registrar TCLE/TALE; iniciar coleta | UC04, UC05 |
@@ -141,6 +142,11 @@ voltando depois para a página pedida.
   modelo é sintético. A tabela lista as versões com a acurácia balanceada no teste,
   o número de análises e a situação. O hash usa fonte de largura fixa, porque é
   conferido caractere a caractere.
+- **Auditoria (admin).** Filtros por usuário, ação, paciente (identificador) e
+  período, guardados no endereço; tabela do evento mais recente ao mais antigo, 50
+  por página, com a ação por extenso e o código, o registro, os detalhes e o IP.
+  Linhas de paciente levam à trilha daquele paciente. Nomes de pacientes nunca
+  aparecem.
 - **Pacientes.** Tabela (nome, idade, sexo, situação, coleta liberada) do cadastro
   mais recente ao mais antigo; busca por nome guardada no endereço (`?busca=`);
   estado vazio convida a cadastrar o primeiro paciente.
@@ -287,6 +293,7 @@ repositório: o serviço de inferência real é o próximo módulo (ADR-0001).
 | F7 | Situação diagnóstica na página do paciente (UC13; ADR-0009) | Concluído: 121 testes; conferido contra a API real, no computador e no celular |
 | F8 | Modelos de IA para o administrador (UC10) | Concluído: 127 testes; conferido contra a API e o Serviço de IA reais |
 | F9 | Histórico do paciente com a versão do modelo de cada análise (UC09) | Concluído: 127 testes; conferido contra a API real |
+| F10 | Trilha de auditoria do administrador (UC11) | Concluído: 133 testes; conferido contra a API real, de 320 px a 1280 px |
 
 Telas de marcos ainda não feitos existem como reserva (`EmConstrucao`), já
 protegidas pelo papel certo, para que as rotas e a navegação sejam testadas desde o F1.
