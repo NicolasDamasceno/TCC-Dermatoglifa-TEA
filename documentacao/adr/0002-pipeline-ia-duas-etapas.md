@@ -130,7 +130,11 @@ concordância); erros da Etapa 1 se propagam para os indicadores.
 
 ## Ações
 
-1. [ ] Escrever `treino/scripts/treinar_padroes.py` a partir do `modelo_arroz_keras.py`.
+1. [x] Escrever o treino da Etapa 1 a partir do `modelo_arroz_keras.py`
+   (`treino/scripts/etapa1.py`, com testes em `treino/testes/`).
 2. [ ] Definir o protocolo de rotulação (guia de classes com exemplos e dois anotadores).
-3. [ ] Implementar a tabela de conversão alça esquerda/direita → ulnar/radial com testes.
-4. [ ] Implementar o cálculo dos indicadores com testes unitários.
+3. [x] Implementar a tabela de conversão alça esquerda/direita → ulnar/radial com
+   testes (`dermatoglifia_ia/dominio.py`). A orientação real das imagens ainda
+   depende do método de captura (ADR-0004, ação 3).
+4. [x] Implementar o cálculo dos indicadores com testes unitários
+   (`dermatoglifia_ia/dominio.py`).
