@@ -27,7 +27,8 @@ tests/
 cd aplicacao/back
 dotnet tool restore                       # instala o dotnet-ef da versão do projeto
 
-# Banco local (exemplo com psql)
+# Banco local: pelo Docker, na raiz do repositório (cp .env.example .env;
+# docker compose up -d banco), ou com um PostgreSQL instalado:
 createuser -P dermatoglifia               # defina uma senha
 createdb -O dermatoglifia dermatoglifia
 

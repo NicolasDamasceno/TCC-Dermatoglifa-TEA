@@ -1,0 +1,17 @@
+# Só no servidor da pesquisa: monta o modelo real, que nunca entra no Git (ADR-0005).
+#
+#   docker compose -f compose.yaml -f compose.producao.yaml up -d --build
+#
+# modelo_producao/producao/ precisa ter modelo.keras (copiado do local controlado),
+# modelo.sha256 e config.json. Com a pasta presente, o serviço usa o modelo real e,
+# se ele for inválido, fica indisponível em vez de cair para o de demonstração.
+
+services:
+  ia:
+    volumes:
+      - type: bind
+        source: ./modelo_producao/producao
+        target: /modelos/producao
+        read_only: true
+        bind:
+          create_host_path: false

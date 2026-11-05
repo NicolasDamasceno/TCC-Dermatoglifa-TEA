@@ -1,0 +1,52 @@
+# Ambiente de desenvolvimento (doc 06; RNF15): PostgreSQL e Serviço de IA.
+# A API (.NET) e o front (React) rodam fora, com `dotnet run` e `npm run dev`.
+#
+#   cp .env.example .env            # e troque a senha
+#   docker compose up -d --build
+#
+# As portas ficam só em 127.0.0.1: nada fica exposto na rede.
+# O Serviço de IA usa o modelo de demonstração (sintético). No servidor da
+# pesquisa, some o compose.producao.yaml para montar o modelo real (ADR-0005).
+
+name: dermatoglifia
+
+services:
+  banco:
+    image: postgres:16.15-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-dermatoglifia}
+      POSTGRES_USER: ${POSTGRES_USER:-dermatoglifia}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?defina POSTGRES_PASSWORD no .env (veja .env.example)}
+    ports:
+      - "127.0.0.1:${POSTGRES_PORTA:-5432}:5432"
+    volumes:
+      - banco:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$$POSTGRES_USER\" -d \"$$POSTGRES_DB\""]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  ia:
+    build: ./modelo_producao/servico
+    image: dermatoglifia-ia:local
+    environment:
+      DERMATOGLIFIA_CONVENCAO_ALCA: ${DERMATOGLIFIA_CONVENCAO_ALCA:-IMPRESSAO}
+    volumes:
+      - ./modelo_producao/demo:/modelos/demo:ro
+    ports:
+      - "127.0.0.1:${IA_PORTA:-8000}:8000"
+    # O serviço não grava em disco (recebe digitais e responde): sistema de
+    # arquivos só de leitura, sem privilégios extras.
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    restart: unless-stopped
+
+volumes:
+  banco:

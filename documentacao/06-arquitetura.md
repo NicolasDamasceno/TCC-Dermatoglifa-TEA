@@ -140,8 +140,15 @@ Etapa 2 se houver modelo validado, senão `escore_risco: null`.
 
 ## Ambiente de desenvolvimento
 
-- `docker compose` (a criar) com PostgreSQL e o Serviço de IA; a API e o front
-  rodam pelo `dotnet run` e `npm run dev`.
+- `compose.yaml` na raiz (RNF15) sobe o PostgreSQL 16 e o Serviço de IA, só em
+  `127.0.0.1`; a API e o front rodam pelo `dotnet run` e `npm run dev`. A senha do
+  banco vem do `.env` (modelo em `.env.example`); sem ela o compose não sobe.
+- O contêiner do Serviço de IA roda sem privilégios, com o sistema de arquivos só
+  de leitura e o modelo montado de fora: a imagem não contém pesos. O modelo de
+  demonstração vem de `modelo_producao/demo/`; no servidor da pesquisa,
+  `compose.producao.yaml` monta `modelo_producao/producao/` (ADR-0005).
+- O volume do banco guarda o que for cadastrado. Com dados reais, ele precisa
+  estar em disco cifrado, como a máquina de treino (RNF11).
 - Configurações sensíveis via `dotnet user-secrets` e `.env` local; o repositório
   só terá `.env.example`.
 

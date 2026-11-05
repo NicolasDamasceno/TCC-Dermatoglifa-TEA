@@ -1,0 +1,8 @@
+# Só requirements.txt, pyproject.toml e o código entram na imagem.
+*
+!requirements.txt
+!pyproject.toml
+!dermatoglifia_ia/
+!servico/
+**/__pycache__
+**/*.pyc

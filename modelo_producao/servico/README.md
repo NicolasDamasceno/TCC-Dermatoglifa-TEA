@@ -34,6 +34,23 @@ python -m servico               # http://127.0.0.1:8000
 
 A API .NET chama `Inferencia:UrlBase` (padrão `http://localhost:8000`).
 
+### Com Docker
+
+O `compose.yaml` da raiz constrói este `Dockerfile` e sobe o serviço em
+`127.0.0.1:8000`, junto com o PostgreSQL (`docker compose up -d --build`). Na
+imagem não há modelo: o compose monta `modelo_producao/demo/` em `/modelos/demo`,
+somente leitura. O contêiner roda sem privilégios e com a raiz só de leitura; o
+Keras grava a própria configuração em `$HOME`, que aponta para o `/tmp` em
+memória. O `HEALTHCHECK` consulta `/saude` e marca o contêiner como
+"unhealthy" quando não há modelo válido. No servidor da pesquisa:
+
+```sh
+docker compose -f compose.yaml -f compose.producao.yaml up -d --build
+```
+
+O `compose.producao.yaml` monta `modelo_producao/producao/` e não sobe se a pasta
+não existir.
+
 | Variável | Padrão | Uso |
 |---|---|---|
 | `DERMATOGLIFIA_MODELO_PRODUCAO` | `modelo_producao/producao/` | pasta do modelo real (só no servidor da pesquisa; fora do Git) |
