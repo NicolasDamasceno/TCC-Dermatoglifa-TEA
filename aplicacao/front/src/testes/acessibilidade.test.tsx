@@ -78,6 +78,18 @@ describe('acessibilidade (axe)', () => {
     await semViolacoes();
   });
 
+  it('Paciente, com a situação diagnóstica em edição e erros', async () => {
+    comSessao();
+    const diagnostico = { fonte: 'Avaliação sintética', avaliadoEm: '2026-10-20', atualizadoEm: '2026-10-21T14:00:00Z' };
+    simularApi({ [`GET ${PACIENTE}`]: json(200, detalhe({ diagnostico }, { situacao: 'TEA_CONFIRMADO' })) });
+    renderizarApp(`/pacientes/${ID_PACIENTE}`);
+    const usuario = userEvent.setup();
+    await usuario.click(await screen.findByRole('button', { name: 'Atualizar situação diagnóstica' }));
+    await usuario.clear(screen.getByLabelText('Fonte do diagnóstico'));
+    await usuario.click(screen.getByRole('button', { name: 'Salvar situação' }));
+    await semViolacoes();
+  });
+
   it('Coleta, com pré-visualização e dedo não coletável', async () => {
     comSessao();
     simularApi({

@@ -218,5 +218,103 @@ describe('Paciente (UC04, UC05)', () => {
     expect(screen.getByText(/foram eliminados a pedido do titular/)).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Registrar consentimento' })).not.toBeInTheDocument();
     expect(screen.queryByRole('region', { name: 'Consentimentos' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('region', { name: 'Situação diagnóstica' })).not.toBeInTheDocument();
+  });
+});
+
+const CONFIRMADO = { fonte: 'Avaliação multiprofissional sintética', avaliadoEm: '2026-10-20', atualizadoEm: '2026-10-21T14:00:00Z' };
+const INDEPENDENTE = /sem considerar o resultado/;
+
+describe('Situação diagnóstica (UC13)', () => {
+  it('registra o diagnóstico com fonte, data e a declaração de independência', async () => {
+    const { fetchMock, usuario } = abrir(
+      json(200, detalhe()),
+      json(200, { situacao: 'TEA_CONFIRMADO', fonteDiagnostico: CONFIRMADO.fonte, avaliadoEm: CONFIRMADO.avaliadoEm, atualizadaEm: CONFIRMADO.atualizadoEm }),
+      json(200, detalhe({ diagnostico: CONFIRMADO }, { situacao: 'TEA_CONFIRMADO' })),
+    );
+
+    const secao = await screen.findByRole('region', { name: 'Situação diagnóstica' });
+    expect(secao).toHaveTextContent('Quando o diagnóstico clínico for fechado');
+    await usuario.click(within(secao).getByRole('button', { name: 'Atualizar situação diagnóstica' }));
+    const formulario = within(secao).getByRole('form', { name: 'Atualizar situação diagnóstica' });
+    expect(within(formulario).getByRole('radio', { name: /^TEA confirmado/ })).toHaveFocus();
+    expect(within(formulario).queryByRole('radio', { name: /Voltar para suspeita/ })).not.toBeInTheDocument();
+
+    await usuario.click(within(formulario).getByRole('radio', { name: /^TEA confirmado/ }));
+    await usuario.click(within(formulario).getByRole('button', { name: 'Salvar situação' }));
+    expect(within(formulario).getByText('Informe como o diagnóstico foi obtido.')).toBeInTheDocument();
+    expect(within(formulario).getByText('Confirme que o diagnóstico não considerou o resultado do sistema.')).toBeInTheDocument();
+    expect(within(formulario).getByRole('checkbox', { name: INDEPENDENTE })).toHaveAttribute('aria-invalid', 'true');
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+
+    await usuario.type(within(formulario).getByLabelText('Fonte do diagnóstico'), CONFIRMADO.fonte);
+    await usuario.type(within(formulario).getByLabelText('Data da avaliação clínica'), CONFIRMADO.avaliadoEm);
+    await usuario.click(within(formulario).getByRole('checkbox', { name: INDEPENDENTE }));
+    await usuario.click(within(formulario).getByRole('button', { name: 'Salvar situação' }));
+
+    expect(await within(secao).findByText('Situação diagnóstica atualizada: TEA confirmado.')).toBeInTheDocument();
+    expect(fetchMock.mock.calls[1]![0]).toBe(`/api/pacientes/${ID_PACIENTE}/situacao-diagnostica`);
+    expect(fetchMock.mock.calls[1]![1]!.method).toBe('PATCH');
+    expect(corpo(fetchMock, 1)).toEqual({
+      situacao: 'TEA_CONFIRMADO',
+      fonte: CONFIRMADO.fonte,
+      avaliadoEm: CONFIRMADO.avaliadoEm,
+      independenteDoSistema: true,
+    });
+    expect(await within(secao).findByText(CONFIRMADO.fonte)).toBeInTheDocument();
+    expect(secao).toHaveTextContent('20/10/2026');
+  });
+
+  it('não aceita avaliação antes do nascimento', async () => {
+    const { fetchMock, usuario } = abrir(json(200, detalhe()));
+
+    await usuario.click(await screen.findByRole('button', { name: 'Atualizar situação diagnóstica' }));
+    const formulario = screen.getByRole('form', { name: 'Atualizar situação diagnóstica' });
+    await usuario.click(within(formulario).getByRole('radio', { name: /^Controle/ }));
+    await usuario.type(within(formulario).getByLabelText('Fonte do diagnóstico'), 'Grupo controle do protocolo');
+    await usuario.type(within(formulario).getByLabelText('Data da avaliação clínica'), '2021-01-10');
+    await usuario.click(within(formulario).getByRole('checkbox', { name: INDEPENDENTE }));
+    await usuario.click(within(formulario).getByRole('button', { name: 'Salvar situação' }));
+
+    expect(within(formulario).getByText('A data da avaliação é anterior ao nascimento.')).toBeInTheDocument();
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('corrige um registro feito por engano voltando para suspeita', async () => {
+    const { fetchMock, usuario } = abrir(
+      json(200, detalhe({ diagnostico: CONFIRMADO }, { situacao: 'TEA_CONFIRMADO' })),
+      json(200, { situacao: 'SUSPEITA', fonteDiagnostico: null, avaliadoEm: null, atualizadaEm: '2026-11-05T12:00:00Z' }),
+      json(200, detalhe()),
+    );
+
+    const secao = await screen.findByRole('region', { name: 'Situação diagnóstica' });
+    expect(within(secao).getByText('Avaliação clínica em')).toBeInTheDocument();
+    await usuario.click(within(secao).getByRole('button', { name: 'Atualizar situação diagnóstica' }));
+    const formulario = within(secao).getByRole('form', { name: 'Atualizar situação diagnóstica' });
+    // Valores atuais preenchidos; a declaração não.
+    expect(within(formulario).getByRole('radio', { name: /^TEA confirmado/ })).toBeChecked();
+    expect(within(formulario).getByLabelText('Fonte do diagnóstico')).toHaveValue(CONFIRMADO.fonte);
+    expect(within(formulario).getByRole('checkbox', { name: INDEPENDENTE })).not.toBeChecked();
+
+    await usuario.click(within(formulario).getByRole('radio', { name: /Voltar para suspeita/ }));
+    expect(within(formulario).queryByLabelText('Fonte do diagnóstico')).not.toBeInTheDocument();
+    await usuario.click(within(formulario).getByRole('button', { name: 'Salvar situação' }));
+
+    expect(await within(secao).findByText('Situação diagnóstica atualizada: Suspeita de TEA.')).toBeInTheDocument();
+    expect(corpo(fetchMock, 1)).toEqual({ situacao: 'SUSPEITA', fonte: null, avaliadoEm: null, independenteDoSistema: false });
+  });
+
+  it('mostra o motivo quando a API recusa', async () => {
+    const { usuario } = abrir(json(200, detalhe()), json(422, { title: 'A data da avaliação clínica não pode estar no futuro.', status: 422 }));
+
+    await usuario.click(await screen.findByRole('button', { name: 'Atualizar situação diagnóstica' }));
+    const formulario = screen.getByRole('form', { name: 'Atualizar situação diagnóstica' });
+    await usuario.click(within(formulario).getByRole('radio', { name: /^TEA descartado/ }));
+    await usuario.type(within(formulario).getByLabelText('Fonte do diagnóstico'), 'Avaliação sintética');
+    await usuario.type(within(formulario).getByLabelText('Data da avaliação clínica'), '2026-10-01');
+    await usuario.click(within(formulario).getByRole('checkbox', { name: INDEPENDENTE }));
+    await usuario.click(within(formulario).getByRole('button', { name: 'Salvar situação' }));
+
+    expect(await within(formulario).findByText('A data da avaliação clínica não pode estar no futuro.')).toBeInTheDocument();
   });
 });

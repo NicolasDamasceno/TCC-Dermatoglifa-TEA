@@ -64,23 +64,35 @@ interface PropsMarcacao {
   descricao?: string;
   marcado: boolean;
   aoMudar: (marcado: boolean) => void;
+  erro?: string | undefined;
 }
 
 /** Caixa de marcação com texto por extenso (as autorizações do TCLE). */
-export function Marcacao({ rotulo, descricao, marcado, aoMudar }: PropsMarcacao) {
+export function Marcacao({ rotulo, descricao, marcado, aoMudar, erro }: PropsMarcacao) {
+  const id = useId();
+
   return (
-    <label className={`${estilos.opcao} ${estilos.marcacao}`}>
-      <input
-        type="checkbox"
-        checked={marcado}
-        onChange={(e) => {
-          aoMudar(e.target.checked);
-        }}
-      />
-      <span>
-        <span className={estilos.rotulo}>{rotulo}</span>
-        {descricao && <span className={estilos.descricao}>{descricao}</span>}
-      </span>
-    </label>
+    <div className={estilos.comErro}>
+      <label className={`${estilos.opcao} ${estilos.marcacao}`}>
+        <input
+          type="checkbox"
+          checked={marcado}
+          aria-invalid={erro ? true : undefined}
+          aria-describedby={erro ? `${id}-erro` : undefined}
+          onChange={(e) => {
+            aoMudar(e.target.checked);
+          }}
+        />
+        <span>
+          <span className={estilos.rotulo}>{rotulo}</span>
+          {descricao && <span className={estilos.descricao}>{descricao}</span>}
+        </span>
+      </label>
+      {erro && (
+        <p id={`${id}-erro`} className={estilos.erro}>
+          {erro}
+        </p>
+      )}
+    </div>
   );
 }

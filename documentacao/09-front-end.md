@@ -144,7 +144,9 @@ voltando depois para a página pedida.
   possível no momento: continuar a coleta em andamento, iniciar (método, tipo de
   impressão e dispositivo), ou explicar por que não está liberada — inclusive
   quando há coleta em andamento e o TCLE foi revogado. Depois, as coletas (com
-  link para o resultado), os consentimentos (registrar TCLE/TALE com as três
+  link para o resultado), a **situação diagnóstica** (UC13: situação, fonte, data
+  da avaliação clínica e a declaração de que o diagnóstico não considerou o
+  resultado do sistema; ADR-0009), os consentimentos (registrar TCLE/TALE com as três
   autorizações por extenso, revogar com confirmação) e o responsável legal. As
   sessões vêm do próprio `GET /api/pacientes/{id}` (campo `sessoes`, doc 08).
 - **Coleta.** A ficha ocupa o topo; cada quadro é um botão ("Direita, Polegar:
@@ -275,6 +277,7 @@ repositório: o serviço de inferência real é o próximo módulo (ADR-0001).
 | F4 | Coleta com a ficha decadactilar (UC06) | Concluído: 96 testes no total; conferido contra a API real com imagens sintéticas |
 | F5 | Resultado da análise (UC07, UC08) | Concluído: 108 testes no total; conferido contra a API real com um serviço de IA falso, fora do repositório |
 | F6 | Revisão de acessibilidade, build de produção, ajustes de texto | Concluído: 116 testes; ver seções 5 e 7 |
+| F7 | Situação diagnóstica na página do paciente (UC13; ADR-0009) | Concluído: 121 testes; conferido contra a API real, no computador e no celular |
 
 Telas de marcos ainda não feitos existem como reserva (`EmConstrucao`), já
 protegidas pelo papel certo, para que as rotas e a navegação sejam testadas desde o F1.

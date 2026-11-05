@@ -49,7 +49,7 @@ export function detalhe(extra: Partial<PacienteDetalhe> = {}, paciente: Partial<
   return {
     paciente: pacienteResumo(paciente),
     responsavel: { nome: 'Responsável Sintético', parentesco: 'MAE', contato: '(00) 90000-0000' },
-    fonteDiagnostico: null,
+    diagnostico: null,
     consentimentos: [],
     sessoes: [],
     ...extra,

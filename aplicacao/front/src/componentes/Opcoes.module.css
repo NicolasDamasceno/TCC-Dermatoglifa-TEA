@@ -68,3 +68,8 @@
   font-size: var(--t-0);
   font-weight: 600;
 }
+
+.comErro {
+  display: flex;
+  flex-direction: column;
+}

@@ -12,10 +12,11 @@ import { useSessao } from '../../sessao/contextoSessao';
 import type { EstadoPacienteCriado } from '../NovoPaciente';
 import { SecaoColeta } from './SecaoColeta';
 import { SecaoConsentimentos } from './SecaoConsentimentos';
+import { SecaoDiagnostico } from './SecaoDiagnostico';
 import { SecaoSessoes } from './SecaoSessoes';
 import estilos from './Paciente.module.css';
 
-/** UC04/UC05 — o paciente: dados, coleta, sessões, consentimentos e responsável. */
+/** UC04/UC05/UC13 — o paciente: dados, coleta, sessões, situação diagnóstica, consentimentos e responsável. */
 export function Paciente() {
   const { id = '' } = useParams();
   const { api } = useSessao();
@@ -46,7 +47,7 @@ export function Paciente() {
     return <FalhaAoCarregar erro={detalhe.error} tentar={() => void detalhe.refetch()} />;
   }
 
-  const { paciente, responsavel, consentimentos, sessoes } = detalhe.data;
+  const { paciente, responsavel, diagnostico, consentimentos, sessoes } = detalhe.data;
 
   return (
     <section className={estilos.pagina} aria-labelledby="titulo-paciente">
@@ -90,6 +91,15 @@ export function Paciente() {
       />
 
       <SecaoSessoes sessoes={sessoes} />
+
+      {!paciente.anonimizado && (
+        <SecaoDiagnostico
+          pacienteId={paciente.id}
+          situacao={paciente.situacao}
+          diagnostico={diagnostico}
+          dataNascimento={paciente.dataNascimento}
+        />
+      )}
 
       {!paciente.anonimizado && (
         <SecaoConsentimentos

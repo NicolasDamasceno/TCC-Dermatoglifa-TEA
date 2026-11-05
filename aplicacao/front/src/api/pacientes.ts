@@ -49,10 +49,17 @@ export interface SessaoDoPaciente {
   analiseStatus: StatusAnalise | null;
 }
 
+/** Como a situação foi definida (UC13); null enquanto o paciente é suspeita. */
+export interface Diagnostico {
+  fonte: string;
+  avaliadoEm: string;
+  atualizadoEm: string;
+}
+
 export interface PacienteDetalhe {
   paciente: PacienteResumo;
   responsavel: Responsavel | null;
-  fonteDiagnostico: string | null;
+  diagnostico: Diagnostico | null;
   consentimentos: Consentimento[];
   sessoes: SessaoDoPaciente[];
 }
@@ -76,6 +83,21 @@ export interface NovoConsentimento {
 export interface ResultadoConsentimento {
   consentimentoId: string;
   podeColetar: boolean;
+}
+
+/** PATCH /api/pacientes/{id}/situacao-diagnostica (UC13; ADR-0009). */
+export interface NovaSituacao {
+  situacao: Situacao;
+  fonte: string | null;
+  avaliadoEm: string | null;
+  independenteDoSistema: boolean;
+}
+
+export interface SituacaoAtualizada {
+  situacao: Situacao;
+  fonteDiagnostico: string | null;
+  avaliadoEm: string | null;
+  atualizadaEm: string;
 }
 
 export interface NovaSessao {
@@ -119,6 +141,11 @@ export function revogarConsentimento(
   consentimentoId: string,
 ): Promise<ResultadoConsentimento> {
   return api.requisitar('POST', `${caminho(pacienteId)}/consentimentos/${encodeURIComponent(consentimentoId)}/revogacao`);
+}
+
+/** UC13 — registra a situação definida pelo diagnóstico clínico, feito fora do sistema. */
+export function atualizarSituacao(api: ClienteApi, pacienteId: string, dados: NovaSituacao): Promise<SituacaoAtualizada> {
+  return api.requisitar('PATCH', `${caminho(pacienteId)}/situacao-diagnostica`, dados);
 }
 
 /** Inicia a sessão de coleta (UC06); a resposta traz o id para abrir a ficha. */
