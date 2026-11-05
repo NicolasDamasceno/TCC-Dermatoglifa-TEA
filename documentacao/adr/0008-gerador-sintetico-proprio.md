@@ -74,5 +74,8 @@ exatamente como será com dados reais.
 ## Ações
 
 1. [x] Gerador, divisão por participante e treino da Etapa 1 com testes (`treino/`).
-2. [ ] Primeiro modelo de demonstração em `modelo_producao/demo/` (treino em andamento; validação ainda oscila entre épocas, a investigar).
+2. [x] Primeiro modelo de demonstração em `modelo_producao/demo/`
+   (`2026-11-04_padroes_sintetico_v1`; acurácia balanceada 0,986 no teste sintético).
+   Pendente: a acurácia de validação ainda oscila entre épocas; investigar antes da
+   próxima versão.
 3. [ ] Comparar, quando houver dados reais, pré-treino sintético contra treino do zero.

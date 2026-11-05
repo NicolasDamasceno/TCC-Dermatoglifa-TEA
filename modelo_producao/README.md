@@ -34,4 +34,7 @@ errado, ele **não** cai para o `demo/`: fica indisponível e explica o motivo e
 
 | Versão | Data | Origem dos dados | Pasta em `treino/modelos/` | Métricas principais | SHA-256 |
 |---|---|---|---|---|---|
-| — | — | — | nenhum modelo promovido ainda | — | — |
+| `2026-11-04_padroes_sintetico_v1` (em `demo/`) | 2026-11-04 | Sintético | `sinteticos/2026-11-04_padroes_sintetico_v1` | acurácia balanceada 0,986 no teste **sintético** (570 imagens, 57 participantes) | `56ba5d66dfed470a9930ea020c3fd7e52c8d25f2fb06fb7005f7cd6de1a989b2` |
+
+O modelo de `demo/` serve só para o sistema rodar: suas métricas não dizem nada
+sobre digitais reais (ADR-0008). Nenhum modelo real foi treinado ainda.

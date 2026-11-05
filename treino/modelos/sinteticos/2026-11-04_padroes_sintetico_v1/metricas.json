@@ -1,0 +1,101 @@
+{
+ "teste": {
+  "imagens": 570,
+  "acuracia": 0.9859649122807017,
+  "acuracia_balanceada": 0.9860869565217392,
+  "auc_macro_um_contra_todos": 1.0,
+  "por_classe": {
+   "ALCA_DIREITA": {
+    "sensibilidade": 1.0,
+    "especificidade": 0.9825708061002179,
+    "precisao": 0.9327731092436975,
+    "f1": 0.9652173913043478,
+    "auc_um_contra_todos": 1.0,
+    "suporte": 111
+   },
+   "ALCA_ESQUERDA": {
+    "sensibilidade": 1.0,
+    "especificidade": 1.0,
+    "precisao": 1.0,
+    "f1": 1.0,
+    "auc_um_contra_todos": 1.0,
+    "suporte": 113
+   },
+   "ARCO": {
+    "sensibilidade": 1.0,
+    "especificidade": 1.0,
+    "precisao": 1.0,
+    "f1": 1.0,
+    "auc_um_contra_todos": 1.0,
+    "suporte": 116
+   },
+   "ARCO_TENDIDO": {
+    "sensibilidade": 0.991304347826087,
+    "especificidade": 1.0,
+    "precisao": 1.0,
+    "f1": 0.9956331877729258,
+    "auc_um_contra_todos": 1.0,
+    "suporte": 115
+   },
+   "VERTICILO": {
+    "sensibilidade": 0.9391304347826087,
+    "especificidade": 1.0,
+    "precisao": 1.0,
+    "f1": 0.968609865470852,
+    "auc_um_contra_todos": 1.0,
+    "suporte": 115
+   }
+  },
+  "matriz_confusao": {
+   "linhas_reais_colunas_previstas": [
+    "ALCA_DIREITA",
+    "ALCA_ESQUERDA",
+    "ARCO",
+    "ARCO_TENDIDO",
+    "VERTICILO"
+   ],
+   "valores": [
+    [
+     111,
+     0,
+     0,
+     0,
+     0
+    ],
+    [
+     0,
+     113,
+     0,
+     0,
+     0
+    ],
+    [
+     0,
+     0,
+     116,
+     0,
+     0
+    ],
+    [
+     1,
+     0,
+     0,
+     114,
+     0
+    ],
+    [
+     7,
+     0,
+     0,
+     0,
+     108
+    ]
+   ]
+  }
+ },
+ "treino": {
+  "epocas_treinadas": 37,
+  "melhor_val_loss": 0.3327697515487671,
+  "duracao_segundos": 1475
+ }
+}
