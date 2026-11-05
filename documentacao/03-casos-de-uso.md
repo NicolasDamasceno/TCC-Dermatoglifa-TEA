@@ -246,10 +246,15 @@ são exigidos para o consentimento de menores. Nenhum outro dado é pedido.
 
 ---
 
-## UC09 — Consultar histórico do paciente *(pós-MVP)*
+## UC09 — Consultar histórico do paciente *(implementado em 2026-11-05)*
 
 O médico vê as sessões de coleta e análises anteriores do paciente, em ordem
 cronológica, com a versão de modelo de cada uma.
+
+Na página do paciente, a tabela "Coletas" vai da mais recente à mais antiga e
+mostra, para cada sessão, a situação da coleta, a situação e a data da análise, a
+versão do modelo que a produziu (com a indicação de modelo sintético) e o link
+para o resultado ou para a coleta.
 
 ## UC10 — Promover versão do modelo *(implementado em 2026-11-05)*
 

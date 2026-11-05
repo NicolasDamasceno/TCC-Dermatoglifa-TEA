@@ -85,6 +85,7 @@ public sealed class ColetaTestes(AmbienteApi ambiente)
         Assert.Equal("EM_ANDAMENTO", emAndamento.GetProperty("status").GetString());
         Assert.Equal(JsonValueKind.Null, emAndamento.GetProperty("analiseId").ValueKind);
         Assert.Equal(JsonValueKind.Null, emAndamento.GetProperty("analiseStatus").ValueKind);
+        Assert.Equal(JsonValueKind.Null, emAndamento.GetProperty("versaoModelo").ValueKind);
 
         foreach (var (mao, dedo) in OrdemColeta)
         {
@@ -98,6 +99,11 @@ public sealed class ColetaTestes(AmbienteApi ambiente)
         Assert.Equal(conclusao.GetProperty("analiseId").GetGuid(), concluida.GetProperty("analiseId").GetGuid());
         Assert.Equal(conclusao.GetProperty("analiseStatus").GetString(), concluida.GetProperty("analiseStatus").GetString());
         Assert.NotEqual(JsonValueKind.Null, concluida.GetProperty("concluidaEm").ValueKind);
+        // UC09: cada análise mostra a versão do modelo que a produziu (RN06).
+        Assert.Equal("CONCLUIDA", concluida.GetProperty("analiseStatus").GetString());
+        Assert.Equal(AmbienteApi.VersaoModeloTeste, concluida.GetProperty("versaoModelo").GetString());
+        Assert.Equal("SINTETICO", concluida.GetProperty("origemDadosModelo").GetString());
+        Assert.NotEqual(JsonValueKind.Null, concluida.GetProperty("analiseConcluidaEm").ValueKind);
     }
 
     private static Task<JsonElement> DetalheAsync(MedicoDeTeste medico, Guid pacienteId)

@@ -186,7 +186,9 @@ login por padrão; as públicas são marcadas com `[AllowAnonymous]`.
                  "analiseId": "…", "analiseStatus": "CONCLUIDA" } ] }
 ```
 `sessoes` vem da mais recente para a mais antiga, com a análise de cada uma
-(`null` enquanto a sessão não foi concluída): é por ela que o front retoma uma
+(`null` enquanto a sessão não foi concluída). Para o histórico (UC09), cada sessão
+traz também `analiseConcluidaEm`, `versaoModelo` e `origemDadosModelo` (`null` sem
+análise concluída): é por ela que o front retoma uma
 coleta em andamento ou abre um resultado a partir do paciente.
 `diagnostico` fica `null` enquanto a situação é `SUSPEITA`; depois traz
 `{ "fonte": "…", "avaliadoEm": "2026-10-20", "atualizadoEm": "…" }` (UC13).

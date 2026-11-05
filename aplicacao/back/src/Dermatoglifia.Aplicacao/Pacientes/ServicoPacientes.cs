@@ -79,7 +79,17 @@ public sealed class ServicoPacientes(
                 s.ConcluidaEm,
                 Analise = contexto.Analises
                     .Where(a => a.SessaoColetaId == s.Id)
-                    .Select(a => new { a.Id, a.Status })
+                    .Select(a => new
+                    {
+                        a.Id,
+                        a.Status,
+                        a.ConcluidaEm,
+                        // Versão do modelo que produziu cada análise (UC09; RN06).
+                        Modelo = contexto.ModelosIA
+                            .Where(m => m.Id == a.ModeloIAId)
+                            .Select(m => new { m.Versao, m.OrigemDados })
+                            .FirstOrDefault(),
+                    })
                     .FirstOrDefault(),
             })
             .ToListAsync(cancelamento);
@@ -103,7 +113,8 @@ public sealed class ServicoPacientes(
                 .ToList(),
             sessoes
                 .Select(s => new SessaoDoPaciente(
-                    s.Id, s.Status, s.IniciadaEm, s.ConcluidaEm, s.Analise?.Id, s.Analise?.Status))
+                    s.Id, s.Status, s.IniciadaEm, s.ConcluidaEm, s.Analise?.Id, s.Analise?.Status,
+                    s.Analise?.ConcluidaEm, s.Analise?.Modelo?.Versao, s.Analise?.Modelo?.OrigemDados))
                 .ToList());
     }
 
@@ -255,11 +266,17 @@ public sealed record PacienteDetalhe(
     IReadOnlyList<ConsentimentoDto> Consentimentos,
     IReadOnlyList<SessaoDoPaciente> Sessoes);
 
-/// <summary>Resumo de uma sessão de coleta no detalhe do paciente.</summary>
+/// <summary>
+/// Resumo de uma sessão de coleta no detalhe do paciente (UC09): a análise, quando
+/// concluída, traz a versão e a origem dos dados do modelo que a produziu.
+/// </summary>
 public sealed record SessaoDoPaciente(
     Guid Id,
     StatusSessao Status,
     DateTimeOffset IniciadaEm,
     DateTimeOffset? ConcluidaEm,
     Guid? AnaliseId,
-    StatusAnalise? AnaliseStatus);
+    StatusAnalise? AnaliseStatus,
+    DateTimeOffset? AnaliseConcluidaEm,
+    string? VersaoModelo,
+    OrigemDados? OrigemDadosModelo);
