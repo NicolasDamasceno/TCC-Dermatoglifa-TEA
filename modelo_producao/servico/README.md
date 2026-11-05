@@ -66,6 +66,9 @@ Uma pasta de modelo tem `modelo.keras`, `modelo.sha256` e `config.json`:
 `classes` vem na ordem da saída da rede (a do `image_dataset_from_directory`, que
 é alfabética). `ajuste_proporcao` e `interpolacao` são opcionais e precisam ser os
 mesmos do treino: `argumentos_dataset()` os transforma nos parâmetros do Keras.
+Não troque o redimensionamento por outro "equivalente": com o modelo de
+demonstração, carregar as mesmas digitais com `keras.utils.load_img` (PIL, com
+antialias) em vez de `tf.image.resize` muda a confiança em até 0,26.
 O `.keras` é lido com `safe_mode=True`: um arquivo com código Python embutido
 (camada `Lambda`) é recusado.
 
