@@ -14,6 +14,7 @@ public sealed class ModelosTestes : IDisposable
 {
     private const string NovaVersao = "2026-11-05_promocao_teste_v2";
     private static readonly string NovoHash = new('c', 64);
+    private static readonly string[] Classes = ["ALCA_DIREITA", "ALCA_ESQUERDA", "ARCO", "ARCO_TENDIDO", "VERTICILO"];
     private readonly AmbienteApi _ambiente;
 
     public ModelosTestes(AmbienteApi ambiente)
@@ -46,7 +47,7 @@ public sealed class ModelosTestes : IDisposable
         ["origem_dados"] = origem,
         ["arquitetura"] = "CNN 3 blocos (teste)",
         ["treinado_em"] = "2026-11-05",
-        ["classes"] = new[] { "ALCA_DIREITA", "ALCA_ESQUERDA", "ARCO", "ARCO_TENDIDO", "VERTICILO" },
+        ["classes"] = Classes,
     });
 
     private const string Metricas =

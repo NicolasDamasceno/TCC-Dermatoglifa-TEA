@@ -40,6 +40,7 @@ public sealed class IaFalsa
     public string? MotivoSemModelo { get; set; }
 
     public static readonly string HashModeloTeste = new('a', 64);
+    private static readonly int[] TamanhoImagem = [128, 128];
 
     public IReadOnlyList<ChamadaIa> Chamadas => [.. _chamadas];
 
@@ -83,7 +84,7 @@ public sealed class IaFalsa
             ["origem"] = "DEMO",
             ["origem_dados"] = OrigemDados,
             ["sha256"] = Sha256,
-            ["tamanho_imagem"] = new[] { 128, 128 },
+            ["tamanho_imagem"] = TamanhoImagem,
             ["convencao_alca"] = "IMPRESSAO",
         });
     }
