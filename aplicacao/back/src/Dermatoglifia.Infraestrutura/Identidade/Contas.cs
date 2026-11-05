@@ -88,6 +88,13 @@ internal sealed class Contas(UserManager<Usuario> userManager, AppDbContext cont
                 cancelamento);
     }
 
+    public async Task<IReadOnlyList<ResumoConta>> ListarAsync(CancellationToken cancelamento = default)
+        => await contexto.Users
+            .AsNoTracking()
+            .OrderBy(u => u.Nome)
+            .Select(u => new ResumoConta(u.Id, u.Nome, u.Email!, u.Papel, u.Status, u.CriadoEm))
+            .ToListAsync(cancelamento);
+
     public async Task<bool> SessaoValidaAsync(Guid id, string resumoCarimbo, CancellationToken cancelamento = default)
     {
         var conta = await contexto.Users.AsNoTracking()

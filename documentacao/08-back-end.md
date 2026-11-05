@@ -311,6 +311,25 @@ o hash gravados vêm do serviço, não do arquivo enviado. Desativar a anterior 
 ativar a nova acontece numa transação (índice parcial único em `ativo`). Auditoria:
 `MODELO_PROMOVIDO` com `versao_modelo` e `resultado` (`REGISTRADO` ou `REATIVADO`).
 
+### Auditoria (UC11)
+`GET /api/auditoria` (ADMIN), todos os filtros opcionais: `usuarioId`, `pacienteId`
+(inclui eventos das sessões e análises do paciente), `acao` (código exato), `de` e
+`ate` (instantes ISO 8601; `ate` exclusivo), `pagina` (desde 1) e `tamanho` (1–100,
+padrão 50) →
+```json
+{ "itens": [ { "id": 812, "ocorridoEm": "…", "usuarioId": "…",
+               "usuario": { "id": "…", "nome": "…", "email": "…", "papel": "MEDICO" },
+               "acao": "SITUACAO_DIAGNOSTICA_ATUALIZADA", "entidade": "paciente", "entidadeId": "…",
+               "ip": "127.0.0.1", "detalhes": { "situacao_anterior": "SUSPEITA", "situacao_nova": "CONTROLE" } } ],
+  "total": 21, "pagina": 1, "tamanho": 50 }
+```
+Do mais recente ao mais antigo. `usuario` é nulo em eventos sem conta (login com
+e-mail inexistente). `422` período invertido; `400` tamanho fora do limite. Cada
+consulta grava `AUDITORIA_CONSULTADA` com a `quantidade` encontrada.
+`GET /api/auditoria/filtros` → `{ "acoes": ["LOGIN_OK", …], "usuarios": [ … ] }`.
+A aplicação lê a trilha por `IContextoDados.TrilhaAuditoria`, uma consulta sem
+rastreamento: não existe caminho no código para alterar ou apagar registros.
+
 ### Erros
 Todos os erros usam `application/problem+json` (`ProblemDetails`), com `title` em
 português para exibição e `errors` por campo nas validações:
@@ -485,6 +504,8 @@ resolução gravada); nenhuma digital real em `tests/` (RNF08).
 | M6 ✅ | ProblemDetails completo, CORS, testes de integração, `.env.example` | `feat(back)`, `test(back)` |
 | M7 ✅ | Situação diagnóstica (UC13): data da avaliação, declaração de independência, auditoria | `feat(back)` |
 | M8 ✅ | Promoção de versão do modelo (UC10), conferida com o `GET /saude` do Serviço de IA | `feat(back)` |
+| M9 ✅ | Histórico do paciente com a versão do modelo de cada análise (UC09) | `feat(back)` |
+| M10 ✅ | Trilha de auditoria para o administrador (UC11) | `feat(back)` |
 
 Cada marco termina com testes passando e o doc correspondente atualizado se algo
 mudou (`CLAUDE.md`, Regra 2).

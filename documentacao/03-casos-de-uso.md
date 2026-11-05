@@ -276,9 +276,19 @@ Em todas, nada muda e a tela explica o motivo. `escore_validado` fica falso: a
 validação da Etapa 2 (RN10) não passa por esta tela. O `registro.sql` gerado pelo
 treino continua valendo como alternativa sem interface.
 
-## UC11 — Consultar trilha de auditoria *(pós-MVP)*
+## UC11 — Consultar trilha de auditoria *(implementado em 2026-11-05)*
 
 O administrador filtra os eventos de acesso por usuário, paciente, ação e período.
+
+1. A tela "Auditoria" lista os eventos do mais recente ao mais antigo, 50 por
+   página: quando, quem (nome e e-mail), a ação por extenso e o código, o registro
+   afetado, os detalhes permitidos e o IP.
+2. O paciente é filtrado pelo identificador pseudônimo, nunca pelo nome; o filtro
+   inclui as coletas e as análises dele. Cada linha de paciente leva à trilha dele.
+3. O período usa o dia local; o fim inclui o dia inteiro.
+4. A própria consulta é registrada (`AUDITORIA_CONSULTADA`).
+
+A trilha é só leitura: a aplicação não altera nem apaga registros (RNF07).
 
 ## UC12 — Atender pedido do titular (LGPD) *(pós-MVP)*
 

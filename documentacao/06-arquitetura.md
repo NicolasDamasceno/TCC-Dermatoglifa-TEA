@@ -104,6 +104,8 @@ front-end, em [09-front-end.md](09-front-end.md) e no ADR-0007.
 | PATCH | `/api/pacientes/{id}/situacao-diagnostica` | MEDICO | UC13 (ADR-0009) |
 | GET | `/api/modelos` | ADMIN | UC10 (versões registradas e modelo do Serviço de IA) |
 | POST | `/api/modelos/promocao` | ADMIN | UC10 |
+| GET | `/api/auditoria?usuarioId=&pacienteId=&acao=&de=&ate=&pagina=&tamanho=` | ADMIN | UC11 |
+| GET | `/api/auditoria/filtros` | ADMIN | UC11 (ações registradas e contas) |
 
 Regras transversais:
 - Toda rota de `MEDICO` verifica se o paciente pertence ao médico logado (RN05);

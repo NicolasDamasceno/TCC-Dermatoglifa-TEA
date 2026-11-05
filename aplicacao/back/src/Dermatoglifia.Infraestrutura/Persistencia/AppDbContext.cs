@@ -31,6 +31,8 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options)
     public DbSet<ResultadoDigital> ResultadosDigitais => Set<ResultadoDigital>();
     public DbSet<RegistroAuditoria> Auditoria => Set<RegistroAuditoria>();
 
+    public IQueryable<RegistroAuditoria> TrilhaAuditoria => Auditoria.AsNoTracking();
+
     public Task<int> SalvarAsync(CancellationToken cancelamento = default) => SaveChangesAsync(cancelamento);
 
     public Task<IDbContextTransaction> IniciarTransacaoAsync(CancellationToken cancelamento = default)

@@ -38,6 +38,12 @@ public interface IContextoDados
     DbSet<Analise> Analises { get; }
     DbSet<ResultadoDigital> ResultadosDigitais { get; }
 
+    /// <summary>
+    /// Trilha de auditoria só para leitura (UC11). A escrita passa por
+    /// <see cref="IAuditoria"/>; a aplicação nunca altera nem apaga linhas (RNF07).
+    /// </summary>
+    IQueryable<RegistroAuditoria> TrilhaAuditoria { get; }
+
     Task<int> SalvarAsync(CancellationToken cancelamento = default);
 
     Task<IDbContextTransaction> IniciarTransacaoAsync(CancellationToken cancelamento = default);
@@ -74,6 +80,9 @@ public interface IContas
     Task AlterarStatusAsync(Guid id, StatusCadastro status, CancellationToken cancelamento = default);
 
     Task<IReadOnlyDictionary<Guid, ResumoConta>> ObterResumosAsync(IEnumerable<Guid> ids, CancellationToken cancelamento = default);
+
+    /// <summary>Todas as contas, para o filtro da trilha de auditoria (UC11).</summary>
+    Task<IReadOnlyList<ResumoConta>> ListarAsync(CancellationToken cancelamento = default);
 
     /// <summary>
     /// Confere, a cada requisição, se o token ainda vale: conta ativa e o resumo do

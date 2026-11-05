@@ -136,7 +136,8 @@ o doc 05 se a estrutura do banco mudar.
 | M7 — situação diagnóstica (UC13; ADR-0009) | concluído |
 | M8 — promoção de versão do modelo (UC10) | concluído |
 | M9 — histórico do paciente com a versão do modelo (UC09) | concluído |
+| M10 — trilha de auditoria (UC11) | concluído |
 
 Com o M6, os fluxos do MVP do back-end (UC01–UC08) estão implementados; do M7 ao
-M9 entram a UC13, a UC10 e a UC09. Ficam para depois: trilha de auditoria (UC11),
-pedidos do titular (UC12) e exportação para treino (UC14).
+M10 entram a UC13, a UC10, a UC09 e a UC11. Ficam para depois: pedidos do titular
+(UC12) e exportação para treino (UC14).

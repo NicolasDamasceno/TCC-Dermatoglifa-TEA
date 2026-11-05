@@ -296,7 +296,8 @@ convertido para ulnar/radial pela mão registrada (ADR-0002).
 - Somente inserção (a aplicação não atualiza nem apaga linhas).
 - Ações mínimas: login (sucesso/falha), aprovação de médico, criação/leitura de
   paciente, upload de digital, visualização de análise, atualização de situação
-  diagnóstica, exportação e eliminação de dados.
+  diagnóstica, promoção de modelo, consulta à própria trilha (UC11), exportação e
+  eliminação de dados.
 - `detalhes` nunca contém imagem, nome de paciente ou senha.
 
 ## Retenção
