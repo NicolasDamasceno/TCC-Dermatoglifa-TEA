@@ -50,6 +50,17 @@ public sealed class IdentificacaoPaciente
         return identificacao;
     }
 
+    /// <summary>Corrige os dados a pedido do titular (UC12), com as mesmas regras do cadastro.</summary>
+    internal void Corrigir(string nome, DateOnly dataNascimento, DadosResponsavel? responsavel, DateOnly hoje)
+    {
+        var corrigida = Criar(PacienteId, nome, dataNascimento, responsavel, hoje);
+        Nome = corrigida.Nome;
+        DataNascimento = corrigida.DataNascimento;
+        ResponsavelNome = corrigida.ResponsavelNome;
+        ResponsavelParentesco = corrigida.ResponsavelParentesco;
+        ResponsavelContato = corrigida.ResponsavelContato;
+    }
+
     public bool EhMenorDeIdade(DateOnly hoje) => DataNascimento.AddYears(MaioridadeAnos) > hoje;
 
     /// <summary>Idade em meses completos na data informada.</summary>

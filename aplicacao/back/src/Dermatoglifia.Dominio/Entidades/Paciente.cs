@@ -134,9 +134,19 @@ public sealed class Paciente : Entidade
         SituacaoAtualizadaEm = agora;
     }
 
+    /// <summary>Corrige a identificação a pedido do titular (UC12; ADR-0010).</summary>
+    public void CorrigirIdentificacao(string nome, DateOnly dataNascimento, DadosResponsavel? responsavel, DateTimeOffset agora)
+    {
+        GarantirNaoAnonimizado();
+        Regra.Exigir(DiagnosticoAvaliadoEm is null || DiagnosticoAvaliadoEm >= dataNascimento,
+            "A nova data de nascimento é posterior à data da avaliação clínica registrada.");
+        Identificacao!.Corrigir(nome, dataNascimento, responsavel, DateOnly.FromDateTime(agora.UtcDateTime));
+    }
+
     /// <summary>
     /// Atende pedido de eliminação do titular (UC12): a identificação deixa de
-    /// existir; ficam apenas dados pseudônimos agregados.
+    /// existir; ficam apenas dados pseudônimos agregados. As imagens e os textos
+    /// livres são apagados pelas sessões e análises (RN08).
     /// </summary>
     public void Anonimizar(DateTimeOffset agora)
     {

@@ -23,6 +23,9 @@ public sealed class Digital : Entidade
     public int? Nfiq2 { get; private set; }
     public DateTimeOffset CapturadaEm { get; private set; }
 
+    /// <summary>Quando a imagem foi apagada a pedido do titular (UC12; RN08).</summary>
+    public DateTimeOffset? ArquivoEliminadoEm { get; private set; }
+
     public PosicaoDedo Posicao => new(Mao, Dedo);
 
     private Digital() { } // EF Core
@@ -54,6 +57,21 @@ public sealed class Digital : Entidade
         AlturaPx = arquivo.AlturaPx;
         Nfiq2 = null;
         CapturadaEm = agora;
+    }
+
+    /// <summary>Apaga a referência ao arquivo e o hash; devolve o caminho para o arquivo ser apagado.</summary>
+    internal string? EliminarArquivo(DateTimeOffset agora)
+    {
+        var caminho = CaminhoArquivo;
+        if (caminho is null)
+        {
+            return null;
+        }
+
+        CaminhoArquivo = null;
+        HashSha256 = null;
+        ArquivoEliminadoEm = agora;
+        return caminho;
     }
 
     internal void DefinirNaoColetavel(string motivo, DateTimeOffset agora)

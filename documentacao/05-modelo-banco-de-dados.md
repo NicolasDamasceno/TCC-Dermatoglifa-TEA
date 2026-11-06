@@ -122,6 +122,7 @@ erDiagram
         int altura_px
         smallint nfiq2
         timestamptz capturada_em
+        timestamptz arquivo_eliminado_em
     }
     MODELO_IA {
         uuid id PK
@@ -235,7 +236,9 @@ convertido para ulnar/radial pela mão registrada (ADR-0002).
   `situacao_atualizada_em` é só o momento do registro no sistema. A restrição
   `ck_paciente_diagnostico_completo` exige fonte e data fora de `SUSPEITA` e as
   duas vazias nela.
-- `anonimizado_em`: preenchido quando o titular pede eliminação (UC12).
+- `anonimizado_em`: preenchido quando o titular pede eliminação (UC12). A
+  eliminação também apaga as imagens (ver `digital`) e as observações em texto
+  livre de sessões e análises (ADR-0010).
 
 ### identificacao_paciente
 - Relação 1-para-1 com `paciente`. Fica em **schema separado** (`identificacao`),
@@ -265,6 +268,10 @@ convertido para ulnar/radial pela mão registrada (ADR-0002).
 - `CHECK (coletavel OR motivo_nao_coletavel IS NOT NULL)`.
 - `caminho_arquivo` relativo ao diretório de armazenamento; nunca uma URL pública.
 - `nfiq2`: escore de qualidade NIST NFIQ 2 (0–100), quando calculado; nulo no MVP.
+- `arquivo_eliminado_em`: preenchido quando a imagem é apagada a pedido do
+  titular (UC12); `caminho_arquivo` e `hash_sha256` ficam nulos. A restrição
+  `ck_digital_arquivo_quando_coletavel` exige arquivo e hash de toda digital
+  coletável, salvo as eliminadas.
 
 ### modelo_ia
 - Índice parcial único em `ativo` onde `ativo = true`: só um modelo ativo.

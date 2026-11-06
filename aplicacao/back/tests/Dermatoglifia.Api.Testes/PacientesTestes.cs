@@ -207,11 +207,12 @@ public sealed class PacientesTestes(AmbienteApi ambiente)
     }
 
     [Fact]
-    public async Task Admin_e_anonimo_nao_acessam_pacientes()
+    public async Task Admin_le_mas_nao_cadastra_e_anonimo_nao_acessa()
     {
         var admin = ambiente.Cliente(await ambiente.TokenAsync(AmbienteApi.EmailAdmin, AmbienteApi.SenhaAdmin));
 
-        Assert.Equal(HttpStatusCode.Forbidden, (await admin.GetAsync("/api/pacientes")).StatusCode);
+        // ADR-0010: o administrador lê os pacientes; cadastrar é do médico.
+        Assert.Equal(HttpStatusCode.OK, (await admin.GetAsync("/api/pacientes")).StatusCode);
         Assert.Equal(HttpStatusCode.Forbidden, (await admin.PostAsJsonAsync("/api/pacientes", Crianca())).StatusCode);
         Assert.Equal(HttpStatusCode.Unauthorized, (await ambiente.Cliente().GetAsync("/api/pacientes")).StatusCode);
     }

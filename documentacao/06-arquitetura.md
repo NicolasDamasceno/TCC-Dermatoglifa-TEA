@@ -86,18 +86,18 @@ front-end, em [09-front-end.md](09-front-end.md) e no ADR-0007.
 | GET | `/api/medicos/solicitacoes?status=PENDENTE` | ADMIN | UC03 |
 | POST | `/api/medicos/{id}/aprovacao` | ADMIN | UC03 |
 | POST | `/api/medicos/{id}/recusa` | ADMIN | UC03 |
-| GET | `/api/pacientes?busca=` | MEDICO | lista os pacientes do médico (filtro opcional por nome) |
+| GET | `/api/pacientes?busca=` | MEDICO, ADMIN | lista os pacientes do médico, ou todos para o admin (filtro opcional por nome; ADR-0010) |
 | POST | `/api/pacientes` | MEDICO | UC04 |
-| GET | `/api/pacientes/{id}` | MEDICO | UC04/UC09 |
+| GET | `/api/pacientes/{id}` | MEDICO, ADMIN | UC04/UC09 |
 | POST | `/api/pacientes/{id}/consentimentos` | MEDICO | UC05 |
-| POST | `/api/pacientes/{id}/consentimentos/{consentimentoId}/revogacao` | MEDICO | UC05 (3b) |
+| POST | `/api/pacientes/{id}/consentimentos/{consentimentoId}/revogacao` | MEDICO, ADMIN | UC05 (3b), UC12 |
 | POST | `/api/pacientes/{id}/sessoes` | MEDICO | UC06 (iniciar) |
 | GET | `/api/sessoes/{id}` | MEDICO | UC06 (situação dos 10 dedos) |
 | PUT | `/api/sessoes/{id}/digitais/{mao}/{dedo}` | MEDICO | UC06 (enviar/refazer) |
 | POST | `/api/sessoes/{id}/digitais/{mao}/{dedo}/nao-coletavel` | MEDICO | UC06 (4b) |
 | POST | `/api/sessoes/{id}/conclusao` | MEDICO | UC06 → UC07 |
 | POST | `/api/sessoes/{id}/cancelamento` | MEDICO | UC06 (4c) |
-| GET | `/api/analises/{id}` | MEDICO | UC08 |
+| GET | `/api/analises/{id}` | MEDICO, ADMIN | UC08 (o admin só lê) |
 | POST | `/api/analises/{id}/nova-tentativa` | MEDICO | UC07 (2a) |
 | PATCH | `/api/analises/{id}/observacao` | MEDICO | UC08 |
 | POST | `/api/analises/{id}/registro-prontuario` | MEDICO | UC08 (CFM 2.454/2026) |
@@ -106,8 +106,14 @@ front-end, em [09-front-end.md](09-front-end.md) e no ADR-0007.
 | POST | `/api/modelos/promocao` | ADMIN | UC10 |
 | GET | `/api/auditoria?usuarioId=&pacienteId=&acao=&de=&ate=&pagina=&tamanho=` | ADMIN | UC11 |
 | GET | `/api/auditoria/filtros` | ADMIN | UC11 (ações registradas e contas) |
+| GET | `/api/pacientes/{id}/exportacao` | ADMIN | UC12 (.zip com dados e imagens) |
+| PUT | `/api/pacientes/{id}/identificacao` | ADMIN | UC12 (correção) |
+| POST | `/api/pacientes/{id}/eliminacao` | ADMIN | UC12 (eliminação, RN08) |
 
 Regras transversais:
+- Cada ação declara a própria política (`ApenasMedico`, `MedicoOuAdmin`,
+  `ApenasAdmin`; ADR-0010). O administrador lê todos os pacientes, mas não faz
+  ações clínicas.
 - Toda rota de `MEDICO` verifica se o paciente pertence ao médico logado (RN05);
   caso contrário responde `404` (não revela existência).
 - Erros no formato `application/problem+json` (RFC 7807, padrão do ASP.NET Core).

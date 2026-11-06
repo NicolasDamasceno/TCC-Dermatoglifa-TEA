@@ -124,7 +124,13 @@ public sealed partial class ServicoAnalises(
         return await MontarAsync(analiseId, cancelamento);
     }
 
-    /// <summary>Ponto único de acesso: análises de sessões conduzidas pelo médico logado.</summary>
+    /// <summary>Leitura: todas para o administrador (ADR-0010), as do médico para o médico.</summary>
+    private IQueryable<Analise> Acessiveis()
+        => usuarioAtual.Papel == PapelUsuario.Admin
+            ? contexto.Analises.Include(a => a.Resultados).AsNoTracking()
+            : DoMedico(rastrear: false);
+
+    /// <summary>Ações clínicas: análises de sessões conduzidas pelo médico logado.</summary>
     private IQueryable<Analise> DoMedico(bool rastrear)
     {
         var medicoId = usuarioAtual.IdObrigatorio;
@@ -139,6 +145,11 @@ public sealed partial class ServicoAnalises(
         var imagens = new Dictionary<PosicaoDedo, byte[]>();
         foreach (var digital in sessao.Digitais.Where(d => d.Coletavel))
         {
+            if (digital.CaminhoArquivo is null)
+            {
+                throw new ImagemIlegivelException("As imagens desta coleta foram eliminadas a pedido do titular (UC12).");
+            }
+
             byte[] png;
             try
             {
@@ -163,7 +174,7 @@ public sealed partial class ServicoAnalises(
 
     private async Task<AnaliseDto> MontarAsync(Guid analiseId, CancellationToken cancelamento)
     {
-        var analise = await DoMedico(rastrear: false).SingleOrDefaultAsync(a => a.Id == analiseId, cancelamento)
+        var analise = await Acessiveis().SingleOrDefaultAsync(a => a.Id == analiseId, cancelamento)
                       ?? throw NaoEncontrada();
         var sessao = await contexto.SessoesColeta.AsNoTracking().Include(s => s.Digitais)
             .SingleAsync(s => s.Id == analise.SessaoColetaId, cancelamento);

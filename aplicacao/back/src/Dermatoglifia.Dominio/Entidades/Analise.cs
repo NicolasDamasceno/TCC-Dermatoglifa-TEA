@@ -26,6 +26,9 @@ public sealed class Analise : Entidade
     public decimal? EscoreRisco { get; private set; }
     public string VersaoAviso { get; private set; } = null!;
     public string? ObservacaoMedico { get; private set; }
+
+    /// <summary>Pedido de eliminação do titular (UC12; RN08): o texto livre pode identificar a pessoa.</summary>
+    public void EliminarTextoLivre() => ObservacaoMedico = null;
     public DateTimeOffset? RegistradoProntuarioEm { get; private set; }
     public string? MensagemErro { get; private set; }
     public DateTimeOffset SolicitadaEm { get; private set; }

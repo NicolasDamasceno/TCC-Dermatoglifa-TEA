@@ -414,7 +414,7 @@ public sealed class AnaliseTestes : IDisposable
     }
 
     [Fact]
-    public async Task Outro_medico_e_admin_nao_acessam_a_analise()
+    public async Task Outro_medico_nao_acessa_e_admin_so_le_a_analise()
     {
         var (medico, sessaoId) = await SessaoProntaAsync();
         var analiseId = (await ConcluirAsync(medico.Cliente, sessaoId)).GetProperty("analiseId").GetGuid();
@@ -425,7 +425,11 @@ public sealed class AnaliseTestes : IDisposable
         Assert.Equal(HttpStatusCode.NotFound, (await outro.Cliente.PostAsync($"/api/analises/{analiseId}/nova-tentativa", null)).StatusCode);
         Assert.Equal(HttpStatusCode.NotFound, (await outro.Cliente.PatchAsJsonAsync($"/api/analises/{analiseId}/observacao", new { observacao = "x" })).StatusCode);
         Assert.Equal(HttpStatusCode.NotFound, (await outro.Cliente.PostAsync($"/api/analises/{analiseId}/registro-prontuario", null)).StatusCode);
-        Assert.Equal(HttpStatusCode.Forbidden, (await admin.GetAsync($"/api/analises/{analiseId}")).StatusCode);
+        // ADR-0010: o administrador lê o resultado, mas não age sobre ele.
+        Assert.Equal(HttpStatusCode.OK, (await admin.GetAsync($"/api/analises/{analiseId}")).StatusCode);
+        Assert.Equal(HttpStatusCode.Forbidden, (await admin.PostAsync($"/api/analises/{analiseId}/nova-tentativa", null)).StatusCode);
+        Assert.Equal(HttpStatusCode.Forbidden, (await admin.PatchAsJsonAsync($"/api/analises/{analiseId}/observacao", new { observacao = "x" })).StatusCode);
+        Assert.Equal(HttpStatusCode.Forbidden, (await admin.PostAsync($"/api/analises/{analiseId}/registro-prontuario", null)).StatusCode);
     }
 
     [Fact]

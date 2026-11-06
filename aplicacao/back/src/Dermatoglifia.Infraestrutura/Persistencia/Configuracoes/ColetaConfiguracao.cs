@@ -50,8 +50,10 @@ internal sealed class DigitalConfiguracao : IEntityTypeConfiguration<Digital>
             t.HasCheckConstraint("ck_digital_dedo", EnumComoTexto.Check<Dedo>("dedo"));
             t.HasCheckConstraint("ck_digital_motivo_nao_coletavel",
                 "\"coletavel\" OR \"motivo_nao_coletavel\" IS NOT NULL");
+            // Imagem apagada a pedido do titular (UC12): o registro fica, sem arquivo nem hash.
             t.HasCheckConstraint("ck_digital_arquivo_quando_coletavel",
-                "NOT \"coletavel\" OR (\"caminho_arquivo\" IS NOT NULL AND \"hash_sha256\" IS NOT NULL)");
+                "NOT \"coletavel\" OR \"arquivo_eliminado_em\" IS NOT NULL"
+                + " OR (\"caminho_arquivo\" IS NOT NULL AND \"hash_sha256\" IS NOT NULL)");
             t.HasCheckConstraint("ck_digital_resolucao_minima", "\"resolucao_dpi\" IS NULL OR \"resolucao_dpi\" >= 500");
             t.HasCheckConstraint("ck_digital_nfiq2", "\"nfiq2\" IS NULL OR \"nfiq2\" BETWEEN 0 AND 100");
         });

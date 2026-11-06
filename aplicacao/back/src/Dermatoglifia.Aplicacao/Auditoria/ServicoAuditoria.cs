@@ -9,8 +9,8 @@ namespace Dermatoglifia.Aplicacao.Auditoria;
 
 /// <summary>
 /// UC11 — Consultar trilha de auditoria. Só leitura: a tabela é somente inserção
-/// (RNF07). A própria consulta também fica registrada. O administrador não vê nomes
-/// de pacientes: o paciente é filtrado pelo identificador pseudônimo.
+/// (RNF07). A própria consulta também fica registrada. A trilha não guarda nomes de
+/// pacientes: o paciente é filtrado pelo identificador pseudônimo.
 /// </summary>
 public sealed class ServicoAuditoria(IContextoDados contexto, IContas contas, IAuditoria auditoria)
 {

@@ -9,14 +9,17 @@ namespace Dermatoglifia.Api.Controllers;
 
 /// <summary>
 /// UC04 — Cadastrar paciente; UC05 — Registrar consentimento; UC13 — Atualizar
-/// situação diagnóstica. Só médicos acessam; o administrador não vê dados de pacientes.
+/// situação diagnóstica; UC12 — Atender pedido do titular. Cada ação declara a
+/// própria política (ADR-0010): ler e revogar termo são do médico (os pacientes
+/// dele) ou do administrador (todos); cadastrar e registrar dados clínicos, só do
+/// médico; exportar, corrigir identificação e eliminar, só do administrador.
 /// </summary>
 [ApiController]
 [Route("api/pacientes")]
-[Authorize(Policy = Politicas.ApenasMedico)]
-public sealed class PacientesController(ServicoPacientes servico) : ControllerBase
+public sealed class PacientesController(ServicoPacientes servico, ServicoTitular titular) : ControllerBase
 {
     [HttpPost]
+    [Authorize(Policy = Politicas.ApenasMedico)]
     [ProducesResponseType<RespostaPacienteCriado>(StatusCodes.Status201Created)]
     public async Task<IActionResult> Cadastrar(RequisicaoPaciente requisicao, CancellationToken cancelamento)
     {
@@ -32,14 +35,17 @@ public sealed class PacientesController(ServicoPacientes servico) : ControllerBa
     }
 
     [HttpGet]
+    [Authorize(Policy = Politicas.MedicoOuAdmin)]
     public Task<IReadOnlyList<PacienteResumo>> Listar([FromQuery, StringLength(100)] string? busca, CancellationToken cancelamento)
         => servico.ListarAsync(busca, cancelamento);
 
     [HttpGet("{id:guid}")]
+    [Authorize(Policy = Politicas.MedicoOuAdmin)]
     public Task<PacienteDetalhe> Obter(Guid id, CancellationToken cancelamento)
         => servico.ObterAsync(id, cancelamento);
 
     [HttpPost("{id:guid}/consentimentos")]
+    [Authorize(Policy = Politicas.ApenasMedico)]
     [ProducesResponseType<ResultadoConsentimento>(StatusCodes.Status201Created)]
     public async Task<IActionResult> RegistrarConsentimento(Guid id, RequisicaoConsentimento requisicao, CancellationToken cancelamento)
     {
@@ -54,6 +60,7 @@ public sealed class PacientesController(ServicoPacientes servico) : ControllerBa
     }
 
     [HttpPatch("{id:guid}/situacao-diagnostica")]
+    [Authorize(Policy = Politicas.ApenasMedico)]
     public Task<SituacaoAtualizada> AtualizarSituacao(Guid id, RequisicaoSituacao requisicao, CancellationToken cancelamento)
         => servico.AtualizarSituacaoAsync(
             id,
@@ -61,9 +68,49 @@ public sealed class PacientesController(ServicoPacientes servico) : ControllerBa
             cancelamento);
 
     [HttpPost("{id:guid}/consentimentos/{consentimentoId:guid}/revogacao")]
+    [Authorize(Policy = Politicas.MedicoOuAdmin)]
     public Task<ResultadoConsentimento> RevogarConsentimento(Guid id, Guid consentimentoId, CancellationToken cancelamento)
         => servico.RevogarConsentimentoAsync(id, consentimentoId, cancelamento);
+
+    /// <summary>UC12 — pacote .zip com os dados e as imagens do paciente (LGPD art. 18, II e V).</summary>
+    [HttpGet("{id:guid}/exportacao")]
+    [Authorize(Policy = Politicas.ApenasAdmin)]
+    public async Task<IActionResult> Exportar(Guid id, CancellationToken cancelamento)
+    {
+        var arquivo = await titular.ExportarAsync(id, cancelamento);
+        return File(arquivo.Conteudo, "application/zip", arquivo.Nome);
+    }
+
+    /// <summary>UC12 — corrige a identificação (LGPD art. 18, III).</summary>
+    [HttpPut("{id:guid}/identificacao")]
+    [Authorize(Policy = Politicas.ApenasAdmin)]
+    public async Task<IActionResult> CorrigirIdentificacao(Guid id, RequisicaoIdentificacao requisicao, CancellationToken cancelamento)
+    {
+        var responsavel = requisicao.Responsavel is null
+            ? null
+            : new NovoResponsavel(requisicao.Responsavel.Nome, requisicao.Responsavel.Parentesco, requisicao.Responsavel.Contato);
+        await titular.CorrigirIdentificacaoAsync(
+            id, new NovaIdentificacao(requisicao.Nome, requisicao.DataNascimento!.Value, responsavel), cancelamento);
+        return NoContent();
+    }
+
+    /// <summary>UC12 — elimina identificação, imagens e textos livres (LGPD art. 18, VI; RN08). Irreversível.</summary>
+    [HttpPost("{id:guid}/eliminacao")]
+    [Authorize(Policy = Politicas.ApenasAdmin)]
+    public async Task<RespostaEliminacao> Eliminar(Guid id, RequisicaoEliminacao requisicao, CancellationToken cancelamento)
+        => new(await titular.EliminarAsync(id, requisicao.Confirmacao, cancelamento));
 }
+
+public sealed record RequisicaoIdentificacao(
+    [Required(ErrorMessage = "Informe o nome."), StringLength(150, ErrorMessage = "Nome com no máximo 150 caracteres.")]
+    string Nome,
+    [Required(ErrorMessage = "Informe a data de nascimento.")] DateOnly? DataNascimento,
+    RequisicaoResponsavel? Responsavel);
+
+public sealed record RequisicaoEliminacao(
+    [Required(ErrorMessage = "Digite ELIMINAR para confirmar.")] string Confirmacao);
+
+public sealed record RespostaEliminacao(int ImagensApagadas);
 
 public sealed record RequisicaoPaciente(
     [Required(ErrorMessage = "Informe o nome."), StringLength(150, ErrorMessage = "Nome com no máximo 150 caracteres.")]

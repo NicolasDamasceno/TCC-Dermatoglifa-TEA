@@ -209,6 +209,10 @@ namespace Dermatoglifia.Infraestrutura.Persistencia.Migracoes
                         .HasColumnType("integer")
                         .HasColumnName("altura_px");
 
+                    b.Property<DateTimeOffset?>("ArquivoEliminadoEm")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("arquivo_eliminado_em");
+
                     b.Property<string>("CaminhoArquivo")
                         .HasMaxLength(300)
                         .HasColumnType("character varying(300)")
@@ -275,7 +279,7 @@ namespace Dermatoglifia.Infraestrutura.Persistencia.Migracoes
 
                     b.ToTable("digital", null, t =>
                         {
-                            t.HasCheckConstraint("ck_digital_arquivo_quando_coletavel", "NOT \"coletavel\" OR (\"caminho_arquivo\" IS NOT NULL AND \"hash_sha256\" IS NOT NULL)");
+                            t.HasCheckConstraint("ck_digital_arquivo_quando_coletavel", "NOT \"coletavel\" OR \"arquivo_eliminado_em\" IS NOT NULL OR (\"caminho_arquivo\" IS NOT NULL AND \"hash_sha256\" IS NOT NULL)");
 
                             t.HasCheckConstraint("ck_digital_dedo", "\"dedo\" IN ('POLEGAR', 'INDICADOR', 'MEDIO', 'ANELAR', 'MINIMO')");
 

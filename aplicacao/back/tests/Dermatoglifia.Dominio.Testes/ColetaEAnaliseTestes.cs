@@ -270,4 +270,25 @@ public class AnaliseTestes
 
         Assert.Equal(500, analise.MensagemErro!.Length);
     }
+
+    [Fact]
+    public void Eliminacao_do_titular_apaga_arquivos_e_cancela_a_coleta_em_andamento()
+    {
+        var sessao = SessaoIniciada();
+        var posicao = PosicaoDedo.OrdemColeta[0];
+        sessao.RegistrarDigital(posicao, Arquivo(posicao), Agora);
+        sessao.RegistrarObservacoes("Texto livre sintético");
+
+        var caminhos = sessao.EliminarDadosDoTitular(Agora);
+
+        Assert.Single(caminhos);
+        Assert.Equal(StatusSessao.Cancelada, sessao.Status);
+        Assert.Null(sessao.Observacoes);
+        var digital = Assert.Single(sessao.Digitais);
+        Assert.True(digital.Coletavel);
+        Assert.Null(digital.CaminhoArquivo);
+        Assert.Null(digital.HashSha256);
+        Assert.Equal(Agora, digital.ArquivoEliminadoEm);
+        Assert.Empty(sessao.EliminarDadosDoTitular(Agora)); // repetir não falha
+    }
 }

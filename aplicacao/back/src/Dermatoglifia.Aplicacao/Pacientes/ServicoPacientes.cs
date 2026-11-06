@@ -9,8 +9,10 @@ namespace Dermatoglifia.Aplicacao.Pacientes;
 
 /// <summary>
 /// UC04 — Cadastrar paciente; UC05 — Registrar consentimento; UC13 — Atualizar
-/// situação diagnóstica. Toda consulta parte de <see cref="DoMedico"/>: um médico só enxerga os
-/// próprios pacientes, e o de outro médico é tratado como inexistente (RN05).
+/// situação diagnóstica. Leituras partem de <see cref="Acessiveis"/>: o médico só
+/// enxerga os próprios pacientes (o de outro médico é tratado como inexistente) e o
+/// administrador enxerga todos (RN05; ADR-0010). Escritas clínicas partem de
+/// <see cref="DoMedico"/>, só do médico responsável.
 /// </summary>
 public sealed class ServicoPacientes(
     IContextoDados contexto,
@@ -36,7 +38,7 @@ public sealed class ServicoPacientes(
 
     public async Task<IReadOnlyList<PacienteResumo>> ListarAsync(string? busca, CancellationToken cancelamento = default)
     {
-        var consulta = DoMedico().AsNoTracking();
+        var consulta = Acessiveis().AsNoTracking();
         if (!string.IsNullOrWhiteSpace(busca))
         {
             var termo = busca.Trim().ToLower(CultureInfo.InvariantCulture);
@@ -60,7 +62,7 @@ public sealed class ServicoPacientes(
 
     public async Task<PacienteDetalhe> ObterAsync(Guid pacienteId, CancellationToken cancelamento = default)
     {
-        var paciente = await DoMedico().AsNoTracking().SingleOrDefaultAsync(p => p.Id == pacienteId, cancelamento)
+        var paciente = await Acessiveis().AsNoTracking().SingleOrDefaultAsync(p => p.Id == pacienteId, cancelamento)
                        ?? throw NaoEncontrado();
 
         auditoria.Registrar("PACIENTE_VISUALIZADO", "paciente", paciente.Id);
@@ -137,10 +139,11 @@ public sealed class ServicoPacientes(
         return new ResultadoConsentimento(consentimento.Id, paciente.PodeColetar);
     }
 
+    /// <summary>UC05 (3b) e UC12: o médico responsável ou o administrador, a pedido do titular.</summary>
     public async Task<ResultadoConsentimento> RevogarConsentimentoAsync(
         Guid pacienteId, Guid consentimentoId, CancellationToken cancelamento = default)
     {
-        var paciente = await DoMedico().SingleOrDefaultAsync(p => p.Id == pacienteId, cancelamento) ?? throw NaoEncontrado();
+        var paciente = await Acessiveis().SingleOrDefaultAsync(p => p.Id == pacienteId, cancelamento) ?? throw NaoEncontrado();
 
         paciente.RevogarConsentimento(consentimentoId, relogio.Agora);
         auditoria.Registrar("CONSENTIMENTO_REVOGADO", "paciente", paciente.Id);
@@ -174,7 +177,13 @@ public sealed class ServicoPacientes(
             paciente.Situacao, paciente.FonteDiagnostico, paciente.DiagnosticoAvaliadoEm, paciente.SituacaoAtualizadaEm!.Value);
     }
 
-    /// <summary>Ponto único de acesso aos pacientes: só os do médico logado.</summary>
+    /// <summary>Pacientes que o usuário pode ver: todos para o administrador, os próprios para o médico.</summary>
+    private IQueryable<Paciente> Acessiveis()
+        => usuarioAtual.Papel == PapelUsuario.Admin
+            ? contexto.Pacientes.Include(p => p.Identificacao).Include(p => p.Consentimentos)
+            : DoMedico();
+
+    /// <summary>Só os pacientes do médico logado (escritas clínicas).</summary>
     private IQueryable<Paciente> DoMedico()
     {
         var medicoId = usuarioAtual.IdObrigatorio;

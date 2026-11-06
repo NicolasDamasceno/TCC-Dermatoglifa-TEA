@@ -109,7 +109,9 @@ Um serviço por área, cada método é um caso de uso:
 
 **Escopo do médico (RN05).** Toda consulta de paciente, sessão ou análise filtra
 por `medico_responsavel_id = IUsuarioAtual.Id` na própria query. Recurso de outro
-médico responde `404`, como se não existisse.
+médico responde `404`, como se não existisse. Para o administrador, as leituras
+(`Acessiveis()`) não filtram por médico; as ações clínicas (`DoMedico()`)
+continuam filtrando, e a política da rota já as recusa antes (ADR-0010).
 
 **Transações na conclusão da coleta.** A chamada à IA não fica dentro de uma
 transação de banco aberta:
@@ -194,7 +196,9 @@ coleta em andamento ou abre um resultado a partir do paciente.
 `{ "fonte": "…", "avaliadoEm": "2026-10-20", "atualizadoEm": "…" }` (UC13).
 `GET /api/pacientes?busca=ana` devolve a lista com o mesmo formato de `paciente`.
 Listar e abrir paciente ficam registrados na auditoria (leitura de dado pessoal).
-Só o papel MEDICO acessa estas rotas; o administrador não vê dados de pacientes.
+O médico vê os próprios pacientes; o administrador vê todos e não faz ações
+clínicas: cadastrar, registrar termo e situação diagnóstica é só do médico
+(ADR-0010). Leituras do administrador ficam na auditoria como as do médico.
 
 `POST /api/pacientes/{id}/consentimentos`
 ```json
@@ -217,6 +221,19 @@ criança e, sozinho, não libera.
 "atualizadaEm": "…" }` · `422` sem fonte, data ou declaração de independência, data
 no futuro ou antes do nascimento, nada mudou ou dados eliminados · `400` situação
 inválida. Para voltar a `SUSPEITA` (correção), `fonte` e `avaliadoEm` vão nulos.
+
+### Pedidos do titular (UC12; ADMIN; ADR-0010)
+`GET /api/pacientes/{id}/exportacao` → `200` `application/zip`, com `dados.json` e
+`digitais/<data>_<MAO>_<DEDO>.png` (decifradas).
+`PUT /api/pacientes/{id}/identificacao` com `{ "nome", "dataNascimento", "responsavel" }`
+→ `204` · `422` regras do cadastro ou nascimento depois da avaliação clínica.
+`POST /api/pacientes/{id}/eliminacao` com `{ "confirmacao": "ELIMINAR" }` →
+`200` `{ "imagensApagadas": 10 }` · `422` confirmação errada ou já eliminado.
+A eliminação grava as mudanças, apaga os arquivos e só então confirma a
+transação: se apagar falhar, nada é confirmado e o pedido pode ser repetido.
+Auditoria: `PACIENTE_EXPORTADO`, `IDENTIFICACAO_CORRIGIDA`, `PACIENTE_ELIMINADO`
+(com a `quantidade` de imagens), sem valores pessoais. A revogação de termo usa a
+rota do UC05, aberta também ao administrador.
 
 ### Coleta
 `POST /api/pacientes/{id}/sessoes`
@@ -288,7 +305,8 @@ sempre volta com os textos daquela versão.
 concluída ou em processamento há menos de 5 minutos.
 `PATCH /api/analises/{id}/observacao` com `{ "observacao": "…" }` → a análise.
 `POST /api/analises/{id}/registro-prontuario` → a análise · `422` se não concluída
-ou já confirmada. Análise de outro médico → `404`; administrador → `403`.
+ou já confirmada. Análise de outro médico → `404`. O administrador lê
+(`GET`), mas recebe `403` nas ações (ADR-0010).
 
 ### Modelos (UC10)
 `GET /api/modelos` (ADMIN) →
@@ -506,6 +524,7 @@ resolução gravada); nenhuma digital real em `tests/` (RNF08).
 | M8 ✅ | Promoção de versão do modelo (UC10), conferida com o `GET /saude` do Serviço de IA | `feat(back)` |
 | M9 ✅ | Histórico do paciente com a versão do modelo de cada análise (UC09) | `feat(back)` |
 | M10 ✅ | Trilha de auditoria para o administrador (UC11) | `feat(back)` |
+| M11 ✅ | Hierarquia de acesso e pedidos do titular (UC12; ADR-0010) | `feat(back)` |
 
 Cada marco termina com testes passando e o doc correspondente atualizado se algo
 mudou (`CLAUDE.md`, Regra 2).

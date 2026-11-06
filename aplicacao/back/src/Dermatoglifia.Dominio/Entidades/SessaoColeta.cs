@@ -112,6 +112,23 @@ public sealed class SessaoColeta : Entidade
         ConcluidaEm = agora;
     }
 
+    /// <summary>
+    /// Pedido de eliminação do titular (UC12; RN08): cancela a coleta em andamento,
+    /// apaga as observações e a referência às imagens. Devolve os caminhos dos
+    /// arquivos, que a aplicação apaga do armazenamento.
+    /// </summary>
+    public IReadOnlyList<string> EliminarDadosDoTitular(DateTimeOffset agora)
+    {
+        if (Status == StatusSessao.EmAndamento)
+        {
+            Status = StatusSessao.Cancelada;
+            ConcluidaEm = agora;
+        }
+
+        Observacoes = null;
+        return _digitais.Select(d => d.EliminarArquivo(agora)).OfType<string>().ToList();
+    }
+
     public void RegistrarObservacoes(string? observacoes)
         => Observacoes = Regra.TextoOpcional(observacoes, "Observações", 1000);
 

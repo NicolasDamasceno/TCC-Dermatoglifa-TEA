@@ -25,6 +25,9 @@ public static class Politicas
 {
     public const string ApenasAdmin = nameof(ApenasAdmin);
     public const string ApenasMedico = nameof(ApenasMedico);
+
+    /// <summary>Leitura de pacientes e resultados: o médico (os dele) e o administrador (todos; ADR-0010).</summary>
+    public const string MedicoOuAdmin = nameof(MedicoOuAdmin);
     public const string LimiteEntrada = "limite-entrada";
 }
 
@@ -166,7 +169,9 @@ public static class ConfiguracaoAutenticacao
             // Por padrão, toda rota exige login; rotas públicas usam [AllowAnonymous].
             .SetFallbackPolicy(new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build())
             .AddPolicy(Politicas.ApenasAdmin, p => p.RequireClaim(Claims.Papel, EnumComoTexto.ParaTexto(PapelUsuario.Admin)))
-            .AddPolicy(Politicas.ApenasMedico, p => p.RequireClaim(Claims.Papel, EnumComoTexto.ParaTexto(PapelUsuario.Medico)));
+            .AddPolicy(Politicas.ApenasMedico, p => p.RequireClaim(Claims.Papel, EnumComoTexto.ParaTexto(PapelUsuario.Medico)))
+            .AddPolicy(Politicas.MedicoOuAdmin, p => p.RequireClaim(Claims.Papel,
+                EnumComoTexto.ParaTexto(PapelUsuario.Medico), EnumComoTexto.ParaTexto(PapelUsuario.Admin)));
 
         // Limite por IP nas rotas públicas (login e solicitação de cadastro).
         var limitePorMinuto = configuracao.GetValue("LimiteRequisicoes:EntradaPorMinuto", 10);

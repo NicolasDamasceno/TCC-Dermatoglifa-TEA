@@ -194,4 +194,27 @@ public class PacienteTestes
         Assert.Throws<RegraDeNegocioException>(() =>
             paciente.AtualizarSituacao(SituacaoDiagnostica.TeaDescartado, "Avaliação", Avaliacao, true, Agora));
     }
+
+    [Fact]
+    public void Correcao_da_identificacao_segue_as_regras_do_cadastro()
+    {
+        var paciente = PacienteMenor();
+
+        Assert.Throws<RegraDeNegocioException>(() =>
+            paciente.CorrigirIdentificacao("Nome Corrigido", new DateOnly(2022, 3, 14), null, Agora)); // menor sem responsável
+
+        paciente.CorrigirIdentificacao(" Nome Corrigido ", new DateOnly(2021, 1, 2), Responsavel, Agora);
+        Assert.Equal("Nome Corrigido", paciente.Identificacao!.Nome);
+        Assert.Equal(new DateOnly(2021, 1, 2), paciente.Identificacao.DataNascimento);
+    }
+
+    [Fact]
+    public void Correcao_nao_deixa_o_nascimento_depois_da_avaliacao_clinica()
+    {
+        var paciente = PacienteMenor();
+        paciente.AtualizarSituacao(SituacaoDiagnostica.TeaDescartado, "Avaliação", new DateOnly(2026, 10, 20), true, Agora);
+
+        Assert.Throws<RegraDeNegocioException>(() =>
+            paciente.CorrigirIdentificacao("Nome", new DateOnly(2026, 10, 21), Responsavel, Agora));
+    }
 }
