@@ -47,7 +47,9 @@ Antes de cada validação, e mais uma vez no fim, o treino recalcula a média e 
 variância de cada `BatchNormalization` sobre o treino sem augmentation
 (`BatchNormPreciso`, ADR-0002). A média móvel padrão do Keras ficava atrasada em
 relação aos pesos: no v1 a validação oscilava entre 0,77 e 0,98 de uma época para
-outra e o `EarlyStopping` e o `ReduceLROnPlateau` reagiam a esse ruído.
+outra e o `EarlyStopping` e o `ReduceLROnPlateau` reagiam a esse ruído. No v2,
+com a correção e a mesma semente, a validação subiu sem oscilar e ficou estável
+a partir da época 11.
 
 Em CPU (Ryzen 5 5600, ADR-0002) o treino é viável; o tempo depende do tamanho de
 entrada (`--tamanho`, padrão 128 px) e do número de imagens.

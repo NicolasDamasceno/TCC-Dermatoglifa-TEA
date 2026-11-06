@@ -7,3 +7,5 @@
 - Erros no teste: 7 verticilos e 1 arco tendido previstos como alça direita.
 - A acurácia de validação oscilou entre épocas durante o treino; investigar antes
   da próxima versão (ADR-0008, ação 2).
+- Resolvido no v2 (`2026-11-05_padroes_sintetico_v2`): a causa eram as
+  estatísticas do `BatchNormalization`, recalculadas agora pelo `BatchNormPreciso`.

@@ -1,0 +1,79 @@
+{
+ "versao": "2026-11-05_padroes_sintetico_v2",
+ "classes": [
+  "ALCA_DIREITA",
+  "ALCA_ESQUERDA",
+  "ARCO",
+  "ARCO_TENDIDO",
+  "VERTICILO"
+ ],
+ "tamanho_imagem": [
+  128,
+  128
+ ],
+ "ajuste_proporcao": "ESTICAR",
+ "interpolacao": "bilinear",
+ "origem_dados": "SINTETICO",
+ "arquitetura": "CNN 3 blocos (32-128 filtros)",
+ "hiperparametros": {
+  "blocos": 3,
+  "filtros_iniciais": 32,
+  "lote": 32,
+  "epocas_maximas": 30,
+  "taxa_aprendizado": 0.0003,
+  "paciencia": 10,
+  "regularizacao_l2": 0.001,
+  "rotacao_maxima_graus": 20,
+  "espelho_aleatorio_com_troca_de_alca": true,
+  "pesos_de_classe": {
+   "ALCA_DIREITA": 1.0215,
+   "ALCA_ESQUERDA": 1.0215,
+   "ARCO": 0.971,
+   "ARCO_TENDIDO": 0.9982,
+   "VERTICILO": 0.9896
+  }
+ },
+ "semente": 42,
+ "divisao": {
+  "treino": {
+   "imagens": 2850,
+   "participantes": 285,
+   "por_classe": {
+    "ALCA_DIREITA": 550,
+    "ALCA_ESQUERDA": 566,
+    "ARCO": 587,
+    "ARCO_TENDIDO": 571,
+    "VERTICILO": 576
+   }
+  },
+  "validacao": {
+   "imagens": 580,
+   "participantes": 58,
+   "por_classe": {
+    "ALCA_DIREITA": 115,
+    "ALCA_ESQUERDA": 117,
+    "ARCO": 117,
+    "ARCO_TENDIDO": 116,
+    "VERTICILO": 115
+   }
+  },
+  "teste": {
+   "imagens": 570,
+   "participantes": 57,
+   "por_classe": {
+    "ALCA_DIREITA": 111,
+    "ALCA_ESQUERDA": 113,
+    "ARCO": 116,
+    "ARCO_TENDIDO": 115,
+    "VERTICILO": 115
+   }
+  }
+ },
+ "versoes": {
+  "python": "3.13.16",
+  "tensorflow": "2.21.0",
+  "keras": "3.15.1",
+  "numpy": "2.5.4"
+ },
+ "treinado_em": "2026-11-05"
+}

@@ -76,6 +76,8 @@ exatamente como será com dados reais.
 1. [x] Gerador, divisão por participante e treino da Etapa 1 com testes (`treino/`).
 2. [x] Primeiro modelo de demonstração em `modelo_producao/demo/`
    (`2026-11-04_padroes_sintetico_v1`; acurácia balanceada 0,986 no teste sintético).
-   Pendente: a acurácia de validação ainda oscila entre épocas; investigar antes da
-   próxima versão.
+   A validação oscilava entre épocas por causa das estatísticas do
+   `BatchNormalization` (ADR-0002). Com a correção, o v2
+   (`2026-11-05_padroes_sintetico_v2`) substituiu o v1: acurácia balanceada 1,000 no
+   teste sintético, que mede só o gerador, não digitais reais.
 3. [ ] Comparar, quando houver dados reais, pré-treino sintético contra treino do zero.
