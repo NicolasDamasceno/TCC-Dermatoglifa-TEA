@@ -9,7 +9,7 @@ em [02-requisitos.md](02-requisitos.md).
 | Ator | Tipo | Descrição |
 |---|---|---|
 | **Médico** | Primário | Profissional com CRM ativo, **membro da equipe do protocolo de pesquisa aprovado pelo CEP**, cadastrado e aprovado no sistema. Cadastra pacientes, coleta digitais e consulta resultados. |
-| **Administrador** | Primário | Responsável pelo sistema (no TCC, o próprio autor/orientador). Aprova médicos e promove versões do modelo. |
+| **Administrador** | Primário | Responsável pelo sistema (no TCC, o próprio autor/orientador). Aprova médicos, promove versões do modelo, consulta a auditoria e atende os pedidos do titular. Vê os dados de todos os pacientes, mas não faz ações clínicas (ADR-0010). |
 | **Serviço de IA** | Secundário (sistema) | Serviço Python que carrega o modelo de `modelo_producao/` e devolve a análise das 10 digitais. |
 
 O paciente e seu responsável legal **não** acessam o sistema; eles participam
@@ -283,18 +283,34 @@ O administrador filtra os eventos de acesso por usuário, paciente, ação e per
 1. A tela "Auditoria" lista os eventos do mais recente ao mais antigo, 50 por
    página: quando, quem (nome e e-mail), a ação por extenso e o código, o registro
    afetado, os detalhes permitidos e o IP.
-2. O paciente é filtrado pelo identificador pseudônimo, nunca pelo nome; o filtro
-   inclui as coletas e as análises dele. Cada linha de paciente leva à trilha dele.
+2. O paciente é filtrado pelo identificador pseudônimo, porque a trilha não guarda
+   nomes; o filtro inclui as coletas e as análises dele. Cada linha de paciente
+   leva à trilha dele.
 3. O período usa o dia local; o fim inclui o dia inteiro.
 4. A própria consulta é registrada (`AUDITORIA_CONSULTADA`).
 
 A trilha é só leitura: a aplicação não altera nem apaga registros (RNF07).
 
-## UC12 — Atender pedido do titular (LGPD) *(pós-MVP)*
+## UC12 — Atender pedido do titular (LGPD) *(implementado em 2026-11-05)*
 
 O administrador, a pedido do titular ou responsável, exporta, corrige ou elimina
 os dados de um paciente, ou registra a revogação de um consentimento. A
 eliminação apaga as imagens armazenadas e anonimiza os registros de análise.
+
+Na página do paciente, a seção "Pedidos do titular (LGPD)" só aparece para o
+administrador (ADR-0010):
+1. **Exportar:** baixa um .zip com `dados.json` (identificação, responsável,
+   termos, situação diagnóstica, coletas e resultados) e as imagens das digitais.
+2. **Corrigir identificação:** nome, nascimento e responsável, com as regras do
+   cadastro (responsável obrigatório para menores).
+3. **Revogar termo:** pelo botão "Revogar" da seção Consentimentos.
+4. **Eliminar:** exige digitar `ELIMINAR`. Apaga nome, nascimento, responsável,
+   imagens e observações em texto livre; cancela coleta em andamento. Ficam, sem
+   identificação, os termos, a situação diagnóstica e os resultados (RN08).
+
+Cada ação fica na auditoria, sem valores pessoais. Exceções: paciente já
+eliminado (nenhuma ação é possível), confirmação errada, correção que fere as
+regras do cadastro.
 
 ## UC13 — Atualizar situação diagnóstica *(implementado em 2026-11-05)*
 

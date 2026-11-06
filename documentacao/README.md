@@ -27,6 +27,7 @@ Ler na ordem abaixo antes de criar ou alterar qualquer módulo (`CLAUDE.md`, Reg
 | [0007](adr/0007-stack-front-end.md) | Front-end com Vite, React, TypeScript e TanStack Query; sessão na aba | Proposto |
 | [0008](adr/0008-gerador-sintetico-proprio.md) | Gerador próprio de digitais sintéticas para o modelo de demonstração | Proposto |
 | [0009](adr/0009-situacao-diagnostica-como-referencia.md) | Situação diagnóstica como padrão de referência: data da avaliação e declaração de independência | Proposto |
+| [0010](adr/0010-hierarquia-de-acesso.md) | Hierarquia de acesso: o administrador vê os dados dos pacientes, sem ações clínicas, e atende os pedidos do titular | Proposto |
 
 Os ADRs ficam "Propostos" até a revisão com o orientador; ao serem aceitos,
 muda-se o status no próprio arquivo. Uma decisão nova que contrarie uma antiga

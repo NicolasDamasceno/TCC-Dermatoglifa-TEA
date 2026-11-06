@@ -33,7 +33,7 @@ os controles são boas práticas de engenharia justificadas por essas normas
 | RN02 | A análise só é solicitada com as 10 digitais coletadas | ADR-0002 (discordância bilateral exige os pares completos) |
 | RN03 | Nenhuma digital é coletada sem TCLE vigente com autorização da análise e ciência do uso de IA; para menores, também o TALE quando a criança puder compreender | Res. CNS 466/2012; Lei 14.874/2024; LGPD art. 14; Res. CFM 2.454/2026 |
 | RN04 | Todo resultado é exibido com o aviso de protótipo de pesquisa, sem ponto de corte validado e, para pacientes do sexo feminino, com a ressalva de falta de dados na literatura | doc 07, seção de evidência |
-| RN05 | Um médico só acessa pacientes pelos quais é responsável | LGPD art. 6º, III e art. 46 |
+| RN05 | Um médico só acessa pacientes pelos quais é responsável; o administrador vê todos, sem ações clínicas, e atende os pedidos do titular (ADR-0010) | LGPD art. 6º, III e art. 46 |
 | RN06 | Toda análise registra a versão do modelo que a produziu | Anvisa Q50 (RDC 657); rastreabilidade |
 | RN07 | Digitais só entram em treino/validação de modelos com autorização específica para esse fim | Res. CNS 738/2024, art. 19; LGPD art. 11, I |
 | RN08 | O pedido do titular de eliminação apaga identificação e imagens, mantendo apenas indicadores agregados pseudônimos | LGPD arts. 16 e 18 |
