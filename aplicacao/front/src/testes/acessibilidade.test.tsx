@@ -133,6 +133,21 @@ describe('acessibilidade (axe)', () => {
     await semViolacoes();
   });
 
+  it('Paciente visto pelo administrador, com a correção aberta e a eliminação', async () => {
+    comSessao(ADMIN);
+    simularApi({ [`GET ${PACIENTE}`]: json(200, detalhe({ consentimentos: [tcle()] })) });
+    renderizarApp(`/pacientes/${ID_PACIENTE}`);
+    const usuario = userEvent.setup();
+    await usuario.click(await screen.findByRole('button', { name: 'Corrigir identificação' }));
+    await usuario.clear(screen.getByLabelText('Nome'));
+    await usuario.click(screen.getByRole('button', { name: 'Salvar correção' }));
+    await semViolacoes();
+    await usuario.click(screen.getByRole('button', { name: 'Cancelar' }));
+    await usuario.click(screen.getByRole('button', { name: 'Eliminar dados' }));
+    await usuario.click(screen.getByRole('button', { name: 'Eliminar os dados do paciente' }));
+    await semViolacoes();
+  });
+
   it('Coleta, com pré-visualização e dedo não coletável', async () => {
     comSessao();
     simularApi({

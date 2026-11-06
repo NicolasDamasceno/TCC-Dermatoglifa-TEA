@@ -53,7 +53,9 @@ export function Resultado() {
 }
 
 function TelaResultado({ analise: a }: { analise: Analise }) {
-  const { api } = useSessao();
+  const { api, sessao } = useSessao();
+  // ADR-0010: o administrador lê o resultado; agir sobre ele é do médico.
+  const admin = sessao?.usuario.papel === 'ADMIN';
   const paciente = useQuery({
     queryKey: chavesPacientes.detalhe(a.pacienteId),
     queryFn: () => obterPaciente(api, a.pacienteId),
@@ -88,9 +90,11 @@ function TelaResultado({ analise: a }: { analise: Analise }) {
             </div>
           )}
         </dl>
-        <p className={estilos.voltar}>
-          <Link to={`/sessoes/${a.sessaoId}`}>Ver a coleta</Link>
-        </p>
+        {!admin && (
+          <p className={estilos.voltar}>
+            <Link to={`/sessoes/${a.sessaoId}`}>Ver a coleta</Link>
+          </p>
+        )}
       </header>
 
       <AvisoNaoDiagnostico texto={a.aviso.texto} versao={a.aviso.versao} />
@@ -114,7 +118,7 @@ function TelaResultado({ analise: a }: { analise: Analise }) {
         </Mensagem>
       )}
 
-      {a.status === 'ERRO' && <ErroAnalise analise={a} />}
+      {a.status === 'ERRO' && <ErroAnalise analise={a} podeTentar={!admin} />}
 
       {a.status === 'CONCLUIDA' && (
         <>
@@ -134,12 +138,12 @@ function TelaResultado({ analise: a }: { analise: Analise }) {
 
       {a.modelo && <Modelo modelo={a.modelo} />}
 
-      {a.status === 'CONCLUIDA' && <Registro analise={a} />}
+      {a.status === 'CONCLUIDA' && <Registro analise={a} somenteLeitura={admin} />}
     </section>
   );
 }
 
-function ErroAnalise({ analise: a }: { analise: Analise }) {
+function ErroAnalise({ analise: a, podeTentar }: { analise: Analise; podeTentar: boolean }) {
   const { api } = useSessao();
   const queryClient = useQueryClient();
   const tentativa = useMutation({
@@ -155,16 +159,18 @@ function ErroAnalise({ analise: a }: { analise: Analise }) {
       <p>{a.mensagemErro ?? 'O serviço de análise não respondeu.'}</p>
       <p>As digitais continuam guardadas; dá para tentar de novo sem refazer a coleta.</p>
       {tentativa.error && <p className={estilos.erroTentativa}>{mensagemDeErro(tentativa.error)}</p>}
-      <Botao
-        className={estilos.tentar}
-        carregando={tentativa.isPending}
-        textoCarregando="Analisando…"
-        onClick={() => {
-          tentativa.mutate();
-        }}
-      >
-        Tentar análise de novo
-      </Botao>
+      {podeTentar && (
+        <Botao
+          className={estilos.tentar}
+          carregando={tentativa.isPending}
+          textoCarregando="Analisando…"
+          onClick={() => {
+            tentativa.mutate();
+          }}
+        >
+          Tentar análise de novo
+        </Botao>
+      )}
     </Mensagem>
   );
 }

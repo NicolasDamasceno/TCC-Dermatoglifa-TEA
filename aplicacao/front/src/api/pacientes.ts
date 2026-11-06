@@ -1,4 +1,4 @@
-import type { ClienteApi } from './cliente';
+import type { ArquivoBaixado, ClienteApi } from './cliente';
 
 export type Sexo = 'MASCULINO' | 'FEMININO';
 export type Situacao = 'SUSPEITA' | 'TEA_CONFIRMADO' | 'TEA_DESCARTADO' | 'CONTROLE';
@@ -150,6 +150,28 @@ export function revogarConsentimento(
 /** UC13 — registra a situação definida pelo diagnóstico clínico, feito fora do sistema. */
 export function atualizarSituacao(api: ClienteApi, pacienteId: string, dados: NovaSituacao): Promise<SituacaoAtualizada> {
   return api.requisitar('PATCH', `${caminho(pacienteId)}/situacao-diagnostica`, dados);
+}
+
+/** UC12 (administrador): dados corrigíveis da identificação; o sexo fica no paciente pseudônimo. */
+export interface NovaIdentificacao {
+  nome: string;
+  dataNascimento: string;
+  responsavel: Responsavel | null;
+}
+
+/** UC12 — pacote .zip com os dados e as imagens do paciente (LGPD art. 18, II e V). */
+export function exportarDados(api: ClienteApi, pacienteId: string): Promise<ArquivoBaixado> {
+  return api.baixar(`${caminho(pacienteId)}/exportacao`);
+}
+
+/** UC12 — corrige a identificação (LGPD art. 18, III). */
+export function corrigirIdentificacao(api: ClienteApi, pacienteId: string, dados: NovaIdentificacao): Promise<void> {
+  return api.requisitar('PUT', `${caminho(pacienteId)}/identificacao`, dados);
+}
+
+/** UC12 — elimina identificação, imagens e textos livres (RN08). Irreversível. */
+export function eliminarDados(api: ClienteApi, pacienteId: string, confirmacao: string): Promise<{ imagensApagadas: number }> {
+  return api.requisitar('POST', `${caminho(pacienteId)}/eliminacao`, { confirmacao });
 }
 
 /** Inicia a sessão de coleta (UC06); a resposta traz o id para abrir a ficha. */

@@ -32,6 +32,9 @@ export function Layout() {
                   </NavLink>
                 ) : (
                   <>
+                    <NavLink to="/pacientes" className={() => classeLink({ isActive: naAreaDePacientes })}>
+                      Pacientes
+                    </NavLink>
                     <NavLink to="/admin/solicitacoes" className={classeLink}>
                       Cadastros pendentes
                     </NavLink>

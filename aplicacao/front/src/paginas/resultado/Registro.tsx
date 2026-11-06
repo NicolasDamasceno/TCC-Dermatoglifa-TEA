@@ -10,13 +10,31 @@ import { Marcacao } from '../../componentes/Opcoes';
 import { useSessao } from '../../sessao/contextoSessao';
 import estilos from './Resultado.module.css';
 
-/** UC08, passos 3 e 4: observação do médico e confirmação do registro no prontuário. */
-export function Registro({ analise: a }: { analise: Analise }) {
+/**
+ * UC08, passos 3 e 4: observação do médico e confirmação do registro no prontuário.
+ * Para o administrador, só leitura (ADR-0010).
+ */
+export function Registro({ analise: a, somenteLeitura = false }: { analise: Analise; somenteLeitura?: boolean }) {
   return (
     <section className={estilos.secao} aria-labelledby="titulo-registro">
       <h2 id="titulo-registro">Registro do médico</h2>
-      <Observacao analise={a} />
-      <Prontuario analise={a} />
+      {somenteLeitura ? (
+        <dl className={estilos.registroLeitura}>
+          <div>
+            <dt>Observação do médico</dt>
+            <dd>{a.observacaoMedico ?? 'Nenhuma.'}</dd>
+          </div>
+          <div>
+            <dt>Registro no prontuário</dt>
+            <dd>{a.registradoProntuarioEm ? `Confirmado em ${dataHora(a.registradoProntuarioEm)}` : 'Ainda não confirmado.'}</dd>
+          </div>
+        </dl>
+      ) : (
+        <>
+          <Observacao analise={a} />
+          <Prontuario analise={a} />
+        </>
+      )}
     </section>
   );
 }

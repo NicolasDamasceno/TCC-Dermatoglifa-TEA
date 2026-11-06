@@ -32,12 +32,16 @@ export function App() {
           <Route path="/admin/auditoria" element={<Auditoria />} />
         </Route>
 
-        <Route element={<RotaProtegida papel="MEDICO" />}>
+        {/* ADR-0010: o administrador lê pacientes e resultados e atende pedidos do titular. */}
+        <Route element={<RotaProtegida papel={['MEDICO', 'ADMIN']} />}>
           <Route path="/pacientes" element={<Pacientes />} />
-          <Route path="/pacientes/novo" element={<NovoPaciente />} />
           <Route path="/pacientes/:id" element={<Paciente />} />
-          <Route path="/sessoes/:id" element={<Coleta />} />
           <Route path="/analises/:id" element={<Resultado />} />
+        </Route>
+
+        <Route element={<RotaProtegida papel="MEDICO" />}>
+          <Route path="/pacientes/novo" element={<NovoPaciente />} />
+          <Route path="/sessoes/:id" element={<Coleta />} />
         </Route>
 
         <Route path="*" element={<NaoEncontrada />} />

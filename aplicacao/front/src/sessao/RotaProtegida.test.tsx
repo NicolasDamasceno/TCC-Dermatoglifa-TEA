@@ -20,10 +20,11 @@ describe('rotas protegidas e sessão', () => {
   });
 
   it('nega a tela de outro papel sem revelar o conteúdo', async () => {
+    // O administrador lê pacientes (ADR-0010), mas cadastrar é só do médico.
     comSessao(ADMIN);
-    renderizarApp('/pacientes');
+    renderizarApp('/pacientes/novo');
     expect(await screen.findByRole('heading', { name: 'Acesso não permitido' })).toBeInTheDocument();
-    expect(screen.queryByRole('heading', { name: 'Pacientes' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: 'Cadastrar paciente' })).not.toBeInTheDocument();
   });
 
   it('quem já entrou e abre /entrar vai para a sua tela', async () => {

@@ -10,7 +10,7 @@ contratos da API ([08](08-back-end.md), seção 5). Stack e guarda do token no
 | Usuário | Onde está | O que precisa da interface |
 |---|---|---|
 | Médico do protocolo | consultório, com o paciente e o leitor de digitais ao lado | cadastrar, registrar o consentimento, coletar os 10 dedos sem se perder, ler o resultado sem confundi-lo com diagnóstico |
-| Administrador | qualquer lugar | aprovar ou recusar cadastros de médicos |
+| Administrador | qualquer lugar | aprovar ou recusar cadastros de médicos, promover modelos, consultar a auditoria, ver pacientes e resultados e atender os pedidos do titular (ADR-0010) |
 
 O trabalho principal da interface é **conduzir uma coleta cuidadosa e auditável**
 e **apresentar um resultado de pesquisa sem exagerar o que ele significa** (RN04).
@@ -98,6 +98,7 @@ ulnar") e a confiança, sem a imagem.
 | `/cadastro` | público | Solicitar cadastro de médico | UC02 |
 | `/` | logado | redireciona: médico → `/pacientes`; admin → `/admin/solicitacoes` | — |
 | `/admin/solicitacoes` | admin | Cadastros pendentes: aprovar ou recusar | UC03 |
+| `/pacientes`, `/pacientes/:id`, `/analises/:id` | médico e admin | o admin vê todos, sem ações clínicas, e tem a seção "Pedidos do titular" no paciente | UC04, UC08, UC12 |
 | `/admin/modelos` | admin | Modelos de IA: o que o serviço carregou, versões registradas e promoção | UC10 |
 | `/admin/auditoria` | admin | Trilha de auditoria com filtros (usuário, ação, paciente, período) no endereço | UC11 |
 | `/pacientes` | médico | Lista e busca | UC04 |
@@ -147,6 +148,13 @@ voltando depois para a página pedida.
   por página, com a ação por extenso e o código, o registro, os detalhes e o IP.
   Linhas de paciente levam à trilha daquele paciente. Nomes de pacientes nunca
   aparecem.
+- **Paciente e resultado vistos pelo administrador (ADR-0010).** Os mesmos dados
+  do médico, sem as ações clínicas: sem a seção de coleta, sem atualizar a
+  situação diagnóstica nem registrar termo, e o resultado com o registro do médico
+  só para leitura. Revogar termo continua disponível. A seção **Pedidos do titular
+  (LGPD)** oferece exportar (download do .zip, com aviso de que o arquivo tem
+  dados sensíveis), corrigir a identificação (as regras do cadastro) e eliminar,
+  com a palavra `ELIMINAR` digitada e a lista do que é apagado e do que fica.
 - **Pacientes.** Tabela (nome, idade, sexo, situação, coleta liberada) do cadastro
   mais recente ao mais antigo; busca por nome guardada no endereço (`?busca=`);
   estado vazio convida a cadastrar o primeiro paciente.
@@ -294,6 +302,7 @@ repositório: o serviço de inferência real é o próximo módulo (ADR-0001).
 | F8 | Modelos de IA para o administrador (UC10) | Concluído: 127 testes; conferido contra a API e o Serviço de IA reais |
 | F9 | Histórico do paciente com a versão do modelo de cada análise (UC09) | Concluído: 127 testes; conferido contra a API real |
 | F10 | Trilha de auditoria do administrador (UC11) | Concluído: 133 testes; conferido contra a API real, de 320 px a 1280 px |
+| F11 | Visão do administrador sobre pacientes e resultados; pedidos do titular (UC12; ADR-0010) | Concluído: 140 testes; conferido contra a API real (exportar, corrigir e eliminar) |
 
 Telas de marcos ainda não feitos existem como reserva (`EmConstrucao`), já
 protegidas pelo papel certo, para que as rotas e a navegação sejam testadas desde o F1.

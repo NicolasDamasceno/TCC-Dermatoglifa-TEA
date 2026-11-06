@@ -11,10 +11,11 @@ import { idadePorExtenso, NOME_SEXO, NOME_SITUACAO } from '../dominio/pacientes'
 import { useSessao } from '../sessao/contextoSessao';
 import estilos from './Pacientes.module.css';
 
-/** UC04 — lista e busca dos pacientes do médico (só os dele, RN05). */
+/** UC04 — lista e busca dos pacientes: os do médico (RN05) ou todos, para o administrador (ADR-0010). */
 export function Pacientes() {
   useTituloPagina('Pacientes');
-  const { api } = useSessao();
+  const { api, sessao } = useSessao();
+  const admin = sessao?.usuario.papel === 'ADMIN';
   const [parametros, setParametros] = useSearchParams();
   const busca = parametros.get('busca')?.trim() ?? '';
   const [texto, setTexto] = useState(busca);
@@ -40,7 +41,7 @@ export function Pacientes() {
     <section className={estilos.pagina} aria-labelledby="titulo-pacientes">
       <div className={estilos.cabecalho}>
         <h1 id="titulo-pacientes">Pacientes</h1>
-        <LinkBotao to="/pacientes/novo">Cadastrar paciente</LinkBotao>
+        {!admin && <LinkBotao to="/pacientes/novo">Cadastrar paciente</LinkBotao>}
       </div>
 
       <form role="search" onSubmit={buscar} className={estilos.busca}>
@@ -63,7 +64,7 @@ export function Pacientes() {
       {pacientes.isPending && <Carregando texto="Carregando pacientes…" />}
       {pacientes.isError && <FalhaAoCarregar erro={pacientes.error} tentar={() => void pacientes.refetch()} />}
       {pacientes.isSuccess && (
-        <Resultado pacientes={pacientes.data} busca={busca} atualizando={pacientes.isPlaceholderData} limpar={limpar} />
+        <Resultado pacientes={pacientes.data} busca={busca} atualizando={pacientes.isPlaceholderData} limpar={limpar} admin={admin} />
       )}
     </section>
   );
@@ -74,9 +75,14 @@ interface PropsResultado {
   busca: string;
   atualizando: boolean;
   limpar: () => void;
+  admin: boolean;
 }
 
-function Resultado({ pacientes, busca, atualizando, limpar }: PropsResultado) {
+function Resultado({ pacientes, busca, atualizando, limpar, admin }: PropsResultado) {
+  if (pacientes.length === 0 && !busca && admin) {
+    return <p className={estilos.vazio}>Nenhum paciente cadastrado pelos médicos ainda.</p>;
+  }
+
   if (pacientes.length === 0 && !busca) {
     return (
       <div className={estilos.vazio}>

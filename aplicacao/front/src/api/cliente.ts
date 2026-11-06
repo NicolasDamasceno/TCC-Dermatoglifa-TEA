@@ -12,6 +12,20 @@ export interface OpcoesCliente {
 
 export interface ClienteApi {
   requisitar<T>(metodo: MetodoHttp, caminho: string, corpo?: unknown): Promise<T>;
+  /** GET de um arquivo (ex.: exportação da UC12): o conteúdo e o nome sugerido pela API. */
+  baixar(caminho: string): Promise<ArquivoBaixado>;
+}
+
+export interface ArquivoBaixado {
+  nome: string;
+  conteudo: Blob;
+}
+
+/** Nome do arquivo no cabeçalho Content-Disposition (forma simples, `filename=`). */
+function nomeDoArquivo(resposta: Response, padrao: string): string {
+  const disposicao = resposta.headers.get('Content-Disposition') ?? '';
+  const m = /filename="?([^";]+)"?/i.exec(disposicao);
+  return m?.[1] ?? padrao;
 }
 
 interface Problema {
@@ -25,42 +39,52 @@ interface Problema {
  * e converte qualquer erro em {@link ErroApi} ou {@link ErroConexao}.
  */
 export function criarClienteApi({ urlBase, obterToken, aoPerderSessao }: OpcoesCliente): ClienteApi {
+  async function enviar(metodo: MetodoHttp, caminho: string, corpo?: unknown): Promise<Response> {
+    const cabecalhos = new Headers({ Accept: 'application/json, application/problem+json, application/zip' });
+    const token = obterToken();
+    if (token) {
+      cabecalhos.set('Authorization', `Bearer ${token}`);
+    }
+
+    let conteudo: BodyInit | undefined;
+    if (corpo instanceof FormData) {
+      conteudo = corpo; // o navegador define o boundary do multipart
+    } else if (corpo !== undefined) {
+      cabecalhos.set('Content-Type', 'application/json');
+      conteudo = JSON.stringify(corpo);
+    }
+
+    let resposta: Response;
+    try {
+      resposta = await fetch(`${urlBase}${caminho}`, { method: metodo, headers: cabecalhos, body: conteudo });
+    } catch {
+      throw new ErroConexao();
+    }
+
+    if (resposta.status === 401 && token) {
+      aoPerderSessao();
+    }
+
+    if (!resposta.ok) {
+      throw await lerProblema(resposta);
+    }
+
+    return resposta;
+  }
+
   return {
     async requisitar<T>(metodo: MetodoHttp, caminho: string, corpo?: unknown): Promise<T> {
-      const cabecalhos = new Headers({ Accept: 'application/json, application/problem+json' });
-      const token = obterToken();
-      if (token) {
-        cabecalhos.set('Authorization', `Bearer ${token}`);
-      }
-
-      let conteudo: BodyInit | undefined;
-      if (corpo instanceof FormData) {
-        conteudo = corpo; // o navegador define o boundary do multipart
-      } else if (corpo !== undefined) {
-        cabecalhos.set('Content-Type', 'application/json');
-        conteudo = JSON.stringify(corpo);
-      }
-
-      let resposta: Response;
-      try {
-        resposta = await fetch(`${urlBase}${caminho}`, { method: metodo, headers: cabecalhos, body: conteudo });
-      } catch {
-        throw new ErroConexao();
-      }
-
-      if (resposta.status === 401 && token) {
-        aoPerderSessao();
-      }
-
-      if (!resposta.ok) {
-        throw await lerProblema(resposta);
-      }
-
+      const resposta = await enviar(metodo, caminho, corpo);
       if (resposta.status === 204) {
         return undefined as T;
       }
 
       return (await resposta.json()) as T;
+    },
+
+    async baixar(caminho: string): Promise<ArquivoBaixado> {
+      const resposta = await enviar('GET', caminho);
+      return { nome: nomeDoArquivo(resposta, 'arquivo'), conteudo: await resposta.blob() };
     },
   };
 }

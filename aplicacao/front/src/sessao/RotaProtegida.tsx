@@ -12,7 +12,7 @@ export interface EstadoEntrar {
  * Sem sessão → /entrar (voltando depois para a página pedida).
  * Papel diferente → "Acesso não permitido", sem revelar o conteúdo.
  */
-export function RotaProtegida({ papel }: { papel?: Papel }) {
+export function RotaProtegida({ papel }: { papel?: Papel | readonly Papel[] }) {
   const { sessao } = useSessao();
   const local = useLocation();
 
@@ -21,7 +21,8 @@ export function RotaProtegida({ papel }: { papel?: Papel }) {
     return <Navigate to="/entrar" replace state={estado} />;
   }
 
-  if (papel && sessao.usuario.papel !== papel) {
+  const permitidos = papel === undefined ? undefined : typeof papel === 'string' ? [papel] : papel;
+  if (permitidos && !permitidos.includes(sessao.usuario.papel)) {
     return <AcessoNegado />;
   }
 

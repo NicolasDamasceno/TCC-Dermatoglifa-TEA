@@ -14,12 +14,18 @@ import { SecaoColeta } from './SecaoColeta';
 import { SecaoConsentimentos } from './SecaoConsentimentos';
 import { SecaoDiagnostico } from './SecaoDiagnostico';
 import { SecaoSessoes } from './SecaoSessoes';
+import { SecaoTitular } from './SecaoTitular';
 import estilos from './Paciente.module.css';
 
-/** UC04/UC05/UC13 — o paciente: dados, coleta, sessões, situação diagnóstica, consentimentos e responsável. */
+/**
+ * UC04/UC05/UC09/UC13 — o paciente: dados, coleta, sessões, situação diagnóstica,
+ * consentimentos e responsável. O administrador vê tudo, sem as ações clínicas, e
+ * atende os pedidos do titular (UC12; ADR-0010).
+ */
 export function Paciente() {
   const { id = '' } = useParams();
-  const { api } = useSessao();
+  const { api, sessao } = useSessao();
+  const admin = sessao?.usuario.papel === 'ADMIN';
   const local = useLocation();
   const recemCriado = (local.state as EstadoPacienteCriado | null)?.criado === true;
   const [registrando, setRegistrando] = useState(false);
@@ -80,17 +86,19 @@ export function Paciente() {
         <Mensagem>Paciente cadastrado. Registre o TCLE assinado para liberar a coleta.</Mensagem>
       )}
 
-      <SecaoColeta
-        pacienteId={paciente.id}
-        podeColetar={paciente.podeColetar}
-        anonimizado={paciente.anonimizado}
-        sessoes={sessoes}
-        registrarConsentimento={() => {
-          setRegistrando(true);
-        }}
-      />
+      {!admin && (
+        <SecaoColeta
+          pacienteId={paciente.id}
+          podeColetar={paciente.podeColetar}
+          anonimizado={paciente.anonimizado}
+          sessoes={sessoes}
+          registrarConsentimento={() => {
+            setRegistrando(true);
+          }}
+        />
+      )}
 
-      <SecaoSessoes sessoes={sessoes} />
+      <SecaoSessoes sessoes={sessoes} podeAbrirColeta={!admin} />
 
       {!paciente.anonimizado && (
         <SecaoDiagnostico
@@ -98,6 +106,7 @@ export function Paciente() {
           situacao={paciente.situacao}
           diagnostico={diagnostico}
           dataNascimento={paciente.dataNascimento}
+          podeAtualizar={!admin}
         />
       )}
 
@@ -107,8 +116,11 @@ export function Paciente() {
           consentimentos={consentimentos}
           registrando={registrando}
           setRegistrando={setRegistrando}
+          podeRegistrar={!admin}
         />
       )}
+
+      {admin && !paciente.anonimizado && <SecaoTitular paciente={paciente} responsavel={responsavel} />}
 
       {!paciente.anonimizado && (
         <section className={estilos.secao} aria-labelledby="titulo-responsavel">

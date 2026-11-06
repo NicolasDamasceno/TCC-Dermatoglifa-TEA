@@ -16,13 +16,15 @@ interface PropsSecao {
   situacao: Situacao;
   diagnostico: Diagnostico | null;
   dataNascimento: string | null;
+  /** Só o médico responsável registra a situação (o administrador só vê). */
+  podeAtualizar?: boolean;
 }
 
 /**
  * UC13 — situação definida pelo diagnóstico clínico, feito fora do sistema.
  * É o padrão de referência de qualquer avaliação futura do sistema (ADR-0009).
  */
-export function SecaoDiagnostico({ pacienteId, situacao, diagnostico, dataNascimento }: PropsSecao) {
+export function SecaoDiagnostico({ pacienteId, situacao, diagnostico, dataNascimento, podeAtualizar = true }: PropsSecao) {
   const [editando, setEditando] = useState(false);
   const [aviso, setAviso] = useState<string | null>(null);
   const refSecao = useRef<HTMLElement>(null);
@@ -38,7 +40,7 @@ export function SecaoDiagnostico({ pacienteId, situacao, diagnostico, dataNascim
     <section ref={refSecao} className={estilos.secao} aria-labelledby="titulo-diagnostico">
       <div className={estilos.cabecalhoSecao}>
         <h2 id="titulo-diagnostico">Situação diagnóstica</h2>
-        {!editando && (
+        {podeAtualizar && !editando && (
           <Botao
             variante="secundario"
             onClick={() => {
@@ -75,7 +77,9 @@ export function SecaoDiagnostico({ pacienteId, situacao, diagnostico, dataNascim
       ) : (
         !editando && (
           <p className={estilos.nota}>
-            Suspeita de TEA. Quando o diagnóstico clínico for fechado, registre aqui o resultado e como ele foi obtido.
+            {podeAtualizar
+              ? 'Suspeita de TEA. Quando o diagnóstico clínico for fechado, registre aqui o resultado e como ele foi obtido.'
+              : 'Suspeita de TEA. O médico responsável registra o resultado quando o diagnóstico clínico for fechado.'}
           </p>
         )
       )}

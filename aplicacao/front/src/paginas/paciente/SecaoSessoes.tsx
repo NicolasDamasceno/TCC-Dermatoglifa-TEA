@@ -8,7 +8,7 @@ import estilos from './Paciente.module.css';
  * UC09 — coletas do paciente, da mais recente para a mais antiga, com a versão do
  * modelo de cada análise e o caminho para o resultado.
  */
-export function SecaoSessoes({ sessoes }: { sessoes: SessaoDoPaciente[] }) {
+export function SecaoSessoes({ sessoes, podeAbrirColeta = true }: { sessoes: SessaoDoPaciente[]; podeAbrirColeta?: boolean }) {
   return (
     <section className={estilos.secao} aria-labelledby="titulo-sessoes">
       <h2 id="titulo-sessoes">Coletas</h2>
@@ -44,7 +44,7 @@ export function SecaoSessoes({ sessoes }: { sessoes: SessaoDoPaciente[] }) {
                     )}
                   </td>
                   <td className={estilos.acao}>
-                    <LinkDaSessao sessao={s} />
+                    <LinkDaSessao sessao={s} podeAbrirColeta={podeAbrirColeta} />
                   </td>
                 </tr>
               ))}
@@ -57,7 +57,7 @@ export function SecaoSessoes({ sessoes }: { sessoes: SessaoDoPaciente[] }) {
 }
 
 /** Um destino por linha; o nome acessível leva a data para diferenciar as linhas. */
-function LinkDaSessao({ sessao: s }: { sessao: SessaoDoPaciente }) {
+function LinkDaSessao({ sessao: s, podeAbrirColeta }: { sessao: SessaoDoPaciente; podeAbrirColeta: boolean }) {
   const quando = dataHora(s.iniciadaEm);
   if (s.analiseId) {
     return (
@@ -66,6 +66,9 @@ function LinkDaSessao({ sessao: s }: { sessao: SessaoDoPaciente }) {
       </Link>
     );
   }
+
+  // A tela de coleta é do médico; o administrador só abre resultados (ADR-0010).
+  if (!podeAbrirColeta) return null;
 
   const texto = s.status === 'EM_ANDAMENTO' ? 'Continuar coleta' : 'Ver a coleta';
   return (

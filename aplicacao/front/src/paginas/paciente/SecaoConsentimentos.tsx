@@ -23,10 +23,12 @@ interface PropsSecao {
   consentimentos: Consentimento[];
   registrando: boolean;
   setRegistrando: (aberto: boolean) => void;
+  /** Registrar termo é do médico; revogar, a pedido do titular, também do administrador. */
+  podeRegistrar?: boolean;
 }
 
 /** UC05 — termos assinados: registrar (TCLE/TALE) e revogar. */
-export function SecaoConsentimentos({ pacienteId, consentimentos, registrando, setRegistrando }: PropsSecao) {
+export function SecaoConsentimentos({ pacienteId, consentimentos, registrando, setRegistrando, podeRegistrar = true }: PropsSecao) {
   const [aviso, setAviso] = useState<string | null>(null);
   const [revogando, setRevogando] = useState<string | null>(null);
   const refSecao = useRef<HTMLElement>(null);
@@ -42,7 +44,7 @@ export function SecaoConsentimentos({ pacienteId, consentimentos, registrando, s
     <section ref={refSecao} className={estilos.secao} aria-labelledby="titulo-consentimentos">
       <div className={estilos.cabecalhoSecao}>
         <h2 id="titulo-consentimentos">Consentimentos</h2>
-        {!registrando && (
+        {podeRegistrar && !registrando && (
           <Botao
             variante="secundario"
             onClick={() => {
