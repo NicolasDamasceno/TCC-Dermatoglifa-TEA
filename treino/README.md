@@ -20,6 +20,9 @@ Scripts em `scripts/` (testes em `testes/`, só com dados sintéticos):
 | `sinteticos.py` | gera digitais **sintéticas** rotuladas, 10 dedos por participante (ADR-0008) |
 | `divisao.py` | divide treino/validação/teste **por participante** (`StratifiedGroupKFold`) e monta uma pasta por classe com links |
 | `etapa1.py` | treina a CNN de padrões na estrutura do `modelo_arroz_keras`, avalia no teste e grava a versão |
+| `prever_padroes.py` | aplica um modelo da Etapa 1 às imagens e grava o `padroes.csv` da Etapa 2 (ADR-0011) |
+| `sinteticos_etapa2.py` | gera participantes **sintéticos** com grupo inventado, para conferir a Etapa 2 |
+| `etapa2.py` | treina e avalia o escore (regressão logística) sobre indicadores, sexo e idade (ADR-0011) |
 
 ```sh
 python -m venv .venv && . .venv/bin/activate      # Windows: .venv\Scripts\activate
@@ -53,6 +56,34 @@ a partir da época 11.
 
 Em CPU (Ryzen 5 5600, ADR-0002) o treino é viável; o tempo depende do tamanho de
 entrada (`--tamanho`, padrão 128 px) e do número de imagens.
+
+## Como treinar a Etapa 2
+
+A Etapa 2 lê duas tabelas na pasta de dados local:
+
+- `participantes.csv`: participante, sexo (`MASCULINO`/`FEMININO`), idade_meses e
+  grupo (`TEA`/`CONTROLE`, da situação diagnóstica; ADR-0009);
+- `padroes.csv`: participante, mao, dedo e padrao (`ARCO`, `ARCO_TENDIDO`,
+  `ALCA_ULNAR`, `ALCA_RADIAL`, `VERTICILO`), da anotação manual ou da Etapa 1.
+
+```sh
+# conferir o código com dados sintéticos (o grupo é inventado)
+python treino/scripts/sinteticos_etapa2.py --participantes 300
+python treino/scripts/etapa2.py --origem SINTETICO --origem-padroes ANOTACAO
+
+# com dados reais e padrões da CNN: o teste exclui quem treinou a CNN
+python treino/scripts/prever_padroes.py --rotulos "$TCC_DADOS_DIR/reais/rotulos.csv" \
+    --modelo /local/controlado/modelos/<versao_etapa1> --saida "$TCC_DADOS_DIR/reais/padroes.csv"
+python treino/scripts/etapa2.py --dados "$TCC_DADOS_DIR/reais" --origem REAL --origem-padroes ETAPA1 \
+    --versao-etapa1 <versao_etapa1> --divisao-etapa1 "$TCC_DADOS_DIR/reais/saidas/<versao_etapa1>/divisao.json"
+```
+
+As variáveis são escolhidas antes de ver os dados (`--variaveis minimo`, o padrão,
+ou `contagens`). O script imprime e grava, no teste, sensibilidade e especificidade
+com IC 95%, ROC-AUC, PR-AUC, VPP e VPN nas prevalências de `--prevalencias`,
+calibração e o **ganho de AUC sobre um modelo só de sexo e idade**, que é o número
+a olhar num caso-controle. O `coeficientes.json` sai sempre com `validado: false`:
+o escore não aparece no sistema até uma ADR registrar a validação (RN10).
 
 ## Os dados não ficam aqui
 
@@ -89,7 +120,7 @@ participou do estudo (inferência de pertencimento), por isso:
 |---|---|---|---|
 | Etapa 1 treinada com dados **sintéticos** | `modelos/sinteticos/<versao>/` | tudo, inclusive `modelo.keras` | no Git |
 | Etapa 1 treinada com dados **reais** | `modelos/reais/<versao>/` | config, métricas, hash, notas | local controlado (repositório privado ou instituição; até lá, disco local cifrado com backup cifrado) |
-| Etapa 2 (regressão logística) | `modelos/reais/<versao>/` | também os coeficientes em `coeficientes.json` | no Git (são estatísticas agregadas) |
+| Etapa 2 (regressão logística) | `modelos/<sinteticos\|reais>/<versao>/` | config, métricas, notas e os coeficientes em `coeficientes.json` | no Git (são estatísticas agregadas) |
 
 O `.gitignore` e o `pre-commit` rejeitam qualquer `.keras`, `.h5`, `.onnx`, `.pt`
 ou `.tflite` fora de `modelos/sinteticos/` e `modelo_producao/demo/`. Modelos
@@ -106,10 +137,10 @@ Cada treino gera uma pasta `AAAA-MM-DD_<nome>_v<N>/` em `sinteticos/` ou `reais/
 |---|---|
 | `modelo.keras` | pesos e arquitetura (só no Git em `sinteticos/`; em `reais/`, vai para `--pesos-reais`) |
 | `modelo.sha256` | hash SHA-256 do `modelo.keras` |
-| `metricas.json` | matriz de confusão, recall por classe; na Etapa 2, sensibilidade, especificidade, AUC |
+| `metricas.json` | matriz de confusão, recall por classe; na Etapa 2, sensibilidade, especificidade, ROC-AUC e PR-AUC com IC 95%, VPP/VPN, calibração e ganho sobre sexo e idade |
 | `config.json` | hiperparâmetros, seed, versão do Keras e, obrigatoriamente, o que o serviço lê: `versao`, `classes` (na ordem da saída), `tamanho_imagem`, `ajuste_proporcao`, `interpolacao`, `origem_dados` (formato em `modelo_producao/servico/README.md`) |
-| `coeficientes.json` | apenas na Etapa 2 |
-| `graficos/` | curvas de acurácia/perda e matriz de confusão em **SVG** (PNG é bloqueado pelo `.gitignore`) |
+| `coeficientes.json` | apenas na Etapa 2: coeficientes, razões de chances, ponto de corte, fração de casos e `validado` |
+| `graficos/` | curvas de acurácia/perda e matriz de confusão (Etapa 1) ou ROC e calibração (Etapa 2), em **SVG** (PNG é bloqueado pelo `.gitignore`) |
 | `registro.sql` | registra e ativa a versão na tabela `modelo_ia` da API, sem interface (a tela **Modelos de IA**, UC10, faz o mesmo com o `config.json` e o `metricas.json`) |
 | `NOTAS.md` | o que mudou em relação à versão anterior |
 

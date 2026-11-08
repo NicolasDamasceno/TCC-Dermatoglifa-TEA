@@ -194,6 +194,19 @@ Os itens abaixo devem ser resolvidos ou declarados como limitação no texto do 
 | Documento oficial da Linha de Cuidado TEA (MS); referência normativa ao DSM-5-TR/CID-11 | Só agências de notícias | Buscar em gov.br/saude; Diretrizes MS 2014; Manual SBP |
 | Itens do TRIPOD+AI sobre calibração e dados agrupados | Texto bloqueado por CAPTCHA | Ler o artigo no BMJ |
 
+## Referências metodológicas da Etapa 2
+
+Acrescentadas em 08/11/2026 para o protocolo da ADR-0011. Todas foram localizadas
+e lidas no resumo ou no texto que sustenta o uso feito delas.
+
+| Referência | O que sustenta | Leitura |
+|---|---|---|
+| Riley et al., *BMJ* 2020;368:m441, doi:10.1136/bmj.m441 ([Keele](https://keele-repository.worktribe.com/OutputFile/464599)) | Tamanho mínimo da amostra para modelo de desfecho binário: quatro critérios (precisão da proporção, erro de previsão, encolhimento 0,9, otimismo do R² 0,05). A regra dos 10 eventos por variável é simplista, e contam todos os parâmetros **candidatos**, não só os do modelo final | Texto integral |
+| Van Calster et al., *BMC Med* 2019;17:230, doi:10.1186/s12916-019-1466-7 ([PMC6912996](https://pmc.ncbi.nlm.nih.gov/articles/PMC6912996)) | Calibração por intercepto (alvo 0) e inclinação (alvo 1; abaixo de 1, previsões extremas demais); o teste de Hosmer-Lemeshow não é recomendado; curvas precisas pedem cerca de 200 casos e 200 controles, abaixo disso basta intercepto e inclinação | Texto integral |
+| Newcombe, *Stat Med* 1998;17(8):857–872 ([PubMed 9595616](https://pubmed.ncbi.nlm.nih.gov/9595616)) | Intervalos simples para uma proporção têm cobertura ruim; recomenda métodos de escore (Wilson) ou de áreas de cauda | Resumo |
+| King & Zeng, *Political Analysis* 2001;9(2):137–163 ([Harvard](https://gking.harvard.edu/publication/logistic-regression-in-rare-events-data/)) | Correção do intercepto quando a proporção de casos da amostra difere da população: α − ln(((1 − τ)/τ)·(ȳ/(1 − ȳ))) | Fórmula conferida em fonte secundária ([notas de J. Arnold](https://jrnold.github.io/bayesian_notes/rare-events.html)); ler o original antes de citar no texto |
+| Pacote pmsampsize ([CRAN](https://cran.r-project.org/web/packages/pmsampsize/refman/pmsampsize.html)) | Implementa o cálculo de Riley et al. (2020) | Página do pacote |
+
 ## Conclusão
 
 O deslocamento mais importante que esta pesquisa produz é de **objeto**. O TCC não deve se vender como "IA que detecta TEA pelas digitais". O que ele pode demonstrar com rigor é um **pipeline auditável que transforma 10 digitais em features dermatoglíficas mensuráveis e testa, com divisão por participante e calibração, se essas features carregam algum sinal**. Essa formulação é sustentável cientificamente, porque a discordância bilateral é a hipótese principal pré-registrável e a ausência de efeito também conta como resultado. Ela também é sustentável regulatoriamente, porque o sistema fica dentro da isenção de investigação da RDC 751 e da exclusão de pesquisa pré-mercado do PL 2338, e tecnicamente, porque a CNN de padrões tem benchmark e cabe numa CPU. Um resultado negativo bem medido teria mais valor para a literatura do que outro estudo caso-controle sem correção para comparações múltiplas.

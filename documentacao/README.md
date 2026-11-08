@@ -28,6 +28,7 @@ Ler na ordem abaixo antes de criar ou alterar qualquer módulo (`CLAUDE.md`, Reg
 | [0008](adr/0008-gerador-sintetico-proprio.md) | Gerador próprio de digitais sintéticas para o modelo de demonstração | Proposto |
 | [0009](adr/0009-situacao-diagnostica-como-referencia.md) | Situação diagnóstica como padrão de referência: data da avaliação e declaração de independência | Proposto |
 | [0010](adr/0010-hierarquia-de-acesso.md) | Hierarquia de acesso: o administrador vê os dados dos pacientes, sem ações clínicas, e atende os pedidos do titular | Proposto |
+| [0011](adr/0011-protocolo-etapa2.md) | Protocolo de treino e avaliação da Etapa 2: variáveis pré-especificadas, ganho sobre sexo e idade, calibração e tamanho da amostra | Proposto |
 
 Os ADRs ficam "Propostos" até a revisão com o orientador; ao serem aceitos,
 muda-se o status no próprio arquivo. Uma decisão nova que contrarie uma antiga

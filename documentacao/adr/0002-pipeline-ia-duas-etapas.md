@@ -77,7 +77,9 @@ orientação real das imagens do dispositivo de captura (ADR-0004).
 **Etapa 2 — escore.** Regressão logística (ou similar interpretável) sobre os
 indicadores + sexo + idade, treinada só quando houver amostra rotulada de casos e
 controles suficiente. **Até lá, `escore_risco` é retornado como `null`** e o
-sistema exibe apenas os indicadores, com a referência dos estudos.
+sistema exibe apenas os indicadores, com a referência dos estudos. O protocolo de
+treino e avaliação (variáveis pré-especificadas, comparação com um modelo só de
+sexo e idade, calibração, tamanho da amostra) está na ADR-0011.
 
 ## Opções consideradas
 
@@ -138,3 +140,5 @@ concordância); erros da Etapa 1 se propagam para os indicadores.
    depende do método de captura (ADR-0004, ação 3).
 4. [x] Implementar o cálculo dos indicadores com testes unitários
    (`dermatoglifia_ia/dominio.py`).
+5. [x] Escrever o treino e a avaliação da Etapa 2 (`treino/scripts/etapa2.py`;
+   protocolo na ADR-0011).
