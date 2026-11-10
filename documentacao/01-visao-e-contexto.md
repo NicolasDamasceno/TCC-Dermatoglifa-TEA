@@ -83,8 +83,8 @@ medido também é um resultado válido para o TCC.
 | PL 2338/2023 | **Não é lei** (situação em 20/10/2026); citado apenas como tendência |
 | Lei 12.764/2012 (Lei Berenice Piana — mesma lei) | Diagnóstico é clínico; nenhuma norma admite biomarcador como critério |
 
-Itens ainda não verificados em fonte primária (texto oficial da Res. CFM
-2.454/2026, enquadramento da instituição como "órgão de pesquisa", entre outros)
+Itens ainda não verificados em fonte primária (enquadramento da instituição como
+"órgão de pesquisa", entre outros)
 estão listados na seção final do documento 07.
 
 ## 7. Ordem de execução
